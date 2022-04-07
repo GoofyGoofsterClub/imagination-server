@@ -1,5 +1,14 @@
-const fastify = require('fastify')({ logger: true });
-fastify.register(require('fastify-multipart'));
+const fastify = require('fastify')({ logger: true, bodyLimit: Number.MAX_SAFE_INTEGER });
+fastify.register(require('fastify-multipart'), {
+    limits: {
+        fieldNameSize: Number.MAX_SAFE_INTEGER,
+        fieldSize: Number.MAX_SAFE_INTEGER,
+        fields: Number.MAX_SAFE_INTEGER,
+        fileSize: Number.MAX_SAFE_INTEGER,
+        parts: Number.MAX_SAFE_INTEGER,
+        headerPairs: Number.MAX_SAFE_INTEGER
+    }
+});
 const fs = require('fs');
 const util = require('util');
 const path = require('path');
