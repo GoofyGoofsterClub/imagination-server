@@ -1,0 +1,13 @@
+﻿{
+  "Version": "13.7.0",
+  "Name": "boobs.pics",
+  "DestinationType": "ImageUploader, TextUploader, FileUploader",
+  "RequestMethod": "POST",
+  "RequestURL": "https://boobs.pics/uploadImage",
+  "Headers": {
+    "Authorization": "yourkeyhere"
+  },
+  "Body": "MultipartFormData",
+  "FileFormName": "image",
+  "URL": "$json:data.link$"
+}
