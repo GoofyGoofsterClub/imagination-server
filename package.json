@@ -4,12 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start" :"node index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fastify/cookie": "^8.3.0",
+    "@fastify/formbody": "^7.4.0",
+    "@fastify/url-data": "^5.2.0",
+    "eta": "^1.12.3",
     "fastify": "^3.28.0",
-    "fastify-multipart": "^5.3.1"
+    "fastify-cookie": "^5.7.0",
+    "fastify-multipart": "^5.3.1",
+    "fastify-static": "^4.6.1",
+    "geoip-lite": "^1.4.6",
+    "mongodb": "^4.7.0",
+    "node-fetch": "^3.2.10",
+    "point-of-view": "^5.2.0"
   }
 }

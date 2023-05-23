@@ -1,0 +1,38 @@
+version: '3'
+services:
+  mongo:
+    image: mongo:5.0.2
+    restart: unless-stopped
+    ports:
+      - $MONGO_EXPOSE_PORT:$MONGO_PORT
+    volumes:
+      - db:/data/db
+    env_file:
+      - ./.env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=$MONGO_USER
+      - MONGO_INITDB_ROOT_PASSWORD=$MONGO_PASSWORD
+  web:
+    depends_on:
+      - mongo
+    image: boobspics-web
+    ports:
+      - $HTTP_EXPOSE_PORT:$HTTP_PORT
+    volumes:
+      - ./:/usr/src/boobspics
+      - /usr/src/boobspics/node_modules
+    container_name: boobspics-web
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      - HTTP_PORT=$HTTP_PORT
+      - MONGO_HOST=mongo
+      - MONGO_PORT=$MONGO_PORT
+      - MONGO_USER=$MONGO_USER
+      - MONGO_DB=$MONGO_DB
+      - MONGO_PASSWORD=$MONGO_PASSWORD
+    build: .
+
+volumes:
+  db:

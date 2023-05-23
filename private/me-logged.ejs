@@ -1,0 +1,592 @@
+<head>
+    <title>me!</title>
+</head>
+
+<style>
+    div.main
+    {
+        margin: 24px auto;
+        width: 80%;
+        padding: 12px;
+    }
+    *
+    {
+        vertical-align: middle;
+    }
+    table {
+        font-family: Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    table td, table th {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    table tr:nth-child(even){background-color: #f2f2f2;}
+
+    table tr:hover {background-color: #ddd;}
+
+    table th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: #04AA6D;
+        color: white;
+    }
+
+    input[type="text"], input[type="password"], input[type="email"], input[type="number"], input[type="search"], input[type="tel"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="week"], input[type="time"], input[type="range"], input[type="file"], textarea, select
+    {
+        padding: 6px 12px;
+        background: white;
+        border: 1px solid rgb(90, 90, 90);
+    }
+
+</style>
+<% if (it.theme == "dark") { %>
+    <style>
+        body
+        {
+            background: #222;
+            color: white;
+        }
+        .main
+        {
+            background: #333;
+        }
+        table, th, td {
+            border: 1px solid #333;
+        }
+        a
+        {
+            color: #00f;
+        }
+
+        a:hover
+        {
+            color: rgb(80, 80, 214);
+        }
+
+        table {
+            font-family: Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        table td, table th {
+            border: 1px solid rgb(27, 27, 27);
+            padding: 8px;
+        }
+
+        table tr:nth-child(even){background-color: rgb(37, 37, 37);}
+
+        table tr:hover {background-color: rgb(14, 14, 14);}
+
+        table th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #04AA6D;
+            color: white;
+        }
+
+        input[type="text"], input[type="password"], input[type="email"], input[type="number"], input[type="search"], input[type="tel"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="week"], input[type="time"], input[type="range"], input[type="file"], textarea, select
+        {
+            padding: 6px 12px;
+            background: #333;
+            border: 1px solid rgb(90, 90, 90);
+            color: white;
+        }
+    </style>
+<% } %>
+<body>
+    <script>window.displayName = "<%= it.username %>"; window.canInvite = <%= it.canInvite %>; window.isAdmin = <%= it.isAdmin %>; window.theme = "<%= it.theme %>"</script>
+    <div class="main">
+        <h1>Welcome back, <span style="<%= it.paint %>"><%= it.username %></span>! <span style="float: right;"><a href="#" id="logout">(logout)</a> / <a href="#" id="themeswitch" style="font-size: 16px;" onclick="ToggleTheme();">(switch theme)</a></span></h1>
+        <p>You have uploaded a total of <b id="uploadsTotal">...</b> files. <%~ it.canInvite ? "You can invite people! <img src='https://cdn.7tv.app/emote/623d4973b8ebd44383da8057/3x.webp' style='width: 32px;'>" : "You can't invite people <img src='https://cdn.frankerfacez.com/emote/425196/4' style='width: 32px;'>" %></p>
+        <p><%~ it.isAdmin ? "You're also an admin! <img src='https://cdn.7tv.app/emote/60aed4fe423a803ccae373d3/4x.webp'  style='width: 32px;'>" : "You don't have admin rights...<img src='https://cdn.7tv.app/emote/60af8da952a13d1adb141008/4x.webp' style='width: 32px;'>" %></p>
+        <hr>
+        <% if (it.canInvite) { %>
+        <h2>Invite people</h2>
+        <p>Invite only trusted people, please.</p>
+        <p><input type="text" placeholder="Display name" required id="invitedisplayname"> <button id="invitesubmit">Create invite</button></p>
+        <p><input type="text" readonly placeholder="Result" id="inviteresult"></p>
+        <br>
+        <hr><br>
+        <% } %>
+        <% if (it.isAdmin) { %>
+        <h2>Manage users and invites</h2>
+        <pre>NOTE: You've been entrusted with managing users, so you have access to their keys, in case they forget them, so don't abuse the power you were granted upon.</pre>
+        <h3>Users</h3>
+        <table style="width: 100%; text-align: left;" id="userstable">
+            <tr>
+                <th>Username</th>
+                <th>Access Key <span style="font-size: 14px;">(hover)</span></th>
+                <th>Invited by</th>
+                <th>Can Invite?</th>
+                <th>Is Admin?</th>
+                <th>Revoke access</th>
+            </tr>
+        </table>
+        <br>
+        <h3>Invites</h3>
+        <table style="width: 100%; text-align: left;" id="invitestable">
+            <tr>
+                <th>Invite Key <span style="font-size: 14px;">(hover)</span></th>
+                <th>Invited by</th>
+                <th>Invitee</th>
+                <th>Revoke</th>
+            </tr>
+        </table>
+        <br><hr><br>
+        <% } %>
+        <h3>Access</h3>
+        <p><a href="#" onclick="window.location.href = '/api/download-sharex?key=<%= it.key %>'; return false;"><img src="https://cdn.7tv.app/emote/60aef388b38361ea914aad89/4x.webp" style="width: 32px;"> Download ShareX custom uploader <img src="https://cdn.7tv.app/emote/60aef388b38361ea914aad89/4x.webp" style="width: 32px;"></a></p>
+        <br><hr><br>
+        <h3>All uploads</h3>
+        <p><button onclick="DeleteAllUploads();" id="delete-all" style="padding: 6px 12px;">Delete All</button></p>
+        <table style="width: 100%; text-align: left;" id="uploadstable">
+            <tr>
+                <th>Public file name</th>
+                <th>Original file name</th>
+                <th>Size</th>
+                <th>Type</th>
+                <th>Uploaded at</th>
+                <th>Uploaded through</th>
+                <th>Views</th>
+                <th>Delete</th>
+            </tr>
+        </table>
+    </div>
+</body>
+
+<script>
+document.getElementById("logout").onclick = async (event) =>
+{
+    event.preventDefault();
+    eraseCookie("key");
+    location.reload();
+};
+
+if(window.canInvite)
+{
+    document.getElementById("invitesubmit").onclick = async (event) =>
+    {
+        event.preventDefault();
+
+        if (document.getElementById("invitedisplayname").value == "")
+        {
+            alert("Please enter a display name.");
+            return;
+        }
+
+        var _try = await fetch("/api/createInvite", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                key: getCookie("key"),
+                invitee_name: document.getElementById("invitedisplayname").value
+            })
+        });
+        var _try = await _try.json();
+        if(!_try['success'])
+        {
+            alert("Something went wrong while creating the invite.");
+            return;
+        }
+        document.getElementById("inviteresult").value = `https://boobs.pics/invite/${_try['invite_key']}`;
+        document.getElementById("inviteresult").focus();
+    };
+}
+
+window.onload = async () =>
+{
+    if(window.canInvite)
+        document.getElementById("inviteresult").value = "";
+    var _try = await fetch("/api/uploadcounts");
+    var _try = await _try.json();
+    document.getElementById("uploadsTotal").innerText = _try['data'][window.displayName] ? _try['data'][window.displayName] : "0";
+
+    var _uploads = await fetch("/api/get-individual-uploads", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            key: getCookie("key")
+        })
+    });
+    var _uploads = await _uploads.json();
+    if(!_uploads['success'])
+    {
+        alert("Something went wrong while loading your uploads.");
+        return;
+    }
+    _uploads = _uploads['data'];
+    // sort uploads by timestamp
+    _uploads.sort((a, b) => (a.timestamp < b.timestamp) ? 1 : -1);
+    var _table = document.getElementById("uploadstable");
+    for(var i = 0; i < _uploads.length; i++)
+    {
+        _d = timeConverter(_uploads[i]['timestamp']/1000);
+        var _row = _table.insertRow(-1);
+        var _cell1 = _row.insertCell(0);
+        var _cell2 = _row.insertCell(1);
+        var _cell3 = _row.insertCell(2);
+        var _cell4 = _row.insertCell(3);
+        var _cell5 = _row.insertCell(4);
+        var _cell6 = _row.insertCell(5);
+        var _cell7 = _row.insertCell(6);
+        var _cell8 = _row.insertCell(7);
+        _row.id = `upload_${_uploads[i]['filename']}`;
+        _cell1.innerHTML = `<a href="/${window.displayName}/${_uploads[i]['filename']}">${_uploads[i]['filename']}</a>`;
+        _cell2.innerHTML = _uploads[i]['original_filename'] ? _uploads[i]['original_filename'] : "Unknown";
+        _cell3.innerHTML = formatBytes(_uploads[i]['size']);
+        _cell4.innerHTML = _uploads[i]['mimetype'];
+        _cell5.innerHTML = _d;
+        _cell6.innerHTML = _uploads[i]['uploaded_thru'];
+        _cell7.innerHTML = _uploads[i]['views'];
+        _cell8.innerHTML = `<button onclick="deleteUpload('${_uploads[i]['filename']}');" id="delete_${_uploads[i]['filename']}">Delete</button>`;
+    }
+
+    if(window.isAdmin)
+    {
+        var _users = await fetch("/api/admin/get-users",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                key: getCookie("key")
+            })
+        });
+        var _users = await _users.json();
+        if(!_users['success'])
+        {
+            alert("Something went wrong while loading users.");
+            return;
+        }
+        _users = _users['data'];
+        var _table = document.getElementById("userstable");
+        for(var i = 0; i < _users.length; i++)
+        {
+            var _row = _table.insertRow(-1);
+            var _cell1 = _row.insertCell(0);
+            var _cell2 = _row.insertCell(1);
+            var _cell3 = _row.insertCell(2);
+            var _cell4 = _row.insertCell(3);
+            var _cell5 = _row.insertCell(4);
+            var _cell6 = _row.insertCell(5);
+            _row.id = `user_${_users[i]['displayName']}`;
+            _cell1.innerHTML = _users[i]['displayName'];
+            _cell2.innerHTML = _users[i]['protected'] ? "" : `<input type='password' disabled readonly value='${_users[i]['key']}' id='key_${_users[i]['displayName']}' onmouseenter='this.type = "text";' onmouseleave='this.type = "password";' style='width: 80%;'> <button id="showkey_${_users[i].displayName}" onclick="ShowKey('${_users[i].displayName}');" style="padding: 6px 12px;">Show</button>`;
+            _cell3.innerHTML = _users[i]['invited_by'] ? _users[i]['invited_by'] : "Unknown";
+            _cell4.innerHTML = "<span id=\"caninvite-"+ _users[i]['displayName'] +"\">"+(_users[i]['can_invite'] ? "Yes" : "No") + "</span> " + "<button id=\"toggle-invite-"+_users[i]['displayName']+"\" onclick='ToggleInvite(\"" + _users[i]['displayName'] + "\")' " + (_users[i]['protected'] ? "disabled" : "") +">Toggle</button>";
+            _cell5.innerHTML = "<span id=\"isadmin-"+ _users[i]['displayName'] +"\">" + (_users[i]['administrator'] ? "Yes" : "No") + "</span> " + "<button id=\"toggle-admin-"+_users[i]['displayName']+"\" onclick='ToggleAdmin(\"" + _users[i]['displayName'] + "\")' " + (_users[i]['protected'] ? "disabled" : "") +">Toggle</button>";
+            _cell6.innerHTML = `<button onclick="revokeAccess('${_users[i]['displayName']}');" `+(_users[i]['protected'] ? "disabled" : "")+` id="revoke_${_users[i]['displayName']}">Revoke</button>`;
+        }
+
+        var _invites = await fetch("/api/admin/get-invites",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                key: getCookie("key")
+            })
+        });
+        var _invites = await _invites.json();
+
+        if(!_invites['success'])
+        {
+            alert("Something went wrong while loading invites.");
+            return;
+        }
+        _invites = _invites['invites'];
+        var _table = document.getElementById("invitestable");
+
+        if(_invites.length == 0)
+        {
+            var _row = _table.insertRow(-1);
+            var _cell1 = _row.insertCell(0);
+            var _cell2 = _row.insertCell(1);
+            var _cell3 = _row.insertCell(2);
+            var _cell4 = _row.insertCell(3);
+            _cell1.innerHTML = "No invites found.";
+            return;
+        }
+
+        for(var i = 0; i < _invites.length; i++)
+        {
+            var _row = _table.insertRow(-1);
+            var _cell1 = _row.insertCell(0);
+            var _cell2 = _row.insertCell(1);
+            var _cell3 = _row.insertCell(2);
+            var _cell4 = _row.insertCell(3);
+            _row.id = `invite_${_invites[i]['key']}`;
+            _cell1.innerHTML = `<input type='password' onmouseenter='this.type = "text";' onmouseleave='this.type = "password";' style="width: 100%;" value="${_invites[i]['key']}">`;
+            _cell2.innerHTML = _invites[i]['invited_by'];
+            _cell3.innerHTML = _invites[i]['displayName'];
+            _cell4.innerHTML = `<button onclick="revokeInvite('${_invites[i]['key']}');" id="revoke_${_invites[i]['key']}">Revoke</button>`;
+        }
+    }
+}
+
+function formatBytes(bytes, decimals = 2) {
+    if (!+bytes) return '0 Bytes'
+
+    const k = 1024
+    const dm = decimals < 0 ? 0 : decimals
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+};
+
+function timeConverter(UNIX_timestamp) {
+    var a = new Date(UNIX_timestamp * 1000);
+    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var year = a.getFullYear();
+    var month = months[a.getMonth()];
+    var date = a.getDate();
+    var hour = a.getHours();
+    var min = a.getMinutes();
+    var sec = a.getSeconds();
+    var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
+    return time;
+}
+
+async function DeleteAllUploads()
+{
+    if(!await confirm("Are you sure you want to delete all your uploads?"))
+    {
+        return;
+    }
+    document.getElementById("delete-all").disabled = true;
+    var _try = await fetch("/api/delete-all-uploads", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            key: getCookie("key")
+        })
+    });
+    var _try = await _try.json();
+    if(!_try['success'])
+    {
+        alert("Something went wrong while deleting your uploads.");
+        // enable the button
+        document.getElementById("delete-all").disabled = false;
+        return;
+    }
+    document.getElementById("uploadstable").innerHTML = "";
+    // add a row saying no uploads found
+    var _table = document.getElementById("uploadstable");
+    var _row = _table.insertRow(-1);
+    var _cell1 = _row.insertCell(0);
+    var _cell2 = _row.insertCell(1);
+    var _cell3 = _row.insertCell(2);
+    var _cell4 = _row.insertCell(3);
+    var _cell5 = _row.insertCell(4);
+    var _cell6 = _row.insertCell(5);
+    _cell1.innerHTML = "No uploads found.";
+    // enable the button
+    document.getElementById("delete-all").disabled = false;
+}
+
+async function deleteUpload(filename)
+{
+    // disable the button
+    document.getElementById(`delete_${filename}`).disabled = true;
+    var _try = await fetch("/api/delete-upload", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            key: getCookie("key"),
+            filename: filename
+        })
+    });
+    var _try = await _try.json();
+    if(!_try['success'])
+    {
+        alert("Something went wrong while deleting your upload.");
+        // enable the button
+        document.getElementById(`delete_${filename}`).disabled = false;
+        return;
+    }
+    document.getElementById(`upload_${filename}`).remove();
+}
+
+async function ToggleAdmin(username)
+{
+    // disable the button
+    document.getElementById(`toggle-admin-${username}`).disabled = true;
+    var _try = await fetch("/api/admin/toggle-admin", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            key: getCookie("key"),
+            username: username
+        })
+    });
+
+    var _try = await _try.json();
+    if(!_try['success'])
+    {
+        alert("Something went wrong while toggling admin status.");
+        // enable the button
+        document.getElementById(`toggle-admin-${username}`).disabled = false;
+        return;
+    }
+    // enable the button
+    document.getElementById(`toggle-admin-${username}`).disabled = false;
+    document.getElementById(`isadmin-${username}`).innerHTML = _try['administrator'] ? "Yes" : "No";
+}
+
+async function ShowKey(username)
+{
+    var _key = document.getElementById(`key_${username}`);
+    document.getElementById("showkey_"+username).disabled = true;
+    
+    var _req = await fetch("/api/admin/get-key", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            key: getCookie("key"),
+            username: username
+        })
+    });
+
+    var _req = await _req.json();
+    if(!_req['success'])
+    {
+        alert("Something went wrong while getting the key.");
+        return;
+    }
+    _key.value = _req['key'];
+    _key.disabled = false;
+}
+
+async function ToggleInvite(username)
+{
+    // disable the button
+    document.getElementById(`toggle-invite-${username}`).disabled = true;
+    var _try = await fetch("/api/admin/toggle-inviter", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            key: getCookie("key"),
+            username: username
+        })
+    });
+
+    var _try = await _try.json();
+    if(!_try['success'])
+    {
+        alert("Something went wrong while toggling invite status.");
+        // enable the button
+        document.getElementById(`toggle-invite-${username}`).disabled = false;
+        return;
+    }
+    // enable the button
+    document.getElementById(`toggle-invite-${username}`).disabled = false;
+    document.getElementById(`caninvite-${username}`).innerHTML = _try['can_invite'] ? "Yes" : "No";
+}
+
+function revokeAccess(username)
+{
+    // disable the button
+    document.getElementById(`revoke_${username}`).disabled = true;
+    fetch("/api/admin/revoke", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            key: getCookie("key"),
+            username: username
+        })
+    }).then(async function(_try)
+    {
+        _try = await _try.json();
+        if(!_try['success'])
+        {
+            alert("Something went wrong while revoking access.");
+            // enable the button
+            document.getElementById(`revoke_${username}`).disabled = false;
+            return;
+        }
+        document.getElementById(`user_${username}`).remove();
+    });
+}
+
+async function revokeInvite(invite)
+{
+    // disable the button
+    document.getElementById(`revoke_${invite}`).disabled = true;
+    var _try = await fetch("/api/admin/revoke-invite", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            key: getCookie("key"),
+            invite: invite
+        })
+    });
+    var _try = await _try.json();
+    if(!_try['success'])
+    {
+        alert("Something went wrong while revoking invite.");
+        // enable the button
+        document.getElementById(`revoke_${invite}`).disabled = false;
+        return;
+    }
+    document.getElementById(`invite_${invite}`).remove();
+}
+
+async function ToggleTheme(event)
+{
+    var _theme = setCookie("theme", getCookie("theme") == "light" ? "dark" : "light", 365);
+    window.location.reload();
+    return false;
+}
+
+function setCookie(name,value,days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+function eraseCookie(name) {   
+    document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+</script>

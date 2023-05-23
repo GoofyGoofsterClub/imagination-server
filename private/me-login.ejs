@@ -1,0 +1,82 @@
+<head>
+    <title>me/login</title>
+</head>
+
+<style>
+    .login-form
+    {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+    form > input
+    {
+        padding: 12px 24px;
+    }
+</style>
+
+<body>
+    <div class="login-form">
+        <form method="POST">
+            <input type="password" required name="key" placeholder="Key">
+            <input type="submit" value="Log in" id="login">
+            <p><a href="/faq">FAQ</a></p>
+        </form>
+    </div>
+</body>
+
+<script>
+
+document.getElementById("login").onclick = async (event) =>
+{
+    event.preventDefault();
+    var _try = await fetch("/api/checkKey", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            key: document.querySelector("input[name=key]").value
+        })
+    });
+    var _try = await _try.json();
+    if (_try.success)
+    {
+        setCookie("key", document.querySelector("input[name=key]").value, 9999);
+        if(getCookie('theme') == null)
+        {
+            setCookie("theme", "light", 9999);
+        }
+        location.reload();
+    }
+    else
+    {
+        alert("Wrong key");
+    }
+};
+
+function setCookie(name,value,days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+function eraseCookie(name) {   
+    document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+</script>

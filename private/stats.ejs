@@ -1,0 +1,253 @@
+<head>
+    <title>boobs.pics stats</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+</head>
+<style>
+    .block
+    {
+        border: 3px solid black; 
+        margin: 2px;
+        display: inline-block;
+    }
+    .block > .content
+    {
+        margin: 12px;
+    }
+    *
+    {
+        vertical-align: middle;
+    }
+</style>
+<body style="padding: 12px;">
+    <h1><img src="https://cdn.7tv.app/emote/60b3d12e2784e58e6fd9588a/4x.webp" style="width: 32px;">Public stats</h1>
+    <p><pre>Colors are random, reload the page if they're unreadable.</pre></p>
+    <div class="block">
+        <div class="content">
+            <h1>Upload count</h1>
+            <a href="/api/uploadcounts">(raw)</a>
+            <canvas id="uploadsCount" style="width:600px;max-width:600px"></canvas>
+        </div>
+    </div>
+    <div class="block">
+        <div class="content">
+            <h1>Total upload size （GB）</h1>
+            <a href="/api/leaderboard">(raw)</a>
+            <canvas id="uploadsSize" style="width:600px;max-width:600px"></canvas>
+        </div>
+    </div>
+    <div class="block">
+        <div class="content">
+            <h1>Uploads/day</h1>
+            <a href="/api/perdate">(raw)</a>
+            <canvas id="uploadspDay" style="width:600px;max-width:600px"></canvas>
+        </div>
+    </div>
+    <div class="block">
+        <div class="content">
+            <h1>Mirror usage (uploads through)</h1>
+            <a href="/api/uploadedthrough">(raw)</a>
+            <canvas id="mirrorUsage" style="width:600px;max-width:600px"></canvas>
+        </div>
+    </div>
+    <div class="block">
+        <div class="content">
+            <h1>Users invited by</h1>
+            <a href="/api/invitestats">(raw)</a>
+            <canvas id="inviter" style="width:600px;max-width:600px"></canvas>
+        </div>
+    </div>
+    <div class="block">
+        <div class="content">
+            <h1>Views (global)</h1>
+            <a href="/api/views-global">(raw)</a>, since 10th Dec 2022
+            <canvas id="viewsGlobal" style="width:600px;max-width:600px"></canvas>
+        </div>
+    </div>
+    <div class="block">
+        <div class="content">
+            <h1>Views (individual)</h1>
+            <a href="/api/views-individual">(raw)</a>, since 10th Dec 2022
+            <canvas id="viewsIndividual" style="width:600px;max-width:600px"></canvas>
+        </div>
+    </div>
+    <br><hr>
+    <br>
+    <p><pre>These stats are public just to be transparent. We know each other anyway.</pre></p>
+</body>
+
+<script>
+    window.onload = async function()
+    {
+        var uploadsCountReq = await fetch("/api/uploadcounts");
+        var uploadsCountData = await uploadsCountReq.json();
+        var leaderboardReq = await fetch("/api/leaderboard");
+        var leaderboardData = await leaderboardReq.json();
+        var uppDraw = await fetch("/api/perdate");
+        var uppDdata = await uppDraw.json();
+        var mirrorUsageRaw = await fetch("/api/uploadedthrough");
+        var mirrorData = await mirrorUsageRaw.json();
+        var inviteDataRaw = await fetch("/api/invitestats");
+        var inviteData = await inviteDataRaw.json();
+
+        var viewsGlobalRaw = await fetch("/api/views-global");
+        var viewsGlobalData = await viewsGlobalRaw.json();
+        var viewsIndividualRaw = await fetch("/api/views-individual");
+        var viewsIndividualData = await viewsIndividualRaw.json();
+
+        var viewsGclean = {};
+        var viewsIclean = {};
+
+        uppDdata = uppDdata['data'];
+        var cleanSize = {};
+        var barColors = [];
+
+        for(var i = 0; i < Object.keys(uploadsCountData['data']).length; i++)
+            barColors.push("#" + Math.floor(Math.random() * 16777215).toString(16));
+
+        for(var leaderboardEntry of leaderboardData['data'])
+        {
+            cleanSize[leaderboardEntry['uploader']] = leaderboardEntry['totalFileSize'] / 1024 / 1024 / 1024;
+        }
+        
+        for (var viewGlobal of viewsGlobalData['data']) {
+            viewsGclean[viewGlobal['date']] = viewGlobal['views'];
+        }
+        for (var viewIndividual of viewsIndividualData['data']) {
+            viewsIclean[viewIndividual['uploader']] = viewIndividual['views'];
+        }
+
+        new Chart("uploadsCount",
+            {
+                type: "pie",
+                data: {
+                    labels: Object.keys(uploadsCountData['data']),
+                    datasets: [{
+                        backgroundColor: barColors,
+                        data: Object.values(uploadsCountData['data'])
+                    }]
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: "Uploads Amount"
+                    }
+                }
+            });
+        new Chart("uploadsSize",
+        {
+            type: "pie",
+            data: {
+                labels: Object.keys(cleanSize),
+                datasets: [{
+                    backgroundColor: barColors,
+                    data: Object.values(cleanSize)
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: "Uploads Size"
+                }
+            }
+        });
+
+        new Chart("uploadspDay",
+        {
+            type: "line",
+            data: {
+                labels: Object.keys(uppDdata),
+                datasets: [{
+                    label: "Uploads per day",
+                    backgroundColor: "#ffffff",
+                    borderColor: barColors[1],
+                    data: Object.values(uppDdata),
+                    pointStyle: 'circle',
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: "Uploads per Day"
+                }
+            }
+        });
+
+        new Chart("mirrorUsage",
+            {
+                type: "pie",
+                data: {
+                    labels: Object.keys(mirrorData),
+                    datasets: [{
+                        backgroundColor: barColors,
+                        data: Object.values(mirrorData)
+                    }]
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: "Mirror usage"
+                    }
+                }
+            });
+        new Chart("inviter",
+            {
+                type: "pie",
+                data: {
+                    labels: Object.keys(inviteData),
+                    datasets: [{
+                        backgroundColor: barColors,
+                        data: Object.values(inviteData)
+                    }]
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: "Invited by"
+                    }
+                }
+            });
+
+        new Chart("viewsGlobal",
+        {
+            type: "line",
+            data: {
+                labels: Object.keys(viewsGclean),
+                datasets: [{
+                    label: "Views per day (global)",
+                    backgroundColor: "#ffffff",
+                    borderColor: barColors[1],
+                    data: Object.values(viewsGclean),
+                    pointStyle: 'circle',
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: "Views per Day (global)"
+                }
+            }
+        });
+
+        new Chart("viewsIndividual",
+            {
+                type: "pie",
+                data: {
+                    labels: Object.keys(viewsIclean),
+                    datasets: [{
+                        backgroundColor: barColors,
+                        data: Object.values(viewsIclean)
+                    }]
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: "Views (individual)"
+                    }
+                }
+            });
+    }
+</script>
