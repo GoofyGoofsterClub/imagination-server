@@ -22,8 +22,8 @@ var geoip = require('geoip-lite');
 const { MongoClient } = require('mongodb');
 
 const {
-    MONGO_USER,
-    MONGO_PASSWORD,
+    //MONGO_USER,
+    //MONGO_PASSWORD,
     MONGO_HOST,
     MONGO_PORT
   } = process.env;
@@ -32,7 +32,7 @@ if (!fs.existsSync('privateuploads'))
     fs.mkdirSync('privateuploads');
 
 
-const url = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}`;
+const url = `mongodb://${MONGO_HOST}:${MONGO_PORT}`;
 const client = new MongoClient(url);
 
 var db = null;
