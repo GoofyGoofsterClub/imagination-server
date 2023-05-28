@@ -2,7 +2,7 @@ name: docker-build-publish
 on:
   push:
     branches:
-      - "master"
+      - "main"
 
 jobs:
   build:
