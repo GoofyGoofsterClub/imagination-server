@@ -173,11 +173,6 @@ fastify.post('/uploadImage', async (req, reply) =>
     ]);
 
     var TEMPORARY_MESSAGE = null;
-    if (req.headers['host'] != "uwu.so" && !user_experienced[_user.displayName])
-    {
-        user_experienced[_user.displayName] = true;
-        TEMPORARY_MESSAGE = "⚠ Users of boobs.pics and noboobs.pics, please switch to uwu.so ⚠";
-    }
 
     leaderboardsCollection.updateOne({ "uploader": _user.displayName }, { $inc: { "uploads": 1, "totalFileSize": fileSizeInBytes} }, { upsert: true });
 
@@ -643,10 +638,10 @@ fastify.get('/api/download-sharex', async (req, reply) => {
         `attachment; filename=${_user.displayName}.sxcu`);
     return {
         "Version": "13.7.0",
-        "Name": req.headers['host'] == "boobs.pics" ? "boobs.pics" : "noboobs.pics",
+        "Name": req.headers['host'],
         "DestinationType": "ImageUploader, TextUploader, FileUploader",
         "RequestMethod": "POST",
-        "RequestURL": req.headers['host'] == "boobs.pics" ? "https://boobs.pics/uploadImage" : "https://noboobs.pics/uploadImage",
+        "RequestURL": `https://${req.headers['host']}/uploadImage`,
         "Headers": {
             "Authorization": req.query.key
         },
