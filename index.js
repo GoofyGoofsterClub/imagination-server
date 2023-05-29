@@ -132,6 +132,8 @@ fastify.post('/uploadImage', async (req, reply) =>
     var accesskey = req.headers['authorization'];
     var fetchedUsers = await userCollection.find({ "key": accesskey }).toArray();
 
+    var hostUri = req.headers['host'];
+    
     if (fetchedUsers.length < 1)
     {
         reply.code(401); return "Fuck you bitch!";
@@ -179,7 +181,9 @@ fastify.post('/uploadImage', async (req, reply) =>
 
     leaderboardsCollection.updateOne({ "uploader": _user.displayName }, { $inc: { "uploads": 1, "totalFileSize": fileSizeInBytes} }, { upsert: true });
 
-    return { "data": { "link": "https://uwu.so/" + _user['displayName'] + "/" + _fakeuploadname + (TEMPORARY_MESSAGE ? ` (${TEMPORARY_MESSAGE})` : ''), "deletehash": _deletehash } };
+    if (hostUri == null) hostUri = "uwu.so";    
+    
+    return { "data": { "link": `https://${hostUri}/` + _user['displayName'] + "/" + _fakeuploadname + (TEMPORARY_MESSAGE ? ` (${TEMPORARY_MESSAGE})` : ''), "deletehash": _deletehash } };
 });
 
 fastify.get('/secret/uploads', async (req, reply) => {
