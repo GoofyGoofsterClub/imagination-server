@@ -9,9 +9,6 @@ services:
       - db:/data/db
     env_file:
       - ./.env
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=$MONGO_USER
-      - MONGO_INITDB_ROOT_PASSWORD=$MONGO_PASSWORD
   web:
     depends_on:
       - mongo
@@ -29,9 +26,7 @@ services:
       - HTTP_PORT=$HTTP_PORT
       - MONGO_HOST=mongo
       - MONGO_PORT=$MONGO_PORT
-      - MONGO_USER=$MONGO_USER
       - MONGO_DB=$MONGO_DB
-      - MONGO_PASSWORD=$MONGO_PASSWORD
     build: .
 
 volumes:
