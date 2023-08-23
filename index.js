@@ -339,7 +339,7 @@ fastify.post('/api/get-individual-uploads', async (req, reply) => {
     if (keyResults.length < 1)
         return { "success": false };    
 
-    var _uploads = await uploadsCollection.find({ "uploader": keyResults[0].displayName }).toArray();
+    var _uploads = await uploadsCollection.find({ "uploader": crypto.createHash('sha256').update(keyResults[0].displayName, 'utf8').digest('hex') }).toArray();
 
     return { "success": true, "data": _uploads };
 
