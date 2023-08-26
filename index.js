@@ -104,15 +104,13 @@ fastify.get('/', async (request, reply) => {
             reply.view("private/newmain.ejs", {
                     'uploadsCount': uploadsCount[0],
                     "uploadersCount": uploadsCount[1],
-                    "haram": true,
                     "domain": request.headers['host']
                 });
             break;
         default:
             reply.view("private/newmain.ejs", {
                 'uploadsCount': uploadsCount[0],
-                    "uploadersCount": uploadsCount[1],
-                "haram": false,
+                "uploadersCount": uploadsCount[1],
                 "domain": request.headers['host']
             });
             break;
