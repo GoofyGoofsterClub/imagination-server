@@ -15,9 +15,7 @@ const util = require('util');
 const path = require('path');
 const crypto = require('crypto');
 const { pipeline } = require('stream');
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const pump = util.promisify(pipeline);
-var geoip = require('geoip-lite');
 
 const { MongoClient } = require('mongodb');
 
