@@ -4,8 +4,8 @@
   "description": "",
   "main": "./lib/run.js",
   "scripts": {
-    "build": "babel src -d lib",
-    "start": "babel src -d lib && node lib/run.js"
+    "build": "babel src -d ./lib",
+    "start": "babel src -d ./lib && node ./lib/run.js"
   },
   "author": "",
   "license": "ISC",
