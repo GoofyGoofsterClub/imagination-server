@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 3443
 
-CMD [ "node", "index.js" ]
+CMD [ "node", ".lib/run.js" ]

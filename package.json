@@ -2,9 +2,10 @@
   "name": "imagination",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./lib/run.js",
   "scripts": {
-    "start" :"node index.js"
+    "build": "babel src -d lib",
+    "start": "babel src -d lib && node lib/run.js"
   },
   "author": "",
   "license": "ISC",
