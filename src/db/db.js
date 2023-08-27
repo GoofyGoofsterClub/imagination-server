@@ -37,7 +37,10 @@ export default class DatabaseController
 
     async getDocument(collection, query)
     {
-        return await this.database.collection(collection).findOne(query).toArray();
+        let result = await this.database.collection(collection).find(query).toArray();
+        if (result.length == 0)
+            return null;
+        return result[0];
     }
 
     async getDocuments(collection, query)
@@ -47,6 +50,8 @@ export default class DatabaseController
 
     async checkDocumentExists(collection, query)
     {
-        return await this.database.collection(collection).findOne(query) != null;
+        let result = await this.database.collection(collection).find(query).toArray();
+        console.log(result);
+        return result.length > 0;
     }
 }
