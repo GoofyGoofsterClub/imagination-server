@@ -23,8 +23,9 @@ export default class HTTPRouting
         for(const route of routes)
         {
             const routeModule = await import(`${__dirname}/../routes/${route.split(".")[0]}`);
-            await routeModule.default.register(server);
-            Output.Log("http", `Registered route :: ${route.split(".")[0].cyan}`);
+            const routeInstance = new routeModule.default();
+            await routeInstance.register(server);
+            Output.Log("http", `Registered route :: ${routeInstance.path.cyan}`);
         }
 
     }
@@ -32,12 +33,14 @@ export default class HTTPRouting
 
 export class Route
 {
-    constructor( path, method, handler)
+    constructor(path, method)
     {
         this.path = path;
         this.method = method;
-        this.handler = handler;
+        this.handler = this.call;
     }
+
+    async call(request, reply) {}
 
     async register(server)
     {
