@@ -37,7 +37,7 @@ export default class DatabaseController
 
     async getDocument(collection, query)
     {
-        return await this.database.collection(collection).findOne(query);
+        return await this.database.collection(collection).findOne(query).toArray();
     }
 
     async getDocuments(collection, query)

@@ -12,6 +12,7 @@ export default class HTTPServer
     {
         this.db = db;
         this.server = fastify();
+        this.server.db = db;
         this.Output = new PresetOutput("http");
         this.registerPlugins();
     }
