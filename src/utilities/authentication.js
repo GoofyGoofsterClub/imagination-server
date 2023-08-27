@@ -11,5 +11,7 @@ export default async function Authenticate(db, key)
         "key": key
     });
 
+    console.log(user);
+
     return user;
 }

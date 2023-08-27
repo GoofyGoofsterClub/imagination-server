@@ -51,7 +51,6 @@ export default class DatabaseController
     async checkDocumentExists(collection, query)
     {
         let result = await this.database.collection(collection).find(query).toArray();
-        console.log(result);
         return result.length > 0;
     }
 }

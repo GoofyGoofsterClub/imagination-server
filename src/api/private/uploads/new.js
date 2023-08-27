@@ -1,6 +1,6 @@
 import { APIRoute } from "http/routing";
 import { GeneratePrivateID, GeneratePublicID } from "utilities/id";
-import { hash } from "utilities/hash";
+import hash from "utilities/hash";
 import { pipeline } from "stream/promises";
 import { promisify } from "util";
 import fs from "fs";
@@ -24,7 +24,7 @@ export default class UploadsNewAPIRoute extends APIRoute
         
         }
 
-        const data = await req.file();
+        const data = await request.file();
 
         if (!data)
         {
@@ -44,10 +44,10 @@ export default class UploadsNewAPIRoute extends APIRoute
         const pipelineAsync = promisify(pipeline);
         await pipelineAsync(
             data.file,
-            fs.createWriteStream(`${__dirname}/../../../privateuploads/${ids.private}`)
+            fs.createWriteStream(`${__dirname}/../../../../privateuploads/${ids.private}`)
         );
 
-        let stats = fs.statSync(`${__dirname}/../../../privateuploads/${ids.private}`);
+        let stats = fs.statSync(`${__dirname}/../../../../privateuploads/${ids.private}`);
         let fileSizeInBytes = stats.size;
 
         let collection = await this.db.getCollection("uploads");
@@ -59,16 +59,15 @@ export default class UploadsNewAPIRoute extends APIRoute
             "file_ext": data.filename.split(".")[1],
             "mimetype": data.mimetype,
             "timestamp": Date.now(),
-            "deletehash": ids.delete,
-            "uploaded_thru": req.headers['host'],
+            "deletehash": null, // DEPRECATED: But still used for backwards compatibility
+            "uploaded_thru": request.headers['host'],
             "size": fileSizeInBytes
         });
 
         reply.send({
             "success": true,
             "data": {
-                "link": `${req.headers['host']}/${_auth.displayName}/${ids.public}`,
-                "deletehash": `${req.headers['host']}/delete/${ids.delete}`
+                "link": `https://${request.headers['host']}/${_auth.displayName}/${ids.public}`
             }
         });
 
