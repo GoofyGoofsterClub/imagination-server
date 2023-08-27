@@ -1,10 +1,18 @@
-const fastify = require('fastify')({ logger: true, bodyLimit: Number.MAX_SAFE_INTEGER });
+import Output from "@utilities/output";
+import HTTPServer from "@http/server";
 
-fastify.get('/', async (request, reply) => {
-    return { hello: 'world' };
+Output.Log("Preparing the server...");
+
+(async () => {
+    const server = new HTTPServer();
+
+    server.registerRoute("/", "GET", async (request, reply) => {
+        return "Hello, world!";
+    });
+
+    server.start(process.env.HTTP_PORT).then(() => {
+        Output.Log("Server started!");
+    });
+})().catch((error) => {
+    Output.Error("sys", "An error occured while starting the server:", error);
 });
-
-fastify.listen({
-    host: '0.0.0.0',
-    port: process.env.HTTP_PORT
-}).catch((e) => { console.log(e); });
