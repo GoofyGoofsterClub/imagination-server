@@ -125,7 +125,7 @@ window.onload = async () => {
 async function ChangePage(page)
 {
     var newData = await fetch('/public/popovers/' + page + '.html');
-    
+
     anime({
         targets: 'body>.content',
         opacity: 0,
@@ -168,6 +168,21 @@ async function ChangePage(page)
         return;    
     }
     newData = await newData.text();
+
+    let parser = new DOMParser();
+    let doc = parser.parseFromString(newData, 'text/html');
+
+    let scripts = doc.getElementsByTagName('preload-script');
+    for (var i = 0; i < scripts.length; i++) {
+        let script = scripts[i];
+        let src = script.getAttribute('src');
+        let scriptElement = document.createElement('script');
+        scriptElement.src = src;
+        document.head.appendChild(scriptElement);
+
+        script.remove();
+    }
+
     document.querySelector('body>.content').innerHTML = newData;
     var els = document.querySelectorAll('body>.content>*');
     for (var i = 0; i < els.length; i++) {
