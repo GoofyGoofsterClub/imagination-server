@@ -8,8 +8,9 @@ import { PresetOutput } from "utilities/output";
 
 export default class HTTPServer
 {
-    constructor()
+    constructor(db)
     {
+        this.db = db;
         this.server = fastify();
         this.Output = new PresetOutput("http");
         this.registerPlugins();

@@ -19,7 +19,7 @@ export default class HTTPRouting
 
 export class Route
 {
-    constructor(path, method, handler)
+    constructor( path, method, handler)
     {
         this.path = path;
         this.method = method;
@@ -28,6 +28,7 @@ export class Route
 
     async register(server)
     {
+        this.db = server.db;
         await server.registerRoute(this.path, this.method, this.handler);
     }
 }

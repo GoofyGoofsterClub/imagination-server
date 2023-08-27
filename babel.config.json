@@ -18,7 +18,8 @@
                 "root": ["./src"],
                 "alias": {
                     "utilities": "./src/utilities",
-                    "http": "./src/http"
+                    "http": "./src/http",
+                    "db": "./src/db"
                 }
             }
         ]
