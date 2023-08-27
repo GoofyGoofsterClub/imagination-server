@@ -1,10 +1,13 @@
 import Output from "utilities/output";
 import HTTPServer from "http/server";
+import HTTPRouting from "http/routing";
 
 Output.Log("Preparing the server...");
 
 (async () => {
     const server = new HTTPServer();
+    
+    HTTPRouting.RegisterRoutes(server);
 
     server.start(process.env.HTTP_PORT).then(() => {
         Output.Log("Server started!");

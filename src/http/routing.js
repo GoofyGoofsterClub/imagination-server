@@ -1,14 +1,17 @@
 import fs from "fs";
+import Output from "utilities/output";
+
 
 export default class HTTPRouting
 {
     static async RegisterRoutes(server)
     {
-        const routes = fs.readdirSync("../routes");
+        const routes = fs.readdirSync(`${__dirname}/../routes`);
         for(const route of routes)
         {
-            const routeModule = await import(`routes/${route.split(".")[0]}`);
+            const routeModule = await import(`${__dirname}/../routes/${route.split(".")[0]}`);
             await routeModule.default.register(server);
+            Output.Log("http", `Registered route :: ${route.split(".")[0].cyan}`);
         }
 
     }
