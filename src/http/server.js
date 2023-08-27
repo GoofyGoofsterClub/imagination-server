@@ -1,4 +1,9 @@
 import fastify from "fastify";
+import fastifyMultipart from "fastify-multipart";
+import fastifyCookie from "fastify-cookie";
+import fastifyStatic from "fastify-static";
+import eta from "eta";
+import pointOfView from "point-of-view";
 import { PresetOutput } from "utilities/output";
 
 export default class HTTPServer
@@ -7,6 +12,11 @@ export default class HTTPServer
     {
         this.server = fastify();
         this.Output = new PresetOutput("http");
+    }
+
+    async registerPlugins()
+    {
+
     }
 
     async registerRoute(path, method, handler)
