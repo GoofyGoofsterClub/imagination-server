@@ -9,7 +9,8 @@ export default class UploadsCountAPIRoute extends APIRoute
 
     async call(request, reply)
     {
-        const count = await this.db.getCollection("uploads").count();
+        let collection = await this.db.getCollection("uploads");
+        let count = await collection.countDocuments();
         reply.send({
             "count": count
         });

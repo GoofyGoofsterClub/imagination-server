@@ -186,3 +186,11 @@ function SetContent(content)
 {
     document.querySelector('body>.content').innerHTML = content;
 }
+
+async function GetUploadCount(event)
+{
+    const _v = await fetch('/api/public/uploads/count');
+    const _v_json = await _v.json();
+    document.getElementById("__upload_counter").innerText = _v_json.count;
+    event.remove();
+}
