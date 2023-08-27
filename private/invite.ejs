@@ -1,26 +1,16 @@
 <head>
-    <title>boobs image server</title>
+    <title>mishashto's Image Uploader - Invite</title>
+    <link rel="stylesheet" href="/public/css/new.css">
+    <script src="/public/js/anime.min.js"></script>
 </head>
-<body style="">
-    <div style="
-    /* forgive me for doing it like that i am just lazy to add another public folder :Chatting: */
-    display: block;
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    ">
-        <div>
-            <p>You've been invited by <b><%= it.inviteData.invited_by %></b>!</p>
-            <a href="/acceptinvite?key=<%= it.inviteData.key %>"><button>Accept</button></a>
-            <br><br>
-            <fieldset style="float: left; text-align: left;">
-                <legend><b>Information</b></legend>
-                <p style="line-height: 0;">Be careful and don't share the link above, your key or how it works.</p>
-                <p style="line-height: 0;">This is a private invitational friends & trusted people only image hosting server.</p>
-                <p style="line-height: 0;"><b>The rules are simple: one key per one person. If I detect that you abuse that shit and abuse it I will revoke the key.</b></p>
-            </fieldset>
+<body>
+    <div class="navbar">
+        <div class="content">
+            <a class="nav-el" href="#invite" style="opacity: 0;" data-content="invite" onclick="return false;"><span>Invite</span></a>
         </div>
     </div>
+    <div class="content">
+        <p>Temporary invite content</p>
+    </div>
+    <div class="legal"><a href="https://reze.moe/" class="me">reze.moe</a> ♥</div>
 </body>
