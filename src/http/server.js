@@ -16,7 +16,18 @@ export default class HTTPServer
 
     async registerPlugins()
     {
-
+        await this.server.register(fastifyMultipart);
+        await this.server.register(fastifyCookie);
+        await this.server.register(fastifyStatic, {
+            root: `${__dirname}/../../public`,
+            prefix: "/public/"
+        });
+        await this.server.register(pointOfView, {
+            engine: {
+                eta: eta
+            },
+            templates: `${__dirname}/../../private`
+        });
     }
 
     async registerRoute(path, method, handler)
