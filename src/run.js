@@ -6,10 +6,6 @@ Output.Log("Preparing the server...");
 (async () => {
     const server = new HTTPServer();
 
-    server.registerRoute("/", "GET", async (request, reply) => {
-        return "Hello, world!";
-    });
-
     server.start(process.env.HTTP_PORT).then(() => {
         Output.Log("Server started!");
     });
