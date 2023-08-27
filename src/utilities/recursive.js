@@ -1,3 +1,5 @@
+import fs from "fs";
+
 export default function GetRoutesResursively(path)
 {
     let paths = [];
