@@ -44,4 +44,9 @@ export default class DatabaseController
     {
         return await this.database.collection(collection).find(query).toArray();
     }
+
+    async checkDocumentExists(collection, query)
+    {
+        return await this.database.collection(collection).findOne(query) != null;
+    }
 }

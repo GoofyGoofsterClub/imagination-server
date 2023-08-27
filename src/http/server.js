@@ -5,13 +5,16 @@ import fastifyStatic from "fastify-static";
 import eta from "eta";
 import pointOfView from "point-of-view";
 import { PresetOutput } from "utilities/output";
+import Authenticate from "utilities/authentication";
 
 export default class HTTPServer
 {
     constructor(db)
     {
         this.db = db;
-        this.server = fastify();
+        this.server = fastify({
+            logger: true
+        });
         this.server.db = db;
         this.Output = new PresetOutput("http");
         this.registerPlugins();
@@ -31,6 +34,10 @@ export default class HTTPServer
             },
             templates: `${__dirname}/../../private`
         });
+
+        this.server._public = {
+            "Authenticate": Authenticate
+        }
     }
 
     async registerRoute(path, method, handler)
