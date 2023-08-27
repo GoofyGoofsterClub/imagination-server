@@ -12,6 +12,7 @@ export default class HTTPServer
     {
         this.server = fastify();
         this.Output = new PresetOutput("http");
+        this.registerPlugins();
     }
 
     async registerPlugins()
