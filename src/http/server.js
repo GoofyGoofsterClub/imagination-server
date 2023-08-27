@@ -1,5 +1,5 @@
 import fastify from "fastify";
-import { PresetOutput } from "@utilities/output";
+import { PresetOutput } from "utilities/output";
 
 export default class HTTPServer
 {
