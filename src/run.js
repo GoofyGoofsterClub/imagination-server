@@ -1,5 +1,5 @@
 import Output from "utilities/output";
-import HTTPServer from "@ttp/server";
+import HTTPServer from "http/server";
 
 Output.Log("Preparing the server...");
 
