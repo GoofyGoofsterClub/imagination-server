@@ -2,7 +2,7 @@ import { MongoClient } from "mongodb";
 
 export default class DatabaseController
 {
-    constructor(host, port, username, password, database)
+    constructor(host, port, database, username, password)
     {
         this.host = host;
         this.port = port;
