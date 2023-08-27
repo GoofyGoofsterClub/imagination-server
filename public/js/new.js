@@ -135,9 +135,13 @@ async function ChangePage(page)
     });
 
     let navButton = document.querySelector(`.nav-el[data-content="${page}"]`);
-    if (navButton == null) navButton = document.querySelector(`.nav-el[data-content="welcome"]`);
-    document.querySelector('.nav-el.current').classList.remove('current');
-    navButton.classList.add('current');
+    if (navButton == null) navButton = null;
+    
+    if (navButton != null)
+    {
+        document.querySelector('.nav-el.current').classList.remove('current');
+        navButton.classList.add('current');
+    }
 
     if (page == "welcome")
     {
@@ -165,25 +169,27 @@ async function ChangePage(page)
     if (newData.status != 200)
     {
         SetContent("<h1>Not Found</h1><p>No such page exists. Contact the server administrator if you think this is a mistake.</p>");
-        return;    
     }
-    newData = await newData.text();
+    else
+    {
+        newData = await newData.text();
 
-    let parser = new DOMParser();
-    let doc = parser.parseFromString(newData, 'text/html');
+        let parser = new DOMParser();
+        let doc = parser.parseFromString(newData, 'text/html');
 
-    let scripts = doc.getElementsByTagName('preload-script');
-    for (var i = 0; i < scripts.length; i++) {
-        let script = scripts[i];
-        let src = script.getAttribute('src');
-        let scriptElement = document.createElement('script');
-        scriptElement.src = src;
-        document.head.appendChild(scriptElement);
+        let scripts = doc.getElementsByTagName('preload-script');
+        for (var i = 0; i < scripts.length; i++) {
+            let script = scripts[i];
+            let src = script.getAttribute('src');
+            let scriptElement = document.createElement('script');
+            scriptElement.src = src;
+            document.head.appendChild(scriptElement);
 
-        script.remove();
+            script.remove();
+        }
+        document.querySelector('body>.content').innerHTML = newData;
     }
-
-    document.querySelector('body>.content').innerHTML = newData;
+    
     var els = document.querySelectorAll('body>.content>*');
     for (var i = 0; i < els.length; i++) {
         els[i].style.opacity = 0;
