@@ -18,7 +18,7 @@ export default class DatabaseController
 
     async connect()
     {
-        if (username == null || password == null)
+        if (this.username == null || this.password == null)
         {
             this.client = new MongoClient(`mongodb://${this.host}:${this.port}`);
             await this.client.connect();
