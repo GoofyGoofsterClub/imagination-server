@@ -209,6 +209,7 @@ async function GetUploads()
     for (let i = 0; i < data.data.length; i++)
     {
         let row = table.insertRow();
+        row.id = "__dashboard_logged_uploads_table_row_" + i;
         let cell = row.insertCell();
         cell.innerHTML = `<a href="https://${window.location.host}/${UserInfo.displayName}/${data.data[i].filename}"><span class="code">[${data.data[i].filename}]</span></a>`;
         cell = row.insertCell();
@@ -221,7 +222,31 @@ async function GetUploads()
         button.classList.add("input-button");
         button.classList.add("button-red");
         button.onclick = async function()
-        {}
+        {
+            DeleteFile(i, data.data[i].filename);
+        }
         cell.appendChild(button);
+
+        var _p = document.createElement("p");
+        _p.innerText = "";
+        _p.id = "__dashboard_logged_uploads_table_error_" + i;
+        _p.classList.add("small-text");
+        _p.classList.add("error-text");
+        cell.appendChild(_p);
     }
+}
+
+async function DeleteFile(index, filename, deletehash)
+{
+    let key = localStorage.getItem("key");
+    let response = await fetch("/api/private/uploads/delete?key=" + key + "&filename=" + filename + "&deletehash=" + deletehash);
+    let data = await response.json();
+    if (!data.success)
+    {
+        document.getElementById("__dashboard_logged_uploads_table_error_" + index).innerText = data.error;
+        document.getElementById("__dashboard_logged_uploads_table_error_" + index).style.display = "block";
+        return;
+    }
+
+    document.querySelector("#__dashboard_logged_uploads_table_row_" + index).remove();
 }
