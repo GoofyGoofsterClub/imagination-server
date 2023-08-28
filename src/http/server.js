@@ -18,6 +18,16 @@ export default class HTTPServer
         this.server.db = db;
         this.Output = new PresetOutput("http");
         this.registerPlugins();
+        this.register404();
+    }
+
+    async register404()
+    {
+        this.server.setNotFoundHandler((request, reply) => {
+            reply.view("404.ejs", {
+                "domain": request.headers['host']
+            });
+        });
     }
 
     async registerPlugins()
