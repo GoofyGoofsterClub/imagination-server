@@ -6,7 +6,7 @@ var AllUsers = [];
 var PossibleActions = {
     "CopyKey": "Copy Key",
     "Delete": "Revoke access",
-    "1984": "Orwell"
+    //"1984": "Orwell"
 }
 
 async function CheckLogin()
