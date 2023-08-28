@@ -181,6 +181,8 @@ async function ChangePage(page)
         for (var i = 0; i < scripts.length; i++) {
             let script = scripts[i];
             let src = script.getAttribute('src');
+            if (document.querySelector(`script[src="${src}"]`) != null)
+                document.querySelector(`script[src="${src}"]`).remove();
             let scriptElement = document.createElement('script');
             scriptElement.src = src;
             document.head.appendChild(scriptElement);
