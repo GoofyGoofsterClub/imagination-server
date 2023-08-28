@@ -190,6 +190,7 @@ input:focus
 
 .input-button
 {
+
     background: rgba(40, 30, 40, 0.2);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 999px;
@@ -197,6 +198,8 @@ input:focus
     color: white;
     outline: none;
     
+    margin: 0 2px;
+
     transition: 0.2s;
 }
 
@@ -210,6 +213,60 @@ input:focus
 .small-text
 {
     font-size: 11px;
+}
+
+.error-text
+{
+    color: rgb(240, 86, 86);
+}
+
+.bold
+{
+    font-weight: 600;
+}
+
+.image-container
+{
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid rgba(255,255,255,0.2);
+}
+
+.dashboard-block
+{
+    background: rgba(40, 30, 40, 0.2);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 16px;
+    margin: 16px 0;
+}
+
+hr
+{
+    border: 1px solid rgba(255,255,255,0.1);
+    margin: 16px 0;
+}
+
+table
+{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td
+{
+    padding: 8px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 16px 16px;
+    display: table-cell;
+    position: relative
+}
+
+th
+{
+    font-weight: 600;
+    background-color: rgba(40, 30, 40, 0.3);
 }
 
  @-webkit-keyframes bigshowoffanimaation {
