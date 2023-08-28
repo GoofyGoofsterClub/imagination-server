@@ -24,6 +24,14 @@ export default class UploadsNewAPIRoute extends APIRoute
         
         }
 
+        if (_auth.isBanned)
+        {
+            reply.status(403);
+            return reply.send({
+                "error": "You are banned."
+            });
+        }
+
         const data = await request.file();
 
         if (!data)
