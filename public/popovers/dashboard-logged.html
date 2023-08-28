@@ -1,4 +1,4 @@
-<h1><button style="float: right;" class="input-button" onclick="logOutLoggedIn();">Log out</button> <button style="float: right;" class="input-button">Download ShareX config</button>Dashboard</h1>
+<h1><button style="float: right;" class="input-button" onclick="logOutLoggedIn();">Log out</button> <button style="float: right;" class="input-button" onclick="DownloadSharex();" id="__dashboard_logged_sharex_button">Download ShareX config</button>Dashboard</h1>
 <p>Okaeri, <b id="__dashboard_logged_displayname">[loading]</b>!</p>
 <br>
 <hr>
@@ -36,7 +36,7 @@
 <hr>
 <br>
 <h2><button style="float: right;" class="input-button" onclick="">Delete all</button>Uploads</h2>
-<p>Your uploads man!</p>
+<p>Your uploads man! You've got a total of <b id="__dashboard_logged_uploads_count">...</b> uploads!</p>
 <table id="__dashboard_logged_uploads_table">
     <thead>
         <tr>
@@ -48,7 +48,7 @@
     </thead>
     <tbody>
         <tr>
-            <td colspan="5">Loading...</td>
+            <td colspan="5" id="__dashboard_logged_uploads_table_info">Loading...</td>
         </tr>
     </tbody>
 </table>

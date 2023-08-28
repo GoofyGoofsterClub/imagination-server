@@ -1,5 +1,7 @@
 CheckLogin();
 
+var UserInfo = {};
+
 async function CheckLogin()
 {
     let key = localStorage.getItem("key");
@@ -37,6 +39,8 @@ async function CheckLogin()
         document.getElementById("__dashboard_logged_invite_block").style.display = "block";
         document.getElementById("__dashboard_logged_invite_block_unavailable").style.display = "none";
     }
+
+    await GetUploads();
 }
 
 async function GetUserInfo()
@@ -44,6 +48,7 @@ async function GetUserInfo()
     let key = localStorage.getItem("key");
     let response = await fetch("/api/private/session/info?key=" + key);
     let data = await response.json();
+    UserInfo = data.data;
     return data.data;
 }
 
@@ -51,4 +56,79 @@ async function logOutLoggedIn()
 {
     localStorage.removeItem("key");
     ChangePage("dashboard");
+}
+
+async function DownloadSharex()
+{
+    document.getElementById("__dashboard_logged_sharex_button").disabled = true;
+    // localhost:8080/api/public/session/sharex?key=
+    let key = localStorage.getItem("key");
+    let response = await fetch("/api/public/session/sharex?key=" + key);
+    if (response.status != 200)
+    {
+        alert("An error occurred while downloading the ShareX config. Please try again later.");
+        document.getElementById("__dashboard_logged_sharex_button").disabled = false;
+        return;
+    }
+
+    // download the file
+    let data = await response.blob();
+    let url = window.URL.createObjectURL(data);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = "sharex.sxcu";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(() =>
+    {
+        document.getElementById("__dashboard_logged_sharex_button").disabled = false;
+    }, 3000);
+}
+
+async function GetUploads()
+{
+    let key = localStorage.getItem("key");
+    let response = await fetch("/api/private/session/uploads?key=" + key);
+    let data = await response.json();
+    if (!data.success)
+    {
+        document.getElementById("__dashboard_logged_uploads_table_info").innerText = "An error occurred while fetching your uploads.";
+        document.getElementById("__dashboard_logged_uploads_table_info").classList.add("error-text");
+        return;
+    }
+
+    if (data.data.length == 0)
+    {
+        document.getElementById("__dashboard_logged_uploads_table_info").innerText = "You have no uploads.";
+        return;
+    }
+
+    data.data.sort((a, b) => (a.timestamp > b.timestamp) ? -1 : 1);
+
+    document.getElementById("__dashboard_logged_uploads_count").innerText = data.data.length;
+
+    let table = document.getElementById("__dashboard_logged_uploads_table");
+    while (table.rows.length > 1)
+        table.deleteRow(1);
+
+    for (let i = 0; i < data.data.length; i++)
+    {
+        let row = table.insertRow();
+        let cell = row.insertCell();
+        cell.innerHTML = `<a href="https://${window.location.host}/${UserInfo.displayName}/${data.data[i].filename}"><span class="code">[${data.data[i].filename}]</span></a>`;
+        cell = row.insertCell();
+        cell.innerText = data.data[i] == undefined ? "Unknown" : new Date(data.data[i].timestamp).toLocaleString();
+        cell = row.insertCell();
+        cell.innerText = data.data[i].uploaded_thru == undefined ? "Unknown" : data.data[i].uploaded_thru;
+        cell = row.insertCell();
+        let button = document.createElement("button");
+        button.innerText = "Delete";
+        button.classList.add("input-button");
+        button.classList.add("button-red");
+        button.onclick = async function()
+        {}
+        cell.appendChild(button);
+    }
 }
