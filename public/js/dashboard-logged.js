@@ -5,9 +5,6 @@ var AllUsers = [];
 
 var PossibleActions = {
     "CopyKey": "Copy Key",
-    "Ban": "Toggle Ban",
-    "AdminPromote": "Toggle administrator status",
-    "CanInvite": "Toggle invite permissions",
     "Delete": "Revoke access",
     "1984": "Orwell"
 }
