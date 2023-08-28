@@ -21,7 +21,7 @@ export default class ImageServing extends Route
             reply.send({
                 "success": false,
                 "data": {
-                    "message": "File not found."
+                    "message": "File not found"
                 }
             });
             return;
