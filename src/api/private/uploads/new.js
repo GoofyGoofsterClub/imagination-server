@@ -26,10 +26,23 @@ export default class UploadsNewAPIRoute extends APIRoute
 
         if (_auth.isBanned)
         {
-            reply.status(403);
-            return reply.send({
-                "error": "You are banned."
-            });
+            // if has ban duration and it passed then unban
+            if (_auth.banDuration && _auth.banDuration < Date.now())
+            {
+                await this.db.updateDocument("users", {
+                    "key": request.headers['authorization']
+                }, { "$set": {
+                    "isBanned": false,
+                    "banDuration": null
+                } });
+            }
+            else
+            {
+                reply.status(403);
+                return reply.send({
+                    "error": "You are banned."
+                });
+            }
         }
 
         const data = await request.file();
@@ -71,6 +84,29 @@ export default class UploadsNewAPIRoute extends APIRoute
             "uploaded_thru": request.headers['host'],
             "size": fileSizeInBytes
         });
+        console.log(this.db.updateDocument);
+
+        if (this._public.Ratelimits.length > 100)
+            this._public.Ratelimits.shift();
+        this._public.Ratelimits.push({
+            "userName": _auth.displayName,
+            "timestamp": Date.now()
+        });
+
+        let uploadsInLast10Seconds = this._public.Ratelimits.filter(x => x.userName == _auth.displayName && x.timestamp > Date.now() - 10000);
+        if (uploadsInLast10Seconds.length > 10)
+        {
+            await this.db.updateDocument("users", {
+                "key": request.headers['authorization']
+                }, { "$set": {
+                    "isBanned": true,
+                    "banDuration": Date.now() + 60000
+                    } });
+            reply.status(429);
+            return reply.send({
+                "error": "You are uploading too fast."
+            });
+        }
 
         reply.send({
             "success": true,

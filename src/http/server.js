@@ -46,7 +46,8 @@ export default class HTTPServer
         });
 
         this.server._public = {
-            "Authenticate": Authenticate
+            "Authenticate": Authenticate,
+            "Ratelimits": []
         }
     }
 

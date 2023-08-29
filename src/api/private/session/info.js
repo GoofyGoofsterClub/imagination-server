@@ -22,6 +22,22 @@ export default class CheckSessionInfoAPIRoute extends APIRoute
             "key": request.query.key
         });
 
+        // if is banned but duration has passed current time, unban
+        if (user.isBanned && user.banDuration < Date.now())
+        {
+            await this.db.updateDocument("users", {
+                "key": request.query.key
+            }, {
+                "$set": {
+                    "isBanned": false,
+                    "banDuration": null
+                }
+            });
+            user.isBanned = false;
+            user.banDuration = null;
+        }
+
+
         return {
             "success": true,
             "data": {
