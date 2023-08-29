@@ -32,7 +32,8 @@ export default class ImageServing extends Route
             "filename": request.params.filename
         });
 
-        console.log(file);
+        if (!file.mimetype.test(/image\/.*/) || !file.mimetype.test(/video\/.*/) || !file.mimetype.test(/audio\/.*/) || !file.mimetype.test(/text\/.*/))
+            reply.header("Content-Disposition", `attachment; filename="${file.filename}.${file.file_ext ? file.file_ext : ""}"`);
 
         reply.type(file.mimetype);
 
