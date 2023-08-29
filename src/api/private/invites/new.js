@@ -2,7 +2,7 @@ import { APIRoute } from "http/routing";
 import { v4 as uuidv4 } from "uuid";
 import hash from "utilities/hash";
 
-export default class AdminGetSessionsAPIRoute extends APIRoute
+export default class InvitesNewAPIRoute extends APIRoute
 {
     constructor()
     {
