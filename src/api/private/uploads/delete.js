@@ -35,6 +35,28 @@ export default class DeleteUploadAPIRoute extends APIRoute
                 "error": "No filename was provided."
             };
         
+        if (request.query.filename == "*")
+        {
+            // delete all of theirs
+            let collection = await this.db.getCollection("uploads");
+            let uploads = await collection.find({
+                "uploader": hash(_auth.displayName)
+            }).toArray();
+
+            await collection.deleteMany({
+                "uploader": hash(_auth.displayName)
+            });
+
+            for (let upload of uploads)
+            {
+                fs.unlinkSync(`${__dirname}/../../../../privateuploads/${upload.actual_filename}`);
+            }
+
+            return {
+                "success": true
+            };
+        }
+        
         let doesExist = await this.db.checkDocumentExists("uploads", {
             "filename": request.query.filename
         });
