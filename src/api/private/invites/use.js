@@ -1,6 +1,7 @@
 import { APIRoute } from "http/routing";
+import { v4 as uuidv4 } from "uuid";
 
-export default class InvitesInfoAPIRoute extends APIRoute
+export default class InvitesUseAPIRoute extends APIRoute
 {
     constructor()
     {
@@ -45,11 +46,36 @@ export default class InvitesInfoAPIRoute extends APIRoute
                 "error": "Invalid code."
             };
         
+        let targetUser = await this.db.getDocument("users", {
+            "displayName": target.displayName
+        });
+
+        if (targetUser)
+            return {
+                "success": false,
+                "error": "User already exists."
+            };
+
+        await this.db.deleteDocuments("invites", {
+            "hash": request.query.code
+        });
+
+        let accessKey = "vX2~!" + uuidv4();
+
+        await this.db.insertDocument("users", {
+            "displayName": target.displayName,
+            "key": accessKey,
+            "administrator": false,
+            "can_invite": false,
+            "isBanned": false
+        });
+
         return {
             "success": true,
-            "data": target
+            "data": {
+                "displayName": target.displayName,
+                "accessKey": accessKey
+            }
         };
-
-
     }
 }
