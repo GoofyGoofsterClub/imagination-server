@@ -10,7 +10,75 @@
         </div>
     </div>
     <div class="content">
-        <p>Temporary invite content</p>
+        <h1>You've been selected!</h1>
+        <p>Irasshya, <b><%= it.invite.displayName %></b>! One of our trusted people, <%= it.invite.invitedBy %>, selected you to be a part of a human experiment. As in to use this service.</p>
+        <p><b>Before you accept: </b>This service is built upon trust. We believe that you wont abuse it and will behave.</p>
+        <br>
+        <br>
+        <p>
+            <div class="dashboard-block">
+                <p>
+                    <input readonly disabled value="●●●●●●●●●●●●●●●●●●●" id="__invite_key_field"> <button class="input-button" id="__invite_accept_button">I accept</button> <button class="input-button" id="__invite__decline_button">I decline</button>
+                    <p class="small-text error-text" id="__invite_result_message"></p>
+                </p>
+            </div>
+        </p>
+        <br>
+        <p class="small-text" style="opacity: 0.8;">Please note that after declining you're most likely to be never invited again.</p>
     </div>
     <div class="legal"><a href="https://reze.moe/" class="me">reze.moe</a> ♥</div>
 </body>
+<script>
+window.onload = async function ()
+{
+    document.getElementById("__invite_accept_button").addEventListener("click", async function ()
+    {
+        document.getElementById("__invite_accept_button").disabled = true;
+        document.getElementById("__invite_accept_button").innerText = "Accepting...";
+        document.getElementById("__invite__decline_button").disabled = true;
+        document.getElementById("__invite_key_field").disabled = true;
+
+        let response = await fetch("/api/private/invites/use?code=<%= it.invite.hash %>");
+
+        let json = await response.json();
+        if (json.success)
+        {
+            document.getElementById("__invite_accept_button").remove();
+            document.getElementById("__invite__decline_button").remove();
+            document.getElementById("__invite_key_field").value = json.data.accessKey;
+            document.getElementById("__invite_key_field").disabled = false;
+        }
+        else
+        {
+            document.getElementById("__invite_accept_button").disabled = false;
+            document.getElementById("__invite_accept_button").innerText = "I accept";
+            document.getElementById("__invite__decline_button").disabled = false;
+            document.getElementById("__invite_key_field").disabled = false;
+            document.getElementById("__invite_result_message").innerText = json.error;
+        }
+    });
+
+    document.getElementById("__invite__decline_button").addEventListener("click", async function ()
+    {
+        document.getElementById("__invite_accept_button").disabled = true;
+        document.getElementById("__invite__decline_button").disabled = true;
+        document.getElementById("__invite_key_field").disabled = true;
+
+        let response = await fetch("/api/private/invites/remove?code=<%= it.invite.hash %>");
+        let json = await response.json();
+        if (json.success)
+        {
+            document.getElementById("__invite_accept_button").remove();
+            document.getElementById("__invite__decline_button").remove();
+            document.getElementById("__invite_key_field").remove();
+            document.getElementById("__invite_result_message").innerText = "You've declined the invitation. You can close this page now.";
+        }
+        else
+        {
+            document.getElementById("__invite_accept_button").disabled = false;
+            document.getElementById("__invite__decline_button").disabled = false;
+            document.getElementById("__invite_result_message").innerText = json.error;
+        }
+    });
+}
+</script>
