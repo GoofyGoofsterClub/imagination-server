@@ -10,26 +10,6 @@ export default class InvitesUseAPIRoute extends APIRoute
 
     async call(request, reply)
     {
-        let doesExist = await this.db.checkDocumentExists("users", {
-            "key": request.query.key
-        });
-
-        if (!doesExist)
-            return {
-                "success": false,
-                "error": "Invalid key."
-            };
-        
-        let user = await this.db.getDocument("users", {
-            "key": request.query.key
-        });
-
-        if (!user.administrator)
-            return {
-                "success": false,
-                "error": "You are not an administrator."
-            };
-
         if (!request.query.code)
             return {
                 "success": false,
