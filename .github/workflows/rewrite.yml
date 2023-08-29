@@ -28,9 +28,9 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/imagination-server-rewrite:latest
-#      - 
-#        name: Webhook
-#        uses: distributhor/workflow-webhook@v2
-#        env:
-#          webhook_url: ${{ secrets.PORTAINER_WEBHOOK }}
-#          webhook_secret: "thereisnosecret"
+      - 
+        name: Webhook
+        uses: distributhor/workflow-webhook@v2
+        env:
+          webhook_url: ${{ secrets.PORTAINER_WEBHOOK_REWRITE }}
+          webhook_secret: "thereisnosecret"

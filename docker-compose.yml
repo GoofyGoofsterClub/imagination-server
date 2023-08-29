@@ -17,7 +17,6 @@ services:
       - $HTTP_EXPOSE_PORT:$HTTP_PORT
     volumes:
       - ./:/usr/src/boobspics
-      - /usr/src/boobspics/node_modules
     container_name: boobspics-web
     restart: unless-stopped
     env_file:

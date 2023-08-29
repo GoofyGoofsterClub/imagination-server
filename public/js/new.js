@@ -114,75 +114,117 @@ window.onload = async () => {
             if (target.tagName == 'SPAN') target = target.parentElement;
             if (target.classList.contains('current')) return;
 
-            if (target.getAttribute('data-content') == 'welcome')
-            {
-                document.querySelector('.big-showoff').style.display = 'block';
-                anime({
-                    targets: '.big-showoff',
-                    height: '600px',
-                    duration: 200,
-                    easing: 'linear'
-                });
-            }
-            else
-            {
-                anime({
-                    targets: '.big-showoff',
-                    height: 0,
-                    duration: 200,
-                    easing: 'linear',
-                    onComplete: () => {
-                        document.querySelector('.big-showoff').style.display = 'none';
-                    }
-                });
-            }
-            anime({
-                targets: 'body>.content',
-                opacity: 0,
-                translateY: 100,
-                duration: 200,
-                easing: 'linear'
-            });
-
             document.querySelector('.nav-el.current').classList.remove('current');
             target.classList.add('current');
 
-            var newData = await fetch('/public/popovers/' + target.getAttribute('data-content') + '.html');
-            
-            if (newData.status != 200)
-            {
-                SetContent("<h1>Not Found</h1><p>No such page exists. Contact the server administrator if you think this is a mistake.</p>");
-                return;    
-            }
-            newData = await newData.text();
-            document.querySelector('body>.content').innerHTML = newData;
-            var els = document.querySelectorAll('body>.content>*');
-            for (var i = 0; i < els.length; i++) {
-                els[i].style.opacity = 0;
-                els[i].style.transform = "translateY(-30px)";
-            }
-            document.querySelector('body>.content').getElementsByClassName.transform = "translateY(-100px)";
-            
-            anime({
-                targets: 'body>.content',
-                opacity: 1,
-                translateY: 0,
-                duration: 200,
-                easing: 'linear'
-            });
-            anime({
-                targets: 'body>.content>*',
-                opacity: 1,
-                translateY: 0,
-                duration: 100,
-                easing: 'linear',
-                delay: anime.stagger(120)
-            });
+            await ChangePage(target.getAttribute('data-content'));
         });
     }
 };
 
+async function ChangePage(page)
+{
+    var newData = await fetch('/public/popovers/' + page + '.html');
+
+    anime({
+        targets: 'body>.content',
+        opacity: 0,
+        translateY: 100,
+        duration: 200,
+        easing: 'linear'
+    });
+
+    let navButton = document.querySelector(`.nav-el[data-content="${page}"]`);
+    if (navButton == null) navButton = null;
+    
+    if (navButton != null)
+    {
+        document.querySelector('.nav-el.current').classList.remove('current');
+        navButton.classList.add('current');
+    }
+
+    if (page == "welcome")
+    {
+        document.querySelector('.big-showoff').style.display = 'block';
+        anime({
+            targets: '.big-showoff',
+            height: '600px',
+            duration: 200,
+            easing: 'linear'
+        });
+    }
+    else
+    {
+        anime({
+            targets: '.big-showoff',
+            height: 0,
+            duration: 200,
+            easing: 'linear',
+            onComplete: () => {
+                document.querySelector('.big-showoff').style.display = 'none';
+            }
+        });
+    }
+
+    if (newData.status != 200)
+    {
+        SetContent("<h1>Not Found</h1><p>No such page exists. Contact the server administrator if you think this is a mistake.</p>");
+    }
+    else
+    {
+        newData = await newData.text();
+
+        let parser = new DOMParser();
+        let doc = parser.parseFromString(newData, 'text/html');
+
+        let scripts = doc.getElementsByTagName('preload-script');
+        for (var i = 0; i < scripts.length; i++) {
+            let script = scripts[i];
+            let src = script.getAttribute('src');
+            if (document.querySelector(`script[src="${src}"]`) != null)
+                document.querySelector(`script[src="${src}"]`).remove();
+            let scriptElement = document.createElement('script');
+            scriptElement.src = src;
+            document.head.appendChild(scriptElement);
+
+            script.remove();
+        }
+        document.querySelector('body>.content').innerHTML = newData;
+    }
+    
+    var els = document.querySelectorAll('body>.content>*');
+    for (var i = 0; i < els.length; i++) {
+        els[i].style.opacity = 0;
+        els[i].style.transform = "translateY(-30px)";
+    }
+    document.querySelector('body>.content').getElementsByClassName.transform = "translateY(-100px)";
+    
+    anime({
+        targets: 'body>.content',
+        opacity: 1,
+        translateY: 0,
+        duration: 200,
+        easing: 'linear'
+    });
+    anime({
+        targets: 'body>.content>*',
+        opacity: 1,
+        translateY: 0,
+        duration: 100,
+        easing: 'linear',
+        delay: anime.stagger(120)
+    });
+}
+
 function SetContent(content)
 {
     document.querySelector('body>.content').innerHTML = content;
+}
+
+async function GetUploadCount(event)
+{
+    const _v = await fetch('/api/public/uploads/count');
+    const _v_json = await _v.json();
+    document.getElementById("__upload_counter").innerText = _v_json.count;
+    event.remove();
 }

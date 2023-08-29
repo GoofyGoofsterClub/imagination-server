@@ -4,10 +4,12 @@ WORKDIR /usr/src/boobspics
 
 COPY package*.json .
 
-RUN npm install
+RUN npm install --save-dev
 
 COPY . .
 
 EXPOSE 3443
 
-CMD [ "node", "index.js" ]
+RUN npx babel src -d lib
+
+CMD [ "node", "./lib/run.js" ]
