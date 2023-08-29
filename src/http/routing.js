@@ -18,7 +18,7 @@ export default class HTTPRouting
             const routeModule = await import(route);
             const routeInstance = new routeModule.default();
             await routeInstance.register(server, routeName);
-            Output.Log("http", `Registered route :: ${routeName.cyan}`);
+            Output.Log("http", `Registered API route :: ${routeName.cyan}`);
         }
         for(const route of routes)
         {
