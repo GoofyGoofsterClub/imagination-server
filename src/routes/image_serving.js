@@ -32,7 +32,13 @@ export default class ImageServing extends Route
             "filename": request.params.filename
         });
 
-        if (!file.mimetype.test(/image\/.*/) || !file.mimetype.test(/video\/.*/) || !file.mimetype.test(/audio\/.*/) || !file.mimetype.test(/text\/.*/))
+        let fileMimetype = file.mimetype;
+        if (
+            !fileMimetype.match(/image\/.*/g) &&
+            !fileMimetype.match(/video\/.*/g) &&
+            !fileMimetype.match(/audio\/.*/g) &&
+            !fileMimetype.match(/application\/pdf/g)
+        )
             reply.header("Content-Disposition", `attachment; filename="${file.filename}.${file.file_ext ? file.file_ext : ""}"`);
 
         reply.type(file.mimetype);
