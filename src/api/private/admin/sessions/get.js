@@ -37,20 +37,21 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute
                 "error": "You are not an administrator."
             };
         
-        if (!request.query.target || !request.query.field)
+        if (!request.query.target)
             return {
                 "success": false,
                 "error": "Missing parameters."
             };
-        
-        if (restrictedFields.includes(request.query.field))
+
+
+        if (request.query.field && restrictedFields.includes(request.query.field))
             return {
                 "success": false,
                 "error": "You cannot get this field."
             };
 
         let target = await this.db.getDocument("users", {
-            "key": request.query.target
+            "displayName": request.query.target
         });
 
         if (!target)
@@ -58,19 +59,14 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute
                 "success": false,
                 "error": "Invalid target."
             };
+
         
-        if (!target[request.query.field])
-            return {
-                "success": false,
-                "error": "Field does not exist."
-            };
-        
-        if (target.administrator)
+        if (request.query.field && target.administrator)
             target[request.query.field] = administratorReplacements[request.query.field];
 
         return {
             "success": true,
-            "data": target[request.query.field]
+            "data": !request.query.field ? target : target[request.query.field]
         };
     }
 }
