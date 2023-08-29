@@ -48,7 +48,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
             };
 
         let target = await this.db.getDocument("users", {
-            "key": request.query.target
+            "displayName": request.query.target
         });
 
         if (!target)
@@ -57,6 +57,12 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
                 "error": "Invalid target."
             };
         
+        if (target.administrator && request.query.field == "isBanned")
+            return {
+                "success": false,
+                "error": "You cannot ban an administrator."
+            };
+
         let collection = await this.db.getCollection("users");
 
         collection.updateOne({
