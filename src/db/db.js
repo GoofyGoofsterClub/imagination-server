@@ -53,4 +53,9 @@ export default class DatabaseController
         let result = await this.database.collection(collection).find(query).toArray();
         return result.length > 0;
     }
+
+    async insertDocument(collection, document)
+    {
+        await this.database.collection(collection).insertOne(document);
+    }
 }
