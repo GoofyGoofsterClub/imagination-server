@@ -84,7 +84,6 @@ export default class UploadsNewAPIRoute extends APIRoute
             "uploaded_thru": request.headers['host'],
             "size": fileSizeInBytes
         });
-        console.log(this.db.updateDocument);
 
         if (this._public.Ratelimits.length > 100)
             this._public.Ratelimits.shift();
