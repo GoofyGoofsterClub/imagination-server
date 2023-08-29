@@ -9,7 +9,7 @@ export default class EnableJSRoute extends Route
 
     async call(request, reply)
     {
-        reply.view("enable.ejs", {
+        reply.view("enableth.ejs", {
             "domain": request.headers['host']
         });
     }
