@@ -47,6 +47,34 @@ async function CheckLogin()
         document.getElementById("__dashboard_logged_invite_block_unavailable").style.display = "none";
     }
 
+    document.getElementById("__dashboard_logged_invite_button").onclick = async function()
+    {
+        let key = localStorage.getItem("key");
+        let username = document.querySelector("#__dashboard_logged_invite_displayname").value;
+        if (username == undefined || username == null || username == "")
+        {
+            document.getElementById("__dashboard_loggen_invite_result").innerText = "Please enter a valid username.";
+            document.getElementById("__dashboard_loggen_invite_result").style.display = "block";
+            document.getElementById("__dashboard_loggen_invite_result").classList.add("error-text");
+            return;
+        }
+
+        let response = await fetch("/api/private/invites/new?key=" + key + "&target=" + username);
+        let data = await response.json();
+        if (!data.success)
+        {
+            document.getElementById("__dashboard_loggen_invite_result").innerText = data.error;
+            document.getElementById("__dashboard_loggen_invite_result").style.display = "block";
+            document.getElementById("__dashboard_loggen_invite_result").classList.add("error-text");
+            return;
+        }
+        
+        document.getElementById("__dashboard_loggen_invite_result").innerText = "Invite link: https://" + window.location.host + "/invite/" + data.data.inviteCode;
+        document.getElementById("__dashboard_loggen_invite_result").style.display = "block";
+        document.getElementById("__dashboard_loggen_invite_result").classList.remove("error-text");
+
+    }
+
     GetUploads();
 
     if(userInfo.administrator)
