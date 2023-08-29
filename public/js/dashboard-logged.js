@@ -47,6 +47,19 @@ async function CheckLogin()
         document.getElementById("__dashboard_logged_invite_block_unavailable").style.display = "none";
     }
 
+    document.getElementById("__dashboard_logged_delete_all").onclick = async function()
+    {
+        let key = localStorage.getItem("key");
+        let response = await fetch("/api/private/uploads/delete?key=" + key + "&filename=*");
+        let data = await response.json();
+        if (!data.success)
+        {
+            return;
+        }
+
+        GetUploads();
+    }
+
     document.getElementById("__dashboard_logged_invite_button").onclick = async function()
     {
         let key = localStorage.getItem("key");
@@ -72,7 +85,6 @@ async function CheckLogin()
         document.getElementById("__dashboard_loggen_invite_result").innerText = "Invite link: https://" + window.location.host + "/invite/" + data.data.inviteCode;
         document.getElementById("__dashboard_loggen_invite_result").style.display = "block";
         document.getElementById("__dashboard_loggen_invite_result").classList.remove("error-text");
-
     }
 
     GetUploads();
@@ -393,6 +405,9 @@ async function GetUploads()
     let key = localStorage.getItem("key");
     let response = await fetch("/api/private/session/uploads?key=" + key);
     let data = await response.json();
+    let table = document.getElementById("__dashboard_logged_uploads_table");
+    while (table.rows.length > 1)
+        table.deleteRow(1);
     if (!data.success)
     {
         document.getElementById("__dashboard_logged_uploads_table_info").innerText = "An error occurred while fetching your uploads.";
@@ -402,17 +417,14 @@ async function GetUploads()
 
     if (data.data.length == 0)
     {
-        document.getElementById("__dashboard_logged_uploads_table_info").innerText = "You have no uploads.";
+        if (document.getElementById("__dashboard_logged_uploads_table_info"))
+            document.getElementById("__dashboard_logged_uploads_table_info").innerText = "You have no uploads.";
         return;
     }
 
     data.data.sort((a, b) => (a.timestamp > b.timestamp) ? -1 : 1);
 
     document.getElementById("__dashboard_logged_uploads_count").innerText = data.data.length;
-
-    let table = document.getElementById("__dashboard_logged_uploads_table");
-    while (table.rows.length > 1)
-        table.deleteRow(1);
 
     for (let i = 0; i < data.data.length; i++)
     {
