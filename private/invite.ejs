@@ -18,8 +18,9 @@
         <p>
             <div class="dashboard-block">
                 <p>
-                    <input readonly disabled value="●●●●●●●●●●●●●●●●●●●" id="__invite_key_field"> <button class="input-button" id="__invite_accept_button">I accept</button> <button class="input-button" id="__invite__decline_button">I decline</button>
+                    <input readonly disabled value="●●●●●●●●●●●●●●●●●●●" id="__invite_key_field" style="transition: 0.3s;"> <button class="input-button" id="__invite_accept_button">I accept</button> <button class="input-button" id="__invite__decline_button">I decline</button>
                     <p class="small-text error-text" id="__invite_result_message"></p>
+                    <p class="small-text" style="display: none;" id="__invite_result_after_acceptance">Welcome, <%= it.invite.displayName %>! Please copy the <span class="error-text">code above before closing this page</span>, this is your key to access everything here. Please look at <a href="/#setup">[Setup Guide]</a> on the main page for instructions on hwo to set this up.</p>
                 </p>
             </div>
         </p>
@@ -46,6 +47,8 @@ window.onload = async function ()
             document.getElementById("__invite_accept_button").remove();
             document.getElementById("__invite__decline_button").remove();
             document.getElementById("__invite_key_field").value = json.data.accessKey;
+            document.getElementById("__invite_key_field").style.width = "100%";
+            document.getElementById("__invite_result_after_acceptance").style.display = "block";
             document.getElementById("__invite_key_field").disabled = false;
         }
         else
@@ -79,6 +82,12 @@ window.onload = async function ()
             document.getElementById("__invite__decline_button").disabled = false;
             document.getElementById("__invite_result_message").innerText = json.error;
         }
+    });
+
+    document.getElementById("__invite_key_field").addEventListener("click", function ()
+    {
+        document.getElementById("__invite_key_field").select();
+        document.execCommand("copy");
     });
 }
 </script>
