@@ -9,7 +9,7 @@ export default class InvitesRemoveAPIRoute extends APIRoute
 
     async call(request, reply)
     {
-        if (!request.query.target)
+        if (!request.query.code)
             return {
                 "success": false,
                 "error": "Missing parameters."
