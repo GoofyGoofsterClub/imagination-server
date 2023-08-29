@@ -10,13 +10,15 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
 {
     constructor()
     {
-        super("GET");
+        super("POST");
     }
 
     async call(request, reply)
     {
+        const requestData = request.body;
+        
         let doesExist = await this.db.checkDocumentExists("users", {
-            "key": request.query.key
+            "key": requestData.key
         });
 
         if (!doesExist)
@@ -26,7 +28,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
             };
         
         let user = await this.db.getDocument("users", {
-            "key": request.query.key
+            "key": requestData.key
         });
 
         if (!user.administrator)
@@ -35,20 +37,20 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
                 "error": "You are not an administrator."
             };
         
-        if (!request.query.target || !request.query.field || !request.query.value)
+        if (!requestData.target || !requestData.field || 'value' in requestData == false)
             return {
                 "success": false,
                 "error": "Missing parameters."
             };
         
-        if (restrictedFields.includes(request.query.field))
+        if (restrictedFields.includes(requestData.field))
             return {
                 "success": false,
                 "error": "You cannot modify this field."
             };
 
         let target = await this.db.getDocument("users", {
-            "displayName": request.query.target
+            "displayName": requestData.target
         });
 
         if (!target)
@@ -57,19 +59,17 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
                 "error": "Invalid target."
             };
         
-        if (target.administrator && request.query.field == "isBanned")
+        if (target.administrator && requestData.field == "isBanned")
             return {
                 "success": false,
                 "error": "You cannot ban an administrator."
             };
 
-        let collection = await this.db.getCollection("users");
-
-        collection.updateOne({
-            "key": request.query.target
+        this.db.updateDocument("users", {
+            "displayName": requestData.target
         }, {
             "$set": {
-                [request.query.field]: request.query.value
+                [requestData.field]: requestData.value
             }
         });
 

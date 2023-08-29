@@ -117,23 +117,143 @@ async function GetUsers()
 
         cell.style = "max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;";
 
+        // admin
         let b = document.createElement("button");
+        b.setAttribute("data-user", data.data[i].displayName);
+        b.setAttribute("data-value", data.data[i].administrator);
         b.classList.add("input-button");
         b.innerText = data.data[i].administrator ? "✔" : "✖";
+
+        b.onclick = async function()
+        {
+            this.disabled = true;
+            let key = localStorage.getItem("key");
+            let user = this.getAttribute("data-user");
+            let value = this.getAttribute("data-value") == "true" ? false : true;
+
+            let response = await fetch("/api/private/admin/sessions/modify",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "key": key,
+                    "target": user,
+                    "field": "administrator",
+                    "value": Boolean(value)
+                })
+            });
+
+            let data = await response.json();
+            if (!data.success)
+            {
+                document.getElementById("__dashboard_logged_users_table_error_" + i).innerText = data.error;
+                document.getElementById("__dashboard_logged_users_table_error_" + i).style.display = "block";
+                document.getElementById("__dashboard_logged_users_table_error_" + i).classList.add("error-text");
+                this.disabled = false;
+                return;
+            }
+
+            this.setAttribute("data-value", value);
+            this.innerText = value ? "✔" : "✖";
+            this.disabled = false;
+        }
+
         cell.appendChild(b);
 
         cell = row.insertCell();
         cell.style = "max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;";
 
+        // invite
         b = document.createElement("button");
+        b.setAttribute("data-user", data.data[i].displayName);
+        b.setAttribute("data-value", data.data[i].can_invite);
         b.classList.add("input-button");
         b.innerText = data.data[i].can_invite ? "✔" : "✖";
+
+        b.onclick = async function()
+        {
+            this.disabled = true;
+            let key = localStorage.getItem("key");
+            let user = this.getAttribute("data-user");
+            let value = this.getAttribute("data-value") == "true" ? false : true;
+            
+            let response = await fetch("/api/private/admin/sessions/modify",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "key": key,
+                    "target": user,
+                    "field": "can_invite",
+                    "value": Boolean(value)
+                })
+            });
+
+            let data = await response.json();
+            if (!data.success)
+            {
+                document.getElementById("__dashboard_logged_users_table_error_" + i).innerText = data.error;
+                document.getElementById("__dashboard_logged_users_table_error_" + i).classList.add("error-text");
+                document.getElementById("__dashboard_logged_users_table_error_" + i).style.display = "block";
+                this.disabled = false;
+                return;
+            }
+
+            this.setAttribute("data-value", value);
+            this.innerText = value ? "✔" : "✖";
+            this.disabled = false;
+        }
+
         cell.appendChild(b);
 
+        // banned
         cell = row.insertCell();
         cell.style = "max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;";
 
         b = document.createElement("button");
+        b.setAttribute("data-user", data.data[i].displayName);
+        b.setAttribute("data-value", data.data[i].isBanned);
+
+        b.onclick = async function()
+        {
+            this.disabled = true;
+            let key = localStorage.getItem("key");
+            let user = this.getAttribute("data-user");
+            let value = this.getAttribute("data-value") == "true" ? false : true;
+
+            let response = await fetch("/api/private/admin/sessions/modify",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "key": key,
+                    "target": user,
+                    "field": "isBanned",
+                    "value": Boolean(value)
+                })
+            });
+
+            let data = await response.json();
+            if (!data.success)
+            {
+                document.getElementById("__dashboard_logged_users_table_error_" + i).innerText = data.error;
+                document.getElementById("__dashboard_logged_users_table_error_" + i).style.display = "block";
+                document.getElementById("__dashboard_logged_users_table_error_" + i).classList.add("error-text");
+                this.disabled = false;
+                return;
+            }
+
+            this.setAttribute("data-value", value);
+            this.innerText = value ? "✔" : "✖";
+            this.disabled = false;
+        }
+
         b.classList.add("input-button");
         b.innerText = data.data[i].isBanned ? "✔" : "✖";
         cell.appendChild(b);
