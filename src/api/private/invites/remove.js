@@ -16,7 +16,7 @@ export default class InvitesRemoveAPIRoute extends APIRoute
             };
         
         let target = await this.db.getDocuments("invites", {
-            "hash": request.query.target
+            "hash": request.query.code
         });
 
         if (!target)
@@ -26,7 +26,7 @@ export default class InvitesRemoveAPIRoute extends APIRoute
             };
         
         await this.db.deleteDocuments("invites", {
-            "hash": request.query.target
+            "hash": request.query.code
         });
 
         return {
