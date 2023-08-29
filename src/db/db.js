@@ -58,4 +58,14 @@ export default class DatabaseController
     {
         await this.database.collection(collection).insertOne(document);
     }
+
+    async deleteDocument(collection, query)
+    {
+        await this.database.collection(collection).deleteOne(query);
+    }
+
+    async deleteDocuments(collection, query)
+    {
+        await this.database.collection(collection).deleteMany(query);
+    }
 }

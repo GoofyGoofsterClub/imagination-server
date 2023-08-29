@@ -2,7 +2,7 @@ import { APIRoute } from "http/routing";
 import { v4 as uuidv4 } from "uuid";
 import hash from "utilities/hash";
 
-export default class InvitesNewAPIRoute extends APIRoute
+export default class InvitesInfoAPIRoute extends APIRoute
 {
     constructor()
     {
@@ -25,42 +25,33 @@ export default class InvitesNewAPIRoute extends APIRoute
             "key": request.query.key
         });
 
-        if (!user.administrator && !user.can_invite)
+        if (!user.administrator)
             return {
                 "success": false,
-                "error": "You are not an administrator or you cannot invite users."
+                "error": "You are not an administrator."
             };
 
-        if (!request.query.target)
+        if (!request.query.code)
             return {
                 "success": false,
                 "error": "Missing parameters."
             };
-
-        let target = await this.db.getDocument("users", {
-            "displayName": request.query.target
-        });
         
-        if (target)
+        let target = await this.db.getDocument("invites", {
+            "hash": request.query.code
+        });
+
+        if (!target)
             return {
                 "success": false,
-                "error": "Specified name is taken."
+                "error": "Invalid code."
             };
         
-        let inviteCode = hash(uuidv4());
-
-        await this.db.insertDocument("invites", {
-            "hash": inviteCode,
-            "displayName": request.query.target,
-            "invitedBy": user.displayName
-        });
-
         return {
             "success": true,
-            "data": {
-                "inviteCode": inviteCode,
-                "displayName": request.query.target
-            }
+            "data": target
         };
+
+
     }
 }
