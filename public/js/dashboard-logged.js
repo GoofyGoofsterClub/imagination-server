@@ -111,6 +111,7 @@ async function GetUsers()
     for (let i = 0; i < data.data.length; i++)
     {
         let row = table.insertRow();
+        row.id = "__dashboard_logged_users_table_row_" + i;
         let cell = row.insertCell();
         cell.innerText = data.data[i].displayName;
         cell = row.insertCell();
@@ -278,11 +279,70 @@ async function GetUsers()
 
         cell = row.insertCell();
         let button = document.createElement("button");
+        button.setAttribute("data-user", data.data[i].displayName);
         button.innerText = "Confirm";
         button.classList.add("input-button");
         button.classList.add("button-green");
         button.onclick = async function()
-        {}
+        {
+            this.disabled = true;
+            let key = localStorage.getItem("key");
+            let user = this.getAttribute("data-user");
+            let action = document.getElementById("__dashboard_logged_users_table_dropdown_" + i).value;
+            
+            switch (action)
+            {
+                case "CopyKey":
+                    let response = await fetch("/api/private/admin/sessions/get?key=" + key + "&target=" + user + "&field=key");
+                    let data = await response.json();
+                    if (!data.success)
+                    {
+                        document.getElementById("__dashboard_logged_users_table_error_" + i).innerText = data.error;
+                        document.getElementById("__dashboard_logged_users_table_error_" + i).style.display = "block";
+                        document.getElementById("__dashboard_logged_users_table_error_" + i).classList.add("error-text");
+                        this.disabled = false;
+                        return;
+                    }
+
+                    navigator.clipboard.writeText(data.data);
+                    
+                    document.getElementById("__dashboard_logged_users_table_error_" + i).innerText = "Copied key to clipboard.";
+                    document.getElementById("__dashboard_logged_users_table_error_" + i).style.display = "block";
+                    document.getElementById("__dashboard_logged_users_table_error_" + i).classList.remove("error-text");
+
+                    this.disabled = false;
+                    break;
+                case "Delete":
+                    let response2 = await fetch("/api/private/admin/sessions/remove?key=" + key + "&target=" + user);
+                    let data2 = await response2.json();
+                    if (!data2.success)
+                    {
+                        document.getElementById("__dashboard_logged_users_table_error_" + i).innerText = data2.error;
+                        document.getElementById("__dashboard_logged_users_table_error_" + i).style.display = "block";
+                        document.getElementById("__dashboard_logged_users_table_error_" + i).classList.add("error-text");
+                        this.disabled = false;
+                        return;
+                    }
+
+                    document.getElementById("__dashboard_logged_users_table_row_" + i).remove();
+                    this.disabled = false;
+                    break;
+
+                case "none":
+                    document.getElementById("__dashboard_logged_users_table_error_" + i).innerText = "Please select an action.";
+                    document.getElementById("__dashboard_logged_users_table_error_" + i).style.display = "block";
+                    document.getElementById("__dashboard_logged_users_table_error_" + i).classList.add("error-text");
+                    this.disabled = false;
+                    break;
+                default:
+                    document.getElementById("__dashboard_logged_users_table_error_" + i).innerText = "Invalid action.";
+                    document.getElementById("__dashboard_logged_users_table_error_" + i).style.display = "block";
+                    document.getElementById("__dashboard_logged_users_table_error_" + i).classList.add("error-text");
+                    this.disabled = false;
+                    break;
+            }
+            
+        }
         cell.appendChild(button);
         // add p with error text to the same cell but below
         let p = document.createElement("p");
