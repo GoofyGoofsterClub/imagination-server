@@ -37,6 +37,12 @@ export default class InvitesNewAPIRoute extends APIRoute
                 "error": "Missing parameters."
             };
 
+        if (request.query.target.length > 32 || !/^[a-zA-Z0-9_]+$/.test(request.query.target))
+            return {
+                "success": false,
+                "error": "Invalid username."
+            };
+
         let target = await this.db.getDocument("users", {
             "displayName": request.query.target
         });
