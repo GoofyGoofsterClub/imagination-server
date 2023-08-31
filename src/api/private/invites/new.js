@@ -65,7 +65,8 @@ export default class InvitesNewAPIRoute extends APIRoute
             "success": true,
             "data": {
                 "inviteCode": inviteCode,
-                "displayName": request.query.target
+                "displayName": request.query.target,
+                "validUntil": Date.now() + 604800000 // 7 days
             }
         };
     }
