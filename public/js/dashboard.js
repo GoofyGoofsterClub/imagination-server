@@ -1,5 +1,11 @@
 CheckLogin();
 
+document.getElementById("__dashboard_login_token").onkeyup = function(event) {
+    if (event.keyCode === 13) {
+        document.getElementById("__dashboard_login_button").click();
+    }
+}
+
 document.getElementById("__dashboard_login_button").onclick = function() {
     LockInput();
     let key = document.getElementById("__dashboard_login_token").value;

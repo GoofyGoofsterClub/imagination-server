@@ -60,6 +60,14 @@ async function CheckLogin()
         GetUploads();
     }
 
+    document.querySelector("#__dashboard_logged_invite_displayname").onkeyup = function(e)
+    {
+        if (e.keyCode == 13)
+        {
+            document.getElementById("__dashboard_logged_invite_button").click();
+        }
+    }
+
     document.getElementById("__dashboard_logged_invite_button").onclick = async function()
     {
         let key = localStorage.getItem("key");
