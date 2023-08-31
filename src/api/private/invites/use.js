@@ -26,6 +26,12 @@ export default class InvitesUseAPIRoute extends APIRoute
                 "error": "Invalid code."
             };
         
+        if (target.validUntil < Date.now())
+            return {
+                "success": false,
+                "error": "Code expired."
+            };
+
         let targetUser = await this.db.getDocument("users", {
             "displayName": target.displayName
         });
