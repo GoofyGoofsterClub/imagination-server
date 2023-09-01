@@ -285,6 +285,65 @@ option
 
 }
 
+ul.changelog
+{
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+ul.changelog > li
+{
+    display: block;
+    padding: 8px 8px;
+    transition: 0.1s;
+}
+
+ul.changelog > li:hover
+{
+    background: rgba(255,255,255,0.1);
+    cursor: pointer;
+}
+
+ul.changelog > li > span
+{
+    display: inline-block;
+    font-size: 11px;
+}
+
+ul.changelog > li > div.icon
+{
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.1);
+    margin-right: 12px;
+    text-align: center;
+    line-height: 32px;
+    vertical-align: middle;
+}
+
+ul.changelog > li.changelog-added > div.icon
+{
+    background: rgb(106, 187, 140);
+}
+
+ul.changelog > li.changelog-changed > div.icon
+{
+    background: rgb(255, 193, 7);
+}
+
+ul.changelog > li.changelog-removed > div.icon
+{
+    background: rgb(240, 86, 86);
+}
+
+ul.changelog > li.changelog-fix > div.icon
+{
+    background: rgb(130, 106, 187);
+}
+
  @-webkit-keyframes bigshowoffanimaation {
     0%{background-position:11% 0%}
     50%{background-position:90% 100%}
