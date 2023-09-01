@@ -58,7 +58,7 @@ export default class UploadsNewAPIRoute extends APIRoute
 
         let ids = {
             "private": GeneratePrivateID(),
-            "public": GeneratePublicID(),
+            "public": GeneratePublicID(8, _auth.displayName.slice(0, 2)),
             "delete": GeneratePrivateID()
         };
         

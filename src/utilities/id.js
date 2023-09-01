@@ -1,21 +1,19 @@
-export function GeneratePrivateID()
+export function GeneratePrivateID(length = 32, salt = "")
 {
-    let id = "";
     let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-    for (let i = 0; i < 32; i++)
-        id += possible.charAt(Math.floor(Math.random() * possible.length));
+    for (let i = 0; i < length; i++)
+        salt += possible.charAt(Math.floor(Math.random() * possible.length));
 
-    return id;
+    return salt;
 }
 
-export function GeneratePublicID()
+export function GeneratePublicID(length = 16, salt = ".~")
 {
-    let id = ".~";
     let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-    for (let i = 0; i < 16; i++)
-        id += possible.charAt(Math.floor(Math.random() * possible.length));
+    for (let i = 0; i < length; i++)
+        salt += possible.charAt(Math.floor(Math.random() * possible.length));
 
-    return id;
+    return salt;
 }
