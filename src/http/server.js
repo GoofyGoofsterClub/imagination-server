@@ -13,7 +13,7 @@ export default class HTTPServer
     {
         this.db = db;
         this.server = fastify({
-            logger: true
+            logger: false
         });
         this.server.db = db;
         this.Output = new PresetOutput("http");
