@@ -47,6 +47,44 @@ async function CheckLogin()
         document.getElementById("__dashboard_logged_invite_block_unavailable").style.display = "none";
     }
 
+    document.getElementById("__dashboard_logged_web_upload_button").onclick = async function()
+    {
+        await document.getElementById("__dashboard_logged_web_upload_hidden_selector").click();
+    }
+    document.getElementById("__dashboard_logged_web_upload_hidden_selector").onchange = async function()
+    {
+        let file = document.getElementById("__dashboard_logged_web_upload_hidden_selector").files[0];
+        if (file == undefined || file == null)
+        {
+            document.getElementById("__dashboard_logged_web_upload_error").innerText = "Please select a file.";
+            document.getElementById("__dashboard_logged_web_upload_error").style.display = "block";
+            document.getElementById("__dashboard_logged_web_upload_error").classList.add("error-text");
+            return;
+        }
+        let key = localStorage.getItem("key");
+        let formData = new FormData();
+        formData.append("file", file);
+        let response = await fetch("/api/private/uploads/new",
+        {
+            method: "POST",
+            body: formData,
+            headers: {
+                "Authorization": key
+            }
+        });
+        let data = await response.json();
+        if (!data.success)
+        {
+            document.getElementById("__dashboard_logged_web_upload_error").innerText = data.error;
+            document.getElementById("__dashboard_logged_web_upload_error").style.display = "block";
+            document.getElementById("__dashboard_logged_web_upload_error").classList.add("error-text");
+            return;
+        }
+        document.getElementById("__dashboard_logged_web_upload_error").innerHTML = `Uploaded successfully: <a href="${data.data.link}">${data.data.link}</a>`;
+        document.getElementById("__dashboard_logged_web_upload_error").style.display = "block";
+        document.getElementById("__dashboard_logged_web_upload_error").classList.remove("error-text");
+    }
+
     document.getElementById("__dashboard_logged_delete_all").onclick = async function()
     {
         let key = localStorage.getItem("key");
