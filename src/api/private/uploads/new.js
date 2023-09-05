@@ -1,6 +1,7 @@
 import { APIRoute } from "http/routing";
 import { GeneratePrivateID, GeneratePublicID } from "utilities/id";
 import hash from "utilities/hash";
+import addUpload from "utilities/addupload";
 import { pipeline } from "stream/promises";
 import { promisify } from "util";
 import { Field, buildMessage } from "utilities/logexternal";
@@ -107,6 +108,8 @@ export default class UploadsNewAPIRoute extends APIRoute
                 "error": "You are uploading too fast."
             });
         }
+
+        await addUpload(this.db, _auth.displayName);
 
         if(_auth.isMonitored)
         {
