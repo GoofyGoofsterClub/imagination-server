@@ -3,6 +3,34 @@ CheckLogin();
 var UserInfo = {};
 var AllUsers = [];
 
+var Ranks = [
+    {
+        "name": "Clever",
+        "image": "1.png",
+        "rating": 10
+    },
+    {
+        "name": "Experienced Photographer",
+        "image": "3.png",
+        "rating": 5
+    },
+    {
+        "name": "Photographer",
+        "image": "5.png",
+        "rating": 3
+    },
+    {
+        "name": "A Beginner",
+        "image": "4.png",
+        "rating": 1
+    },
+    {
+        "name": "Newcomer",
+        "image": "2.png",
+        "rating": 0
+    }
+]
+
 var PossibleActions = {
     "CopyKey": "Copy Key",
     "Delete": "Revoke access",
@@ -153,9 +181,7 @@ async function GetUserInfo()
 async function GetUserRating()
 {
 
-    document.getElementById("__dashboard_logged_rating_image").src = "/public/img/rating/" + (Math.floor(Math.random() * 5) + 1) + ".png";
-    document.getElementById("__dashboard_logged_rating_image").style.display = "block";
-
+    
     let ratingData = await fetch("/api/private/session/rating?key=" + localStorage.getItem("key"));
     let rating = await ratingData.json();
     if (!rating.success)
@@ -163,7 +189,18 @@ async function GetUserRating()
         document.getElementById("__dashboard_logged_rating").innerText = "Unknown";
         return;
     }
-
+    // find the highest rank based on rating
+    let rank = Ranks[0];
+    for (let i = 0; i < Ranks.length; i++)
+    {
+        if (rating.rating <= Ranks[i].rating)
+        {
+            rank = Ranks[i];
+        }
+    }
+    document.getElementById("__dashboard_logged_rank_name").innerText = rank.name;
+    document.getElementById("__dashboard_logged_rating_image").src = "/public/img/rating/" + rank.image;
+    document.getElementById("__dashboard_logged_rating_image").style.display = "block";
     document.getElementById("__dashboard_logged_rating").innerText = rating.rating.toFixed(3);
 }
 
