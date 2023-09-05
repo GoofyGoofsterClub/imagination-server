@@ -1,5 +1,6 @@
 import { Route } from "http/routing";
 import hash from "utilities/hash";
+import addView from "utilities/addview";
 
 export default class ImageServing extends Route
 {
@@ -32,6 +33,8 @@ export default class ImageServing extends Route
             "filename": request.params.filename
         });
 
+        await addView(this.db, file.filename, request.params.uploader);
+
         let fileMimetype = file.mimetype;
         if (
             !fileMimetype.match(/image\/.*/g) &&
@@ -40,7 +43,7 @@ export default class ImageServing extends Route
             !fileMimetype.match(/application\/pdf/g)
         )
             reply.header("Content-Disposition", `attachment; filename="${file.filename}.${file.file_ext ? file.file_ext : ""}"`);
-
+        
         reply.type(file.mimetype);
 
         reply.sendFile(file.actual_filename, {
