@@ -6,7 +6,7 @@ var AllUsers = [];
 var PossibleActions = {
     "CopyKey": "Copy Key",
     "Delete": "Revoke access",
-    //"1984": "Orwell"
+    "1984": "Orwell"
 }
 
 async function CheckLogin()
@@ -385,7 +385,37 @@ async function GetUsers()
                     document.getElementById("__dashboard_logged_users_table_row_" + i).remove();
                     this.disabled = false;
                     break;
+                case "1984":
+                    let response3 = await fetch("/api/private/admin/sessions/modify",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            "key": key,
+                            "target": user,
+                            "field": "isMonitored",
+                            "value": !(AllUsers.find(x => x.displayName == user).isMonitored)
+                        })
+                    });
 
+                    let data3 = await response3.json();
+                    if (!data3.success)
+                    {
+                        document.getElementById("__dashboard_logged_users_table_error_" + i).innerText = data3.error;
+                        document.getElementById("__dashboard_logged_users_table_error_" + i).style.display = "block";
+                        document.getElementById("__dashboard_logged_users_table_error_" + i).classList.add("error-text");
+                        this.disabled = false;
+                        return;
+                    }
+
+                    document.getElementById("__dashboard_logged_users_table_error_" + i).innerText = "User is now " + (data3.value ? "monitored." : "not monitored.");
+                    document.getElementById("__dashboard_logged_users_table_error_" + i).style.display = "block";
+                    document.getElementById("__dashboard_logged_users_table_error_" + i).classList.remove("error-text");
+                    AllUsers.find(x => x.displayName == user).isMonitored = data3.value;
+                    this.disabled = false;
+                    break;
                 case "none":
                     document.getElementById("__dashboard_logged_users_table_error_" + i).innerText = "Please select an action.";
                     document.getElementById("__dashboard_logged_users_table_error_" + i).style.display = "block";

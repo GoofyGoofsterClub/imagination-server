@@ -1,4 +1,5 @@
 import { APIRoute } from "http/routing";
+import { Field, buildMessage } from "utilities/logexternal";
 
 const restrictedFields = [
     "key",
@@ -73,8 +74,23 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
             }
         });
 
+        // External logging
+        console.log(this);
+        this.externalLogging.Log(buildMessage(
+            request.headers['host'],
+            "info",
+            "A user's session has been modified.",
+            `A user's session has been modified by \`${user.displayName}\`:\n\`${requestData.target}\`'s \`${requestData.field}\` has been set to \`${requestData.value}\``,
+            null,
+            new Field("Target", requestData.target, false),
+            new Field("Field", requestData.field, true),
+            new Field("Value", requestData.value, true),
+            new Field("Modified By", user.displayName, false)
+        ));
+
         return {
-            "success": true
+            "success": true,
+            "value": requestData.value
         };
     }
 }
