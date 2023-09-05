@@ -48,6 +48,9 @@ export default class DevCalculateEveryoneTestAPIRoute extends APIRoute
             users[i].rating = calculateRating(users[i].uploads, users[i].views, Math.floor((Date.now() - users[i].lastUploadTimestamp) / 86400000)) ?? 0;
             if (users[i].rating == Infinity) // nah bro no trolling.
                 users[i].rating = 0;
+            
+            if(isNaN(users[i].rating))
+                users[i].rating = 0;
 
             await this.db.updateDocument("users", {
                 "displayName": users[i].displayName
