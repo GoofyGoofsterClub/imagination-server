@@ -31,6 +31,12 @@ export default class InvitesNewAPIRoute extends APIRoute
                 "error": "You are not an administrator or you cannot invite users."
             };
 
+        if(user.rating && user.rating < -3)
+            return {
+                "success": false,
+                "error": "Your rating is too low to invite users."
+            };
+        
         if (!request.query.target)
             return {
                 "success": false,

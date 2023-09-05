@@ -1,4 +1,6 @@
 import { APIRoute } from "http/routing";
+import CheckRating from "utilities/rating/conditions";
+
 
 export default class CheckSessionInfoAPIRoute extends APIRoute
 {
@@ -22,8 +24,10 @@ export default class CheckSessionInfoAPIRoute extends APIRoute
             "key": request.query.key
         });
 
+        let ratingResponse = await CheckRating(this.db, user.displayName);
+
         // if is banned but duration has passed current time, unban
-        if (user.isBanned && user.banDuration < Date.now())
+        if (user.isBanned && user.banDuration < Date.now() && user.banDuration != null)
         {
             await this.db.updateDocument("users", {
                 "key": request.query.key
