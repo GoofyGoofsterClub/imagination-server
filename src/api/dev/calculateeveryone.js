@@ -55,6 +55,7 @@ export default class DevCalculateEveryoneTestAPIRoute extends APIRoute
             await this.db.updateDocument("users", {
                 "displayName": users[i].displayName
             }, { "$set": {
+                "uploads": users[i].uploads,
                 "views": users[i].views,
                 "lastUploadTimestamp": users[i].lastUploadTimestamp,
                 "rating": users[i].rating
