@@ -10,17 +10,17 @@ var Ranks = [
         "rating": 10
     },
     {
-        "name": "Experienced Photographer",
+        "name": "Dungeon Master",
         "image": "3.png",
         "rating": 5
     },
     {
-        "name": "Photographer",
+        "name": "Popular Bitch",
         "image": "5.png",
         "rating": 3
     },
     {
-        "name": "A Beginner",
+        "name": "Beginner",
         "image": "4.png",
         "rating": 1
     },
@@ -28,6 +28,11 @@ var Ranks = [
         "name": "Newcomer",
         "image": "2.png",
         "rating": 0
+    },
+    {
+        "name": "Loser",
+        "image": "loser.png",
+        "rating": -100
     }
 ]
 
@@ -190,13 +195,13 @@ async function GetUserRating()
         return;
     }
     // find the highest rank based on rating
-    let rank = Ranks[0];
-    for (let i = 0; i < Ranks.length; i++)
+  
+    let ranks2 = [...Ranks].reverse();
+    var rank = null;
+    for (var i = 0; i < ranks2.length; i++)
     {
-        if (rating.rating <= Ranks[i].rating)
-        {
-            rank = Ranks[i];
-        }
+        if (rating.rating >= ranks2[i].rating)
+            rank = ranks2[i];
     }
     document.getElementById("__dashboard_logged_rank_name").innerText = rank.name;
     document.getElementById("__dashboard_logged_rating_image").src = "/public/img/rating/" + rank.image;
