@@ -19,6 +19,7 @@ export default class HTTPServer
         this.server.db = db;
         this.Output = new PresetOutput("http");
         this.externalLogging = new ExternalLogging(process.env.LOG_WEBHOOK);
+        this.server.externalLogging = this.externalLogging;
         if (this.externalLogging.enabled)
             this.Output.Log("External logging enabled!");
         else
@@ -90,6 +91,8 @@ export default class HTTPServer
 
         this.server._public = {
             "Authenticate": Authenticate,
+            "Output": this.Output,
+            "ExternalLogging": this.externalLogging,
             "Ratelimits": []
         }
     }
