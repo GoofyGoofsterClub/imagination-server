@@ -31,7 +31,7 @@ async function CheckLogin()
         ChangePage("banned");
         return;
     }
-
+    await GetUserRating();
     document.getElementById("__dashboard_logged_displayname").innerText = userInfo.displayName;
 
     if (userInfo.administrator)
@@ -148,6 +148,23 @@ async function GetUserInfo()
     let data = await response.json();
     UserInfo = data.data;
     return data.data;
+}
+
+async function GetUserRating()
+{
+
+    document.getElementById("__dashboard_logged_rating_image").src = "/public/img/rating/" + (Math.floor(Math.random() * 5) + 1) + ".png";
+    document.getElementById("__dashboard_logged_rating_image").style.display = "block";
+
+    let ratingData = await fetch("/api/private/session/rating?key=" + localStorage.getItem("key"));
+    let rating = await ratingData.json();
+    if (!rating.success)
+    {
+        document.getElementById("__dashboard_logged_rating").innerText = "Unknown";
+        return;
+    }
+
+    document.getElementById("__dashboard_logged_rating").innerText = rating.rating.toFixed(3);
 }
 
 async function GetUsers()

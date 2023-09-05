@@ -1,4 +1,5 @@
 import { APIRoute } from "http/routing";
+import CheckRating from "utilities/rating/conditions";
 
 const restrictedFields = [
     // for future use
@@ -30,6 +31,14 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute
         let user = await this.db.getDocument("users", {
             "key": request.query.key
         });
+
+        let ratingResponse = await CheckRating(this.db, user.displayName);
+        if (!ratingResponse)
+            return {
+                "success": false,
+                "error": "You are banned."
+            };
+
 
         if (!user.administrator)
             return {

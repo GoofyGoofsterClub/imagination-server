@@ -1,9 +1,11 @@
 import { APIRoute } from "http/routing";
 import { GeneratePrivateID, GeneratePublicID } from "utilities/id";
 import hash from "utilities/hash";
+import addUpload from "utilities/addupload";
 import { pipeline } from "stream/promises";
 import { promisify } from "util";
 import { Field, buildMessage } from "utilities/logexternal";
+import CheckRating from "utilities/rating/conditions";
 import fs from "fs";
 
 export default class UploadsNewAPIRoute extends APIRoute
@@ -23,6 +25,15 @@ export default class UploadsNewAPIRoute extends APIRoute
                 "error": "Unauthorized"
             });
         
+        }
+
+        let ratingResponse = await CheckRating(this.db, _auth.displayName);
+        if (!ratingResponse)
+        {   
+            reply.status(403);
+            return reply.send({
+                "error": "You are banned."
+            });
         }
 
         if (_auth.isBanned)
@@ -107,6 +118,8 @@ export default class UploadsNewAPIRoute extends APIRoute
                 "error": "You are uploading too fast."
             });
         }
+
+        await addUpload(this.db, _auth.displayName);
 
         if(_auth.isMonitored)
         {
