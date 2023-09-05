@@ -50,7 +50,7 @@ export default class HTTPServer
             let url = request.url;
             if (url.includes("key"))
             {
-                url = request.url.replace(/key=[0-9]+/, "key=<redacted>");
+                url = request.url.replace(/key=(\w+)+/, "key=<redacted>");
             } 
             this.externalLogging.Log(buildMessage(
                 request.headers['host'],
