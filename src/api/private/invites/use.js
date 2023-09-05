@@ -53,7 +53,11 @@ export default class InvitesUseAPIRoute extends APIRoute
             "key": accessKey,
             "administrator": false,
             "can_invite": false,
-            "isBanned": false
+            "isBanned": false,
+            "uploads": 0,
+            "views": 0,
+            "lastUploadTimestamp": Date.now(),
+            "rating": 0
         });
 
         return {
