@@ -75,7 +75,6 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
         });
 
         // External logging
-        console.log(this);
         this.externalLogging.Log(buildMessage(
             request.headers['host'],
             "info",
