@@ -83,9 +83,9 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
             `A user's session has been modified by \`${user.displayName}\`:\n\`${requestData.target}\`'s \`${requestData.field}\` has been set to \`${requestData.value}\``,
             null,
             new Field("Target", requestData.target, false),
-            new Field("Field", requestData.field, true),
-            new Field("Value", requestData.value, true),
-            new Field("Modified By", user.displayName, false)
+            new Field("Modified By", user.displayName, true),
+            new Field("Field", requestData.field, false),
+            new Field("Value", requestData.value, true)
         ));
 
         return {
