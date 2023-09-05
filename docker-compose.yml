@@ -26,6 +26,7 @@ services:
       - MONGO_HOST=mongo
       - MONGO_PORT=$MONGO_PORT
       - MONGO_DB=$MONGO_DB
+      - LOG_WEBHOOK=$LOG_WEBHOOK
     build: .
 
 volumes:
