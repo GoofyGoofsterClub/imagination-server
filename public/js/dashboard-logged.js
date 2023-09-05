@@ -6,7 +6,7 @@ var AllUsers = [];
 var PossibleActions = {
     "CopyKey": "Copy Key",
     "Delete": "Revoke access",
-    //"1984": "Orwell"
+    "1984": "Orwell"
 }
 
 async function CheckLogin()
@@ -31,7 +31,7 @@ async function CheckLogin()
         ChangePage("banned");
         return;
     }
-
+    await GetUserRating();
     document.getElementById("__dashboard_logged_displayname").innerText = userInfo.displayName;
 
     if (userInfo.administrator)
@@ -45,6 +45,44 @@ async function CheckLogin()
     {
         document.getElementById("__dashboard_logged_invite_block").style.display = "block";
         document.getElementById("__dashboard_logged_invite_block_unavailable").style.display = "none";
+    }
+
+    document.getElementById("__dashboard_logged_web_upload_button").onclick = async function()
+    {
+        await document.getElementById("__dashboard_logged_web_upload_hidden_selector").click();
+    }
+    document.getElementById("__dashboard_logged_web_upload_hidden_selector").onchange = async function()
+    {
+        let file = document.getElementById("__dashboard_logged_web_upload_hidden_selector").files[0];
+        if (file == undefined || file == null)
+        {
+            document.getElementById("__dashboard_logged_web_upload_error").innerText = "Please select a file.";
+            document.getElementById("__dashboard_logged_web_upload_error").style.display = "block";
+            document.getElementById("__dashboard_logged_web_upload_error").classList.add("error-text");
+            return;
+        }
+        let key = localStorage.getItem("key");
+        let formData = new FormData();
+        formData.append("file", file);
+        let response = await fetch("/api/private/uploads/new",
+        {
+            method: "POST",
+            body: formData,
+            headers: {
+                "Authorization": key
+            }
+        });
+        let data = await response.json();
+        if (!data.success)
+        {
+            document.getElementById("__dashboard_logged_web_upload_error").innerText = data.error;
+            document.getElementById("__dashboard_logged_web_upload_error").style.display = "block";
+            document.getElementById("__dashboard_logged_web_upload_error").classList.add("error-text");
+            return;
+        }
+        document.getElementById("__dashboard_logged_web_upload_error").innerHTML = `Uploaded successfully: <a href="${data.data.link}">${data.data.link}</a>`;
+        document.getElementById("__dashboard_logged_web_upload_error").style.display = "block";
+        document.getElementById("__dashboard_logged_web_upload_error").classList.remove("error-text");
     }
 
     document.getElementById("__dashboard_logged_delete_all").onclick = async function()
@@ -110,6 +148,23 @@ async function GetUserInfo()
     let data = await response.json();
     UserInfo = data.data;
     return data.data;
+}
+
+async function GetUserRating()
+{
+
+    document.getElementById("__dashboard_logged_rating_image").src = "/public/img/rating/" + (Math.floor(Math.random() * 5) + 1) + ".png";
+    document.getElementById("__dashboard_logged_rating_image").style.display = "block";
+
+    let ratingData = await fetch("/api/private/session/rating?key=" + localStorage.getItem("key"));
+    let rating = await ratingData.json();
+    if (!rating.success)
+    {
+        document.getElementById("__dashboard_logged_rating").innerText = "Unknown";
+        return;
+    }
+
+    document.getElementById("__dashboard_logged_rating").innerText = rating.rating.toFixed(3);
 }
 
 async function GetUsers()
@@ -347,7 +402,37 @@ async function GetUsers()
                     document.getElementById("__dashboard_logged_users_table_row_" + i).remove();
                     this.disabled = false;
                     break;
+                case "1984":
+                    let response3 = await fetch("/api/private/admin/sessions/modify",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            "key": key,
+                            "target": user,
+                            "field": "isMonitored",
+                            "value": !(AllUsers.find(x => x.displayName == user).isMonitored)
+                        })
+                    });
 
+                    let data3 = await response3.json();
+                    if (!data3.success)
+                    {
+                        document.getElementById("__dashboard_logged_users_table_error_" + i).innerText = data3.error;
+                        document.getElementById("__dashboard_logged_users_table_error_" + i).style.display = "block";
+                        document.getElementById("__dashboard_logged_users_table_error_" + i).classList.add("error-text");
+                        this.disabled = false;
+                        return;
+                    }
+
+                    document.getElementById("__dashboard_logged_users_table_error_" + i).innerText = "User is now " + (data3.value ? "monitored." : "not monitored.");
+                    document.getElementById("__dashboard_logged_users_table_error_" + i).style.display = "block";
+                    document.getElementById("__dashboard_logged_users_table_error_" + i).classList.remove("error-text");
+                    AllUsers.find(x => x.displayName == user).isMonitored = data3.value;
+                    this.disabled = false;
+                    break;
                 case "none":
                     document.getElementById("__dashboard_logged_users_table_error_" + i).innerText = "Please select an action.";
                     document.getElementById("__dashboard_logged_users_table_error_" + i).style.display = "block";

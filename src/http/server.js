@@ -5,6 +5,7 @@ import fastifyStatic from "fastify-static";
 import eta from "eta";
 import pointOfView from "point-of-view";
 import { PresetOutput } from "utilities/output";
+import { ExternalLogging, Field, buildMessage } from "utilities/logexternal";
 import Authenticate from "utilities/authentication";
 
 export default class HTTPServer
@@ -13,11 +14,18 @@ export default class HTTPServer
     {
         this.db = db;
         this.server = fastify({
-            logger: true
+            logger: false
         });
         this.server.db = db;
         this.Output = new PresetOutput("http");
+        this.externalLogging = new ExternalLogging(process.env.LOG_WEBHOOK);
+        this.server.externalLogging = this.externalLogging;
+        if (this.externalLogging.enabled)
+            this.Output.Log("External logging enabled!");
+        else
+            this.Output.Log("External logging is not enabled, please set the LOG_WEBHOOK environment variable to enable it.");
         this.registerPlugins();
+        this.registerErrorHandler();
         this.register404();
     }
 
@@ -26,6 +34,42 @@ export default class HTTPServer
         this.server.setNotFoundHandler((request, reply) => {
             reply.view("404.ejs", {
                 "domain": request.headers['host']
+            });
+        });
+    }
+
+    async registerErrorHandler()
+    {
+        this.server.setErrorHandler((error, request, reply) => {
+            this.Output.Error("sys", "An error occured while processing a request:", error);
+            let cookies = "";
+            for (let cookie in request.cookies)
+            {
+                cookies += `\`${cookie}\` = \`${request.cookies[cookie]}\`\n`;
+            }
+            let url = request.url;
+            if (url.includes("key"))
+            {
+                url = request.url.replace(/key=(\w+)+/, "key=<redacted>");
+            } 
+            this.externalLogging.Log(buildMessage(
+                request.headers['host'],
+                "sys",
+                "An error occured while processing a request:",
+                `Error has been thrown:\n\`\`\`${error.stack}\`\`\``,
+                null,
+                new Field("Request URL", url, false),
+                new Field("Request Method", request.method, false),
+                new Field("Request Headers", JSON.stringify(request.headers).length > 1024 ? "Too large to display" : JSON.stringify(request.headers), false),
+                new Field("Request Body", JSON.stringify(request.body).length > 1024 ? "Too large to display" : JSON.stringify(request.body), false),
+                new Field("Request Cookies", JSON.stringify(cookies).length > 1024 ? "Too large to display" : cookies.length > 0 ? cookies : "None", false),
+                new Field("Request IP", request.ip, false)
+            ));
+                
+            reply.view("error.ejs", {
+                "domain": request.headers['host'],
+                "error_title": "An error occured while processing your request",
+                "error_message": error
             });
         });
     }
@@ -47,6 +91,8 @@ export default class HTTPServer
 
         this.server._public = {
             "Authenticate": Authenticate,
+            "Output": this.Output,
+            "ExternalLogging": this.externalLogging,
             "Ratelimits": []
         }
     }

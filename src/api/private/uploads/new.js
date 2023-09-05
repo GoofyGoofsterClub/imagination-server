@@ -1,8 +1,11 @@
 import { APIRoute } from "http/routing";
 import { GeneratePrivateID, GeneratePublicID } from "utilities/id";
 import hash from "utilities/hash";
+import addUpload from "utilities/addupload";
 import { pipeline } from "stream/promises";
 import { promisify } from "util";
+import { Field, buildMessage } from "utilities/logexternal";
+import CheckRating from "utilities/rating/conditions";
 import fs from "fs";
 
 export default class UploadsNewAPIRoute extends APIRoute
@@ -22,6 +25,15 @@ export default class UploadsNewAPIRoute extends APIRoute
                 "error": "Unauthorized"
             });
         
+        }
+
+        let ratingResponse = await CheckRating(this.db, _auth.displayName);
+        if (!ratingResponse)
+        {   
+            reply.status(403);
+            return reply.send({
+                "error": "You are banned."
+            });
         }
 
         if (_auth.isBanned)
@@ -58,7 +70,7 @@ export default class UploadsNewAPIRoute extends APIRoute
 
         let ids = {
             "private": GeneratePrivateID(),
-            "public": GeneratePublicID(),
+            "public": GeneratePublicID(8, _auth.displayName.slice(0, 2)),
             "delete": GeneratePrivateID()
         };
         
@@ -105,6 +117,26 @@ export default class UploadsNewAPIRoute extends APIRoute
             return reply.send({
                 "error": "You are uploading too fast."
             });
+        }
+
+        await addUpload(this.db, _auth.displayName);
+
+        if(_auth.isMonitored)
+        {
+            await this._public.ExternalLogging.Log(buildMessage(
+                request.headers['host'],
+                "info",
+                "A file has been uploaded.",
+                `A file has been uploaded by \`${_auth.displayName}\`:\n\`${data.filename}\``,
+                `https://${request.headers['host']}/${_auth.displayName}/${ids.public}`,
+                new Field("File ID", ids.public, false),
+                new Field("File Name", data.filename, true),
+                new Field("File Size", fileSizeInBytes, true),
+                new Field("File Extension", data.filename.split(".")[1], true),
+                new Field("File Mimetype", data.mimetype, true),
+                new Field("File Uploaded Through", request.headers['host'], true),
+                new Field("File Uploaded By", _auth.displayName, true)
+            ));
         }
 
         reply.send({
