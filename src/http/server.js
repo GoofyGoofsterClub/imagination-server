@@ -90,6 +90,8 @@ export default class HTTPServer
 
         this.server._public = {
             "Authenticate": Authenticate,
+            "Output": this.Output,
+            "ExternalLogging": this.externalLogging,
             "Ratelimits": []
         }
     }

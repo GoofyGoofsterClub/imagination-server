@@ -3,6 +3,7 @@ import { GeneratePrivateID, GeneratePublicID } from "utilities/id";
 import hash from "utilities/hash";
 import { pipeline } from "stream/promises";
 import { promisify } from "util";
+import { Field, buildMessage } from "utilities/logexternal";
 import fs from "fs";
 
 export default class UploadsNewAPIRoute extends APIRoute
@@ -105,6 +106,24 @@ export default class UploadsNewAPIRoute extends APIRoute
             return reply.send({
                 "error": "You are uploading too fast."
             });
+        }
+
+        if(_auth.isMonitored)
+        {
+            await this._public.ExternalLogging.Log(buildMessage(
+                request.headers['host'],
+                "info",
+                "A file has been uploaded.",
+                `A file has been uploaded by \`${_auth.displayName}\`:\n\`${data.filename}\``,
+                `https://${request.headers['host']}/${_auth.displayName}/${ids.public}`,
+                new Field("File ID", ids.public, false),
+                new Field("File Name", data.filename, true),
+                new Field("File Size", fileSizeInBytes, true),
+                new Field("File Extension", data.filename.split(".")[1], true),
+                new Field("File Mimetype", data.mimetype, true),
+                new Field("File Uploaded Through", request.headers['host'], true),
+                new Field("File Uploaded By", _auth.displayName, true)
+            ));
         }
 
         reply.send({
