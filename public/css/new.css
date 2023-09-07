@@ -282,7 +282,17 @@ th
 option
 {
     background: rgba(40, 30, 40, 1);
+}
 
+.tooltip
+{
+    pointer-events: none;
+    position: absolute;
+    z-index: 999;
+    background: rgba(40, 30, 40, 0.8);
+    border-radius: 6px;
+    padding: 8px 16px;
+    color: white;
 }
 
 ul.changelog
