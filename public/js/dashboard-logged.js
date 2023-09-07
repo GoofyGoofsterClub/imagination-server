@@ -230,7 +230,27 @@ async function GetUsers()
         let row = table.insertRow();
         row.id = "__dashboard_logged_users_table_row_" + i;
         let cell = row.insertCell();
-        cell.innerText = data.data[i].displayName;
+        let image  = document.createElement("img");
+
+        let ranks2 = [...Ranks].reverse();
+        let rank = null;
+        for (var j = 0; j < ranks2.length; j++)
+        {
+            if (data.data[i].rating >= ranks2[j].rating)
+                rank = ranks2[j];
+        }
+        image.setAttribute("data-tooltip", `${rank.name} - ${data.data[i].rating.toFixed(3)}`);
+        image.src = "/public/img/rating/" + rank.image;
+        image.style = "max-width: 48px; max-height: 48px; vertical-align: middle; margin-right: 12px; border-radius: 999px;";
+        if (data.data[i].isBanned)
+            image.style.filter = "grayscale(100%)";
+        cell.appendChild(image);
+
+        let userName = document.createElement("span");
+        userName.innerText = data.data[i].displayName;
+        userName.style = "vertical-align: middle;";
+        cell.appendChild(userName);
+
         cell = row.insertCell();
 
         cell.style = "max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;";
@@ -369,6 +389,7 @@ async function GetUsers()
 
             this.setAttribute("data-value", value);
             this.innerText = value ? "✔" : "✖";
+            document.querySelector("#__dashboard_logged_users_table_row_" + i + " > td > img" ).style.filter = value ? "grayscale(100%)" : "none";
             this.disabled = false;
         }
 
@@ -498,6 +519,48 @@ async function GetUsers()
         p.style = "display: none";
         cell.appendChild(p);
     }
+}
+
+// on element hover check if there's data-tooltip attribute and if there is, show it
+document.addEventListener("mouseover", function(e)
+{
+    if (e.target.hasAttribute("data-tooltip-id"))
+        return;
+    if (e.target.hasAttribute("data-tooltip"))
+    {
+        let tooltip = document.createElement("div");
+        tooltip.id = uuidv4();
+        tooltip.classList.add("tooltip");
+        
+        let rect = e.target.getBoundingClientRect();
+        tooltip.style.top = rect.top + window.scrollY - (rect.height) + "px";
+        tooltip.style.left = rect.left + window.scrollX - (rect.width) + "px";
+
+        tooltip.innerText = e.target.getAttribute("data-tooltip");
+        e.target.setAttribute("data-tooltip-id", tooltip.id);
+        document.body.appendChild(tooltip);
+    }
+});
+
+document.addEventListener("mouseout", function(e)
+{
+    if (!e.target.hasAttribute("data-tooltip-id"))
+        return;
+    let tooltip = document.getElementById(e.target.getAttribute("data-tooltip-id"));
+    if (tooltip)
+        tooltip.remove();
+    e.target.removeAttribute("data-tooltip-id");
+});
+
+function uuidv4()
+{
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c)
+    {
+        var r = Math.random() * 16 | 0,
+            v = c == 'x' ? r : (r & 0x3 | 0x8);
+
+        return v.toString(16);
+    });
 }
 
 async function logOutLoggedIn()
