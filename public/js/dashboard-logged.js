@@ -95,17 +95,37 @@ async function CheckLogin()
             return;
         }
         let key = localStorage.getItem("key");
+        document.getElementById("__dashboard_logged_web_upload_progress").style.width = "0%";
         let formData = new FormData();
         formData.append("file", file);
-        let response = await fetch("/api/private/uploads/new",
-        {
-            method: "POST",
-            body: formData,
-            headers: {
-                "Authorization": key
+        
+        // upload and update progress bar on the way
+        let response = new Promise((resolve, reject) => {
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "/api/private/uploads/new");
+            xhr.setRequestHeader("Authorization", key);
+            xhr.upload.onprogress = function(e)
+            {
+                if (e.lengthComputable)
+                {
+                    let percent = Math.round((e.loaded / e.total) * 100);
+                    document.getElementById("__dashboard_logged_web_upload_progress").style.width = percent + "%";
+                }
             }
+            xhr.onload = function()
+            {
+                resolve(xhr.response);
+            }
+            xhr.onerror = function()
+            {
+                reject(xhr.statusText);
+            }
+            xhr.send(formData);
         });
-        let data = await response.json();
+
+        let data = await response;
+        data = JSON.parse(data);
+
         if (!data.success)
         {
             document.getElementById("__dashboard_logged_web_upload_error").innerText = data.error;

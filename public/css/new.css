@@ -201,6 +201,8 @@ input:focus
     margin: 0 2px;
 
     transition: 0.2s;
+
+    position: relative;
 }
 
 .input-button:disabled
@@ -352,6 +354,19 @@ ul.changelog > li.changelog-removed > div.icon
 ul.changelog > li.changelog-fix > div.icon
 {
     background: rgb(130, 106, 187);
+}
+
+.progressbar_button
+{
+    width: 0%;
+    height: 100%;
+    background: rgba(40, 30, 40, 0.2);
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 999px;
+    z-index: -10;
+    transition: 0.2s;
 }
 
  @-webkit-keyframes bigshowoffanimaation {
