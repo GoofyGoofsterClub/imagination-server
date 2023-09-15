@@ -1,12 +1,12 @@
 import { APIRoute } from "http/routing";
 import { GeneratePrivateID, GeneratePublicID } from "utilities/id";
-import hash from "utilities/hash";
+import hash, { hashBuffer } from "utilities/hash";
 import addUpload from "utilities/addupload";
 import { pipeline } from "stream/promises";
 import { promisify } from "util";
 import { Field, buildMessage } from "utilities/logexternal";
 import CheckRating from "utilities/rating/conditions";
-import fs from "fs";
+import { promises as fs } from 'fs';
 
 export default class UploadsNewAPIRoute extends APIRoute
 {
@@ -58,6 +58,8 @@ export default class UploadsNewAPIRoute extends APIRoute
         }
 
         const data = await request.file();
+        const dataBuffer = await data.toBuffer();
+        const datahash = await hashBuffer(dataBuffer.slice(0, 1024 * 1024));
 
         if (!data)
         {
@@ -68,19 +70,32 @@ export default class UploadsNewAPIRoute extends APIRoute
         
         }
 
+        const existance = await this.db.getDocument("uploads", {
+            "hash": datahash
+        });
+
+        if (existance)
+        {
+            reply.send({
+                "success": true,
+                "data": {
+                    "link": `https://${request.headers['host']}/${_auth.displayName}/${existance.filename}`
+                }
+            });
+            return;
+        }
+
         let ids = {
             "private": GeneratePrivateID(),
             "public": GeneratePublicID(8, _auth.displayName.slice(0, 2)),
             "delete": GeneratePrivateID()
         };
         
-        const pipelineAsync = promisify(pipeline);
-        await pipelineAsync(
-            data.file,
-            fs.createWriteStream(`${__dirname}/../../../../privateuploads/${ids.private}`)
-        );
+        // write dataBuffer to private
+        await fs.writeFile(`${__dirname}/../../../../privateuploads/${ids.private}`, dataBuffer);
 
-        let stats = fs.statSync(`${__dirname}/../../../../privateuploads/${ids.private}`);
+        let stats = await fs.stat(`${__dirname}/../../../../privateuploads/${ids.private}`);
+
         let fileSizeInBytes = stats.size;
 
         let collection = await this.db.getCollection("uploads");
@@ -91,6 +106,7 @@ export default class UploadsNewAPIRoute extends APIRoute
             "filename": ids.public,
             "file_ext": data.filename.split(".")[1],
             "mimetype": data.mimetype,
+            "hash": datahash,
             "timestamp": Date.now(),
             "deletehash": null, // DEPRECATED: But still used for backwards compatibility
             "uploaded_thru": request.headers['host'],
