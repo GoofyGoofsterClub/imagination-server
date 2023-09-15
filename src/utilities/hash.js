@@ -25,3 +25,27 @@ export async function hashFile(path)
     hash.update(buffer);
     return hash.digest('hex');
 }
+
+/**
+ * @param {fs.ReadStream} stream
+ * @returns {Promise<string>}
+ * @description Hashes a stream using SHA256.
+*/
+export async function hashStream(stream)
+{
+    let hash = crypto.createHash('sha256');
+    let buffer = Buffer.alloc(1024 * 1024);
+    let read = 0;
+    while ((read = await stream.read(buffer, 0, 1024 * 1024)) > 0)
+    {
+        hash.update(buffer.slice(0, read));
+    }
+    return hash.digest('hex');
+}
+
+export async function hashBuffer(buffer)
+{
+    let hash = crypto.createHash('sha256');
+    hash.update(buffer);
+    return hash.digest('hex');
+}
