@@ -197,6 +197,7 @@ input:focus
     padding: 8px 32px;
     color: white;
     outline: none;
+    overflow: hidden;
     
     margin: 0 2px;
 
