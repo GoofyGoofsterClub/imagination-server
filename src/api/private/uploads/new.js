@@ -71,6 +71,7 @@ export default class UploadsNewAPIRoute extends APIRoute
         }
 
         const existance = await this.db.getDocument("uploads", {
+            "uploader": hash(_auth.displayName),
             "hash": datahash
         });
 
