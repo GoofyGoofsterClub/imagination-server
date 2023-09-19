@@ -77,7 +77,10 @@ window.onload = async () =>
         {
             let badge = badges[i];
             let badgeElement = document.createElement("div");
-            badgeElement.style.setProperty("--badge-icon", "url('/public/img/badges/" + badge.image + "')");
+            if (badge.image.startsWith("http"))
+                badgeElement.style.setProperty("--badge-icon", "url('" + badge.image + "')");
+            else
+                badgeElement.style.setProperty("--badge-icon", "url('/public/img/badges/" + badge.image + "')");
             badgeElement.title = badge.name;
             badgeElement.className = "profile-badge";
             document.querySelector(".profile-badges-blocks").appendChild(badgeElement);
