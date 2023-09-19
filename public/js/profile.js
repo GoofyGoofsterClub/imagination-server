@@ -58,6 +58,10 @@ window.onload = async () =>
     }
 
     document.querySelector("#profile-picture").src = "/public/img/rating/" + rank.image;
+    document.querySelector("#profile-picture").onload = () =>
+    {
+        document.querySelector("#profile-picture").style.display = "block";
+    };
 
     // Badges
     let badges = profileInfo.badges;
@@ -67,7 +71,6 @@ window.onload = async () =>
             "image": "1.png"
         });
 
-    console.log(badges);
     if (badges.length > 0)
     {
         for (var i = 0; i < badges.length; i++)
