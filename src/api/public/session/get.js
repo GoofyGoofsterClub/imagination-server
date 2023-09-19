@@ -30,6 +30,22 @@ export default class PublicSessionGetAPIRoute extends APIRoute
             "displayName": request.query.target
         });
 
+        if (user.private)
+            return {
+                "success": true,
+                "data": {
+                    "displayName": user.displayName,
+                    "rating": 0,
+                    "uploads": 0,
+                    "invitedBy": null,
+                    "administrator": false,
+                    "views": 0,
+                    "badges": user.badges ?? [],
+                    "paint": user.paint ?? null,
+                    "isBanned": user.isBanned ?? false
+                }
+            };
+
         return {
             "success": true,
             "data": {
