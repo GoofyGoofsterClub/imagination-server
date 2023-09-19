@@ -19,14 +19,10 @@ export default async function CalculateRatingWorker(db, output)
         await db.updateDocument("users", {
             "displayName": user.displayName
         }, { "$set": {
-<<<<<<< HEAD
             "rating": rating,
             "views": user.views,
             "uploads": user.uploads,
             "lastUpload": user.lastUpload
-=======
-            "rating": rating
->>>>>>> f427f41d4c1c9d02a3247070b9b54dbf1c28b31c
         } });
         output.Log(`Calculated rating for ${user.displayName}: ${rating}`);
         await CheckRating(db, user.displayName);
