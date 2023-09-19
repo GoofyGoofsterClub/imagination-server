@@ -40,7 +40,8 @@ export default class PublicSessionGetAPIRoute extends APIRoute
                 "administrator": user.administrator,
                 "views": user.views ?? 0,
                 "badges": user.badges ?? [],
-                "paint": user.paint ?? null
+                "paint": user.paint ?? null,
+                "isBanned": user.isBanned ?? false
             }
         };
     }

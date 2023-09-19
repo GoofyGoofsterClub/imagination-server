@@ -379,6 +379,21 @@ ul.changelog > li.changelog-fix > div.icon
     border-radius: 16px 16px 0 0;
 }
 
+.profile.banned
+{
+    opacity: 0.7;
+}
+
+.profile > .profile-banned
+{
+    margin-top: 24px;
+    margin-left: 24px;
+    padding: 12px;
+    border: 2px solid rgba(255, 145, 145, 0.6);
+    background: rgba(255, 145, 145, 0.3);
+    border-radius: 16px;
+}
+
 .profile-header > img
 {
     position: absolute;

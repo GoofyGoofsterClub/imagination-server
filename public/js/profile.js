@@ -84,6 +84,12 @@ window.onload = async () =>
         }
     }
 
+    if (profileInfo.isBanned)
+    {
+        document.querySelector(".profile-banned").style.display = "block";
+        document.querySelector(".profile").classList.add("banned");
+    }
+
     // Done!
     document.querySelector(".profile").style.display = "block";
 };
