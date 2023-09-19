@@ -2,6 +2,7 @@ import Output from "utilities/output";
 import HTTPServer from "http/server";
 import HTTPRouting from "http/routing";
 import DatabaseController from "db/db";
+import CalculateRatingWorker from "utilities/rating/calculationworker";
 
 Output.Log("Preparing the server...");
 
@@ -13,6 +14,8 @@ Output.Log("Preparing the server...");
         'boobspics'
     );
     Output.Log("Connected to the database!");
+
+    setTimeout(() => CalculateRatingWorker(db, Output), 10000);
 
     Output.Log("Registering routes...");
     const server = new HTTPServer(db);
