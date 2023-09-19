@@ -1,6 +1,5 @@
 import { APIRoute } from "http/routing";
 import calculateRating from "utilities/rating/calculate";
-import calculateUploadCount, { calculateUploadViews } from "utilities/calculateUploadData";
 
 export default class CheckRatingSessionAPIRoute extends APIRoute
 {
@@ -25,12 +24,6 @@ export default class CheckRatingSessionAPIRoute extends APIRoute
             "key": request.query.key
         });
         
-        if (!user.uploads)
-            user.uploads = await calculateUploadCount(this.db, user.displayName);
-
-        if (!user.views)
-            user.views = await calculateUploadViews(this.db, user.displayName);
-
         if (!user.lastUploadTimestamp)
             user.lastUploadTimestamp = Date.now();
 

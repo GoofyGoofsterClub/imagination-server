@@ -60,9 +60,9 @@ export default class HTTPServer
                 null,
                 new Field("Request URL", url, false),
                 new Field("Request Method", request.method, false),
-                new Field("Request Headers", JSON.stringify(request.headers).length > 1024 ? "Too large to display" : JSON.stringify(request.headers), false),
-                new Field("Request Body", JSON.stringify(request.body).length > 1024 ? "Too large to display" : JSON.stringify(request.body), false),
-                new Field("Request Cookies", JSON.stringify(cookies).length > 1024 ? "Too large to display" : cookies.length > 0 ? cookies : "None", false),
+                new Field("Request Headers", request.headers ? (JSON.stringify(request.headers).length > 1024 ? "Too large to display" : JSON.stringify(request.headers)) : "No data", false),
+                new Field("Request Body", request.body ? (JSON.stringify(request.body).length > 1024 ? "Too large to display" : JSON.stringify(request.body)) : "No data", false),
+                new Field("Request Cookies", cookies ? (JSON.stringify(cookies).length > 1024 ? "Too large to display" : cookies.length > 0 ? cookies : "None") : "No data", false),
                 new Field("Request IP", request.ip, false)
             ));
                 

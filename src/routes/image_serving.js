@@ -19,13 +19,10 @@ export default class ImageServing extends Route
         if (!doesFileExist)
         {
             reply.status(404);
-            reply.send({
-                "success": false,
-                "data": {
-                    "message": "File not found"
-                }
+            return reply.view("error.ejs", {
+                "error_title": "Not Found",
+                "error_message": "<p>This page doesn't exist.</p><img src='/public/img/uhhh.jpg'>"
             });
-            return;
         }
 
         let file = await this.db.getDocument("uploads", {

@@ -62,17 +62,37 @@ async function CheckLogin()
             return;
         }
         let key = localStorage.getItem("key");
+        document.getElementById("__dashboard_logged_web_upload_progress").style.width = "0%";
         let formData = new FormData();
         formData.append("file", file);
-        let response = await fetch("/api/private/uploads/new",
-        {
-            method: "POST",
-            body: formData,
-            headers: {
-                "Authorization": key
+        
+        // upload and update progress bar on the way
+        let response = new Promise((resolve, reject) => {
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "/api/private/uploads/new");
+            xhr.setRequestHeader("Authorization", key);
+            xhr.upload.onprogress = function(e)
+            {
+                if (e.lengthComputable)
+                {
+                    let percent = Math.round((e.loaded / e.total) * 100);
+                    document.getElementById("__dashboard_logged_web_upload_progress").style.width = percent + "%";
+                }
             }
+            xhr.onload = function()
+            {
+                resolve(xhr.response);
+            }
+            xhr.onerror = function()
+            {
+                reject(xhr.statusText);
+            }
+            xhr.send(formData);
         });
-        let data = await response.json();
+
+        let data = await response;
+        data = JSON.parse(data);
+
         if (!data.success)
         {
             document.getElementById("__dashboard_logged_web_upload_error").innerText = data.error;
@@ -153,9 +173,7 @@ async function GetUserInfo()
 async function GetUserRating()
 {
 
-    document.getElementById("__dashboard_logged_rating_image").src = "/public/img/rating/" + (Math.floor(Math.random() * 5) + 1) + ".png";
-    document.getElementById("__dashboard_logged_rating_image").style.display = "block";
-
+    
     let ratingData = await fetch("/api/private/session/rating?key=" + localStorage.getItem("key"));
     let rating = await ratingData.json();
     if (!rating.success)
@@ -163,7 +181,18 @@ async function GetUserRating()
         document.getElementById("__dashboard_logged_rating").innerText = "Unknown";
         return;
     }
-
+    // find the highest rank based on rating
+  
+    let ranks2 = [...Ranks].reverse();
+    var rank = null;
+    for (var i = 0; i < ranks2.length; i++)
+    {
+        if (rating.rating >= ranks2[i].rating)
+            rank = ranks2[i];
+    }
+    document.getElementById("__dashboard_logged_rank_name").innerText = rank.name;
+    document.getElementById("__dashboard_logged_rating_image").src = "/public/img/rating/" + rank.image;
+    document.getElementById("__dashboard_logged_rating_image").style.display = "block";
     document.getElementById("__dashboard_logged_rating").innerText = rating.rating.toFixed(3);
 }
 
@@ -188,7 +217,27 @@ async function GetUsers()
         let row = table.insertRow();
         row.id = "__dashboard_logged_users_table_row_" + i;
         let cell = row.insertCell();
-        cell.innerText = data.data[i].displayName;
+        let image  = document.createElement("img");
+
+        let ranks2 = [...Ranks].reverse();
+        let rank = null;
+        for (var j = 0; j < ranks2.length; j++)
+        {
+            if (data.data[i].rating >= ranks2[j].rating)
+                rank = ranks2[j];
+        }
+        image.setAttribute("data-tooltip", `${rank.name} - ${data.data[i].rating.toFixed(3)}`);
+        image.src = "/public/img/rating/" + rank.image;
+        image.style = "max-width: 48px; max-height: 48px; vertical-align: middle; margin-right: 12px; border-radius: 999px;";
+        if (data.data[i].isBanned)
+            image.style.filter = "grayscale(100%)";
+        cell.appendChild(image);
+
+        let userName = document.createElement("span");
+        userName.innerText = data.data[i].displayName;
+        userName.style = "vertical-align: middle;";
+        cell.appendChild(userName);
+
         cell = row.insertCell();
 
         cell.style = "max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;";
@@ -327,6 +376,7 @@ async function GetUsers()
 
             this.setAttribute("data-value", value);
             this.innerText = value ? "✔" : "✖";
+            document.querySelector("#__dashboard_logged_users_table_row_" + i + " > td > img" ).style.filter = value ? "grayscale(100%)" : "none";
             this.disabled = false;
         }
 
@@ -458,7 +508,7 @@ async function GetUsers()
     }
 }
 
-async function logOutLoggedIn()
+function logOutLoggedIn()
 {
     localStorage.removeItem("key");
     ChangePage("dashboard");

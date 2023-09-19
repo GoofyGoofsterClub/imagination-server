@@ -60,6 +60,12 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
                 "error": "Invalid target."
             };
         
+        if (target.protected)
+            return {
+                "success": false,
+                "error": "You cannot modify this user."
+            };
+
         if (target.administrator && requestData.field == "isBanned")
             return {
                 "success": false,

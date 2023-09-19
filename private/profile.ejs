@@ -1,0 +1,51 @@
+<head>
+    <title>mishashto's Image Uploader - Profile of <%= it.username %></title>
+    <link rel="icon" type="image/webp" href="/public/img/favicon.webp">
+    <script src="/public/js/rankdata.js"></script>
+    <link rel="stylesheet" href="/public/css/new.css">
+</head>
+<script>
+const USERNAME = "<%= it.username %>";
+</script>
+<body style="opacity: 1 !important;">
+    <div class="navbar">
+        <div class="content">
+            <a class="nav-el" href="#profile" data-content="profile" onclick="return false;" style="opacity: 1 !important;"><span>Profile</span></a>
+        </div>
+    </div>
+    <div class="content">
+        <div id="_profile_not_found" style="display: none;">
+            <h1>Error</h1>
+            <p id="_profile_error_text">Error Text</p>
+        </div>
+        <div class="profile">
+            <div class="profile-header">
+                <img src="/public/img/rating/loser.png" id="profile-picture" style="display: none;">
+            </div>
+            <div class="profile-username-holder"><span style="/* public paint */" id="profile-user-name">username</span><span class="small-text">invited by <a href="/profile/username2" id="profile-invited-by">username2</a></span></div>
+            <div class="profile-banned" style="display: none;">
+                <h3>This user is currently banned.</h3>
+                <p>Access of this user to the platform has been limited due to probable abuse or other reasons, so what you're seeing is archived data.</p>
+            </div>
+            <div class="profile-badges-blocks">
+            </div>
+            <div class="profile-info-blocks">
+                <div class="profile-info-block" id="profile-block-rating">
+                    <span class="profile-info-block-header">Rating</span>
+                    <span class="profile-info-block-value">0</span>
+                </div>
+                <div class="profile-info-block" id="profile-block-uploads">
+                    <span class="profile-info-block-header">Uploads</span>
+                    <span class="profile-info-block-value">0</span>
+                </div>
+                <div class="profile-info-block" id="profile-block-views">
+                    <span class="profile-info-block-header">Views</span>
+                    <span class="profile-info-block-value">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="legal"><a href="https://reze.moe/" class="me">reze.moe</a> ♥</div>
+</body>
+
+<script src="/public/js/profile.js"></script>
