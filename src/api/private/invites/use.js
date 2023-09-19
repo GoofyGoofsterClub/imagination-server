@@ -54,6 +54,7 @@ export default class InvitesUseAPIRoute extends APIRoute
             "administrator": false,
             "can_invite": false,
             "isBanned": false,
+            "invitedBy": target.invitedBy,
             "uploads": 0,
             "views": 0,
             "lastUploadTimestamp": Date.now(),
