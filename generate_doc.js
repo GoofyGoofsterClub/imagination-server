@@ -36,7 +36,6 @@ for (var i = 0; i < files.length; i++)
     if (method == null)
         continue;
     method = method[0].replace(methodRe, '$1');
-    // get only text inside /*--includedoc ... */
     const regex = /\/\*--includedoc([\s\S]*?)\*\//g;
     const matches = fileContents.match(regex);
 
@@ -84,9 +83,7 @@ for (var i = 0; i < files.length; i++)
         const paramsGroups = params.match(paramsRegex);
 
         if (paramsGroups == null)
-        {
             docParamsObject.params = {};
-        }
         else
         {
             let _params = [];
@@ -107,6 +104,13 @@ for (var i = 0; i < files.length; i++)
             docParamsObject.params = _params;
         }
     }
+
+    for (param in docParamsObject)
+        if (param != 'params' && param != 'returnexample')
+            try
+            {
+                docParamsObject[param] = JSON.parse(docParamsObject[param]);
+            } catch {}
 
     apiResult.push({
         "path": apiPath,
