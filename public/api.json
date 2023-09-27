@@ -4,9 +4,9 @@
         "method": "GET",
         "description": "Returns all unused invites.",
         "params": {
-            "private": "false",
-            "needsauth": "true",
-            "adminonly": "true",
+            "private": false,
+            "needsauth": true,
+            "adminonly": true,
             "params": [
                 {
                     "type": "string",
@@ -22,9 +22,9 @@
         "method": "GET",
         "description": "Returns specific field from a user's profile.",
         "params": {
-            "private": "false",
-            "needsauth": "true",
-            "adminonly": "true",
+            "private": false,
+            "needsauth": true,
+            "adminonly": true,
             "params": [
                 {
                     "type": "string",
@@ -48,9 +48,9 @@
         "method": "POST",
         "description": "Modifies a specific field from a user's profile, excluding protected fields.",
         "params": {
-            "private": "false",
-            "needsauth": "true",
-            "adminonly": "true",
+            "private": false,
+            "needsauth": true,
+            "adminonly": true,
             "params": [
                 {
                     "type": "string",
@@ -78,9 +78,9 @@
         "method": "GET",
         "description": "Deletes a user.",
         "params": {
-            "private": "false",
-            "needsauth": "true",
-            "adminonly": "true",
+            "private": false,
+            "needsauth": true,
+            "adminonly": true,
             "params": [
                 {
                     "type": "string",
@@ -100,9 +100,9 @@
         "method": "GET",
         "description": "Returns all user's public and private profile data.",
         "params": {
-            "private": "false",
-            "needsauth": "true",
-            "adminonly": "true",
+            "private": false,
+            "needsauth": true,
+            "adminonly": true,
             "params": [
                 {
                     "type": "string",
@@ -118,9 +118,9 @@
         "method": "GET",
         "description": "Returns the data about a valid invite code.",
         "params": {
-            "private": "false",
-            "needsauth": "true",
-            "adminonly": "true",
+            "private": false,
+            "needsauth": true,
+            "adminonly": true,
             "params": [
                 {
                     "type": "string",
@@ -140,9 +140,9 @@
         "method": "GET",
         "description": "Creates a new invite code for a user with selected username by an eligible user.",
         "params": {
-            "private": "false",
-            "needsauth": "true",
-            "adminonly": "true",
+            "private": false,
+            "needsauth": true,
+            "adminonly": true,
             "params": [
                 {
                     "type": "string",
@@ -162,9 +162,9 @@
         "method": "GET",
         "description": "Removes the already existing invite code.",
         "params": {
-            "private": "false",
-            "needsauth": "true",
-            "adminonly": "true",
+            "private": false,
+            "needsauth": true,
+            "adminonly": true,
             "params": [
                 {
                     "type": "string",
@@ -184,9 +184,9 @@
         "method": "GET",
         "description": "Consumes an invite code and creates a new user with it, returning the access key.",
         "params": {
-            "private": "false",
-            "needsauth": "false",
-            "adminonly": "false",
+            "private": false,
+            "needsauth": false,
+            "adminonly": false,
             "params": [
                 {
                     "type": "string",
@@ -202,9 +202,9 @@
         "method": "GET",
         "description": "Check if a session key is valid.",
         "params": {
-            "private": "false",
-            "needsauth": "true",
-            "adminonly": "false",
+            "private": false,
+            "needsauth": true,
+            "adminonly": false,
             "params": [
                 {
                     "type": "string",
@@ -220,9 +220,9 @@
         "method": "GET",
         "description": "Gets publically available information about a user. (Internal use)",
         "params": {
-            "private": "false",
-            "needsauth": "true",
-            "adminonly": "false",
+            "private": false,
+            "needsauth": true,
+            "adminonly": false,
             "params": [
                 {
                     "type": "string",
@@ -238,9 +238,9 @@
         "method": "GET",
         "description": "Recalculates and returns the rating of a user.",
         "params": {
-            "private": "false",
-            "needsauth": "true",
-            "adminonly": "false",
+            "private": false,
+            "needsauth": true,
+            "adminonly": false,
             "params": [
                 {
                     "type": "string",
@@ -256,9 +256,9 @@
         "method": "GET",
         "description": "Returns all user's uploads",
         "params": {
-            "private": "false",
-            "needsauth": "true",
-            "adminonly": "false",
+            "private": false,
+            "needsauth": true,
+            "adminonly": false,
             "params": [
                 {
                     "type": "string",
@@ -274,9 +274,9 @@
         "method": "GET",
         "description": "A route to request a file deletion.",
         "params": {
-            "private": "false",
-            "needsauth": "true",
-            "adminonly": "false",
+            "private": false,
+            "needsauth": true,
+            "adminonly": false,
             "params": [
                 {
                     "type": "string",
@@ -296,9 +296,9 @@
         "method": "POST",
         "description": "Upload a file to the server as an authenticated user.",
         "params": {
-            "private": "false",
-            "needsauth": "true",
-            "adminonly": "false",
+            "private": false,
+            "needsauth": true,
+            "adminonly": false,
             "params": [
                 {
                     "type": "byte",
@@ -314,9 +314,9 @@
         "method": "GET",
         "description": "Gets publically available information about a user.",
         "params": {
-            "private": "false",
-            "needsauth": "false",
-            "adminonly": "false",
+            "private": false,
+            "needsauth": false,
+            "adminonly": false,
             "params": [
                 {
                     "type": "string",
@@ -332,9 +332,9 @@
         "method": "GET",
         "description": "Generate a ShareX config file for the user.",
         "params": {
-            "private": "false",
-            "needsauth": "true",
-            "adminonly": "false",
+            "private": false,
+            "needsauth": true,
+            "adminonly": false,
             "params": [
                 {
                     "type": "string",
@@ -350,9 +350,9 @@
         "method": "GET",
         "description": "Counts the number of uploads in the database.",
         "params": {
-            "private": "false",
-            "needsauth": "false",
-            "adminonly": "false",
+            "private": false,
+            "needsauth": false,
+            "adminonly": false,
             "params": {},
             "returns": "The number of uploads in the database.",
             "returnexample": "{ \"count\": 123 }"
