@@ -1,5 +1,16 @@
 import { APIRoute } from "http/routing";
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly true
+@params [(string) key]
+@returns Returns if key is valid
+@returnexample { "success": true, "data": [...] }
+Returns all user's public and private profile data.
+
+*/
 export default class AdminGetSessionsAPIRoute extends APIRoute
 {
     constructor()

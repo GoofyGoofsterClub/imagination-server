@@ -7,6 +7,17 @@ const restrictedFields = [
     "displayName"
 ];
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly true
+@params [(string) key, (string) target, (string) field, (string) value]
+@returns New value
+@returnexample { "success": true, "value": "" }
+Modifies a specific field from a user's profile, excluding protected fields.
+
+*/
 export default class AdminModifySessionsAPIRoute extends APIRoute
 {
     constructor()

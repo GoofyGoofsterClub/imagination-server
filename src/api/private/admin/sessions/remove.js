@@ -1,5 +1,16 @@
 import { APIRoute } from "http/routing";
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly true
+@params [(string) key, (string) target]
+@returns Nothing
+@returnexample { "success": true }
+Deletes a user.
+
+*/
 export default class AdminRemoveSessionAPIRoute extends APIRoute
 {
     constructor()

@@ -1,5 +1,16 @@
 import { APIRoute } from "http/routing";
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly true
+@params [(string) key]
+@returns All invites
+@returnexample { "success": true, "data": [...] }
+Returns all unused invites.
+
+*/
 export default class AdminGetSessionsAPIRoute extends APIRoute
 {
     constructor()

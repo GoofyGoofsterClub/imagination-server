@@ -9,6 +9,17 @@ const administratorReplacements = {
     "key": "<redacted>"
 }
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly true
+@params [(string) key, (string) target, (string) field]
+@returns Requested data
+@returnexample { "success": true, "data": "" }
+Returns specific field from a user's profile.
+
+*/
 export default class AdminGetSessionsFieldAPIRoute extends APIRoute
 {
     constructor()
