@@ -1,361 +1,364 @@
-[
-    {
-        "path": "api/private/admin/invites",
-        "method": "GET",
-        "description": "Returns all unused invites.",
-        "params": {
-            "private": false,
-            "needsauth": true,
-            "adminonly": true,
-            "params": [
-                {
-                    "type": "string",
-                    "name": "key"
-                }
-            ],
-            "returns": "All invites",
-            "returnexample": "{ \"success\": true, \"data\": [...] }"
+{
+    "generationTimestamp": "2023-09-27T12:26:03.805Z",
+    "routes": [
+        {
+            "path": "api/private/admin/invites",
+            "method": "GET",
+            "description": "Returns all unused invites.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": true,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    }
+                ],
+                "returns": "All invites",
+                "returnexample": "{ \"success\": true, \"data\": [...] }"
+            }
+        },
+        {
+            "path": "api/private/admin/sessions/get",
+            "method": "GET",
+            "description": "Returns specific field from a user's profile.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": true,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    },
+                    {
+                        "type": "string",
+                        "name": "target"
+                    },
+                    {
+                        "type": "string",
+                        "name": "field"
+                    }
+                ],
+                "returns": "Requested data",
+                "returnexample": "{ \"success\": true, \"data\": \"\" }"
+            }
+        },
+        {
+            "path": "api/private/admin/sessions/modify",
+            "method": "POST",
+            "description": "Modifies a specific field from a user's profile, excluding protected fields.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": true,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    },
+                    {
+                        "type": "string",
+                        "name": "target"
+                    },
+                    {
+                        "type": "string",
+                        "name": "field"
+                    },
+                    {
+                        "type": "string",
+                        "name": "value"
+                    }
+                ],
+                "returns": "New value",
+                "returnexample": "{ \"success\": true, \"value\": \"\" }"
+            }
+        },
+        {
+            "path": "api/private/admin/sessions/remove",
+            "method": "GET",
+            "description": "Deletes a user.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": true,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    },
+                    {
+                        "type": "string",
+                        "name": "target"
+                    }
+                ],
+                "returns": "Nothing",
+                "returnexample": "{ \"success\": true }"
+            }
+        },
+        {
+            "path": "api/private/admin/sessions",
+            "method": "GET",
+            "description": "Returns all user's public and private profile data.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": true,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    }
+                ],
+                "returns": "Returns if key is valid",
+                "returnexample": "{ \"success\": true, \"data\": [...] }"
+            }
+        },
+        {
+            "path": "api/private/invites/info",
+            "method": "GET",
+            "description": "Returns the data about a valid invite code.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": true,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    },
+                    {
+                        "type": "string",
+                        "name": "code"
+                    }
+                ],
+                "returns": "Information about the invite",
+                "returnexample": "{ \"success\": true, \"data\": [...] }"
+            }
+        },
+        {
+            "path": "api/private/invites/new",
+            "method": "GET",
+            "description": "Creates a new invite code for a user with selected username by an eligible user.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": true,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    },
+                    {
+                        "type": "string",
+                        "name": "target"
+                    }
+                ],
+                "returns": "Invite code",
+                "returnexample": "{ \"success\": true, \"data\": { \"inviteCode\": \"00000000-2f6b-4f8b-8d5b-9b8f6b7c4d0a\", \"displayName\": \"test\", \"validUntil\": 1600000000000 } }"
+            }
+        },
+        {
+            "path": "api/private/invites/remove",
+            "method": "GET",
+            "description": "Removes the already existing invite code.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": true,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    },
+                    {
+                        "type": "string",
+                        "name": "code"
+                    }
+                ],
+                "returns": "Nothing",
+                "returnexample": "{ \"success\": true }"
+            }
+        },
+        {
+            "path": "api/private/invites/use",
+            "method": "GET",
+            "description": "Consumes an invite code and creates a new user with it, returning the access key.",
+            "params": {
+                "private": false,
+                "needsauth": false,
+                "adminonly": false,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "code"
+                    }
+                ],
+                "returns": "Returns a private user data",
+                "returnexample": "{ \"success\": true, \"data\": { \"displayName\": \"test\", \"accessKey\": \"vX2~!00000000-2f6b-4f8b-8d5b-9b8f6b7c4d0a\" }"
+            }
+        },
+        {
+            "path": "api/private/session/check",
+            "method": "GET",
+            "description": "Check if a session key is valid.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": false,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    }
+                ],
+                "returns": "Returns if key is valid",
+                "returnexample": "{ \"success\": true }"
+            }
+        },
+        {
+            "path": "api/private/session/info",
+            "method": "GET",
+            "description": "Gets publically available information about a user. (Internal use)",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": false,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    }
+                ],
+                "returns": "Returns publically available information about a user.",
+                "returnexample": "{ \"success\": true, \"data\": { \"displayName\": \"username\", \"can_invite\": true, \"administrator\": false, \"isBanned\": false } }"
+            }
+        },
+        {
+            "path": "api/private/session/rating",
+            "method": "GET",
+            "description": "Recalculates and returns the rating of a user.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": false,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    }
+                ],
+                "returns": "Recalculates and returns the rating of a user.",
+                "returnexample": "{ \"success\": true, \"rating\": 0.58488221 }"
+            }
+        },
+        {
+            "path": "api/private/session/uploads",
+            "method": "GET",
+            "description": "Returns all user's uploads",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": false,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    }
+                ],
+                "returns": "Returns all user's uploads",
+                "returnexample": "{ \"success\": true, \"data\": [...] }"
+            }
+        },
+        {
+            "path": "api/private/uploads/delete",
+            "method": "GET",
+            "description": "A route to request a file deletion.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": false,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    },
+                    {
+                        "type": "string",
+                        "name": "filename"
+                    }
+                ],
+                "returns": "Nothing",
+                "returnexample": "{ \"success\": true }"
+            }
+        },
+        {
+            "path": "api/private/uploads/new",
+            "method": "POST",
+            "description": "Upload a file to the server as an authenticated user.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": false,
+                "params": [
+                    {
+                        "type": "byte",
+                        "name": "file"
+                    }
+                ],
+                "returns": "Nothing",
+                "returnexample": "{ \"success\": true, \"data\": { \"link\": \"https://.../username/usIUSisdbQ\" } }"
+            }
+        },
+        {
+            "path": "api/public/session/get",
+            "method": "GET",
+            "description": "Gets publically available information about a user.",
+            "params": {
+                "private": false,
+                "needsauth": false,
+                "adminonly": false,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "target"
+                    }
+                ],
+                "returns": "Publically available information about a user.",
+                "returnexample": "{ \"success\": true, \"data\": { \"displayName\": \"test\", \"rating\": 0, \"uploads\": 0, \"invitedBy\": null, \"administrator\": false, \"views\": 0, \"badges\": [], \"paint\": null, \"isBanned\": false }"
+            }
+        },
+        {
+            "path": "api/public/session/sharex",
+            "method": "GET",
+            "description": "Generate a ShareX config file for the user.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": false,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    }
+                ],
+                "returns": "Returns a ShareX config file for the user.",
+                "returnexample": "ShareX file"
+            }
+        },
+        {
+            "path": "api/public/uploads/count",
+            "method": "GET",
+            "description": "Counts the number of uploads in the database.",
+            "params": {
+                "private": false,
+                "needsauth": false,
+                "adminonly": false,
+                "params": {},
+                "returns": "The number of uploads in the database.",
+                "returnexample": "{ \"count\": 123 }"
+            }
         }
-    },
-    {
-        "path": "api/private/admin/sessions/get",
-        "method": "GET",
-        "description": "Returns specific field from a user's profile.",
-        "params": {
-            "private": false,
-            "needsauth": true,
-            "adminonly": true,
-            "params": [
-                {
-                    "type": "string",
-                    "name": "key"
-                },
-                {
-                    "type": "string",
-                    "name": "target"
-                },
-                {
-                    "type": "string",
-                    "name": "field"
-                }
-            ],
-            "returns": "Requested data",
-            "returnexample": "{ \"success\": true, \"data\": \"\" }"
-        }
-    },
-    {
-        "path": "api/private/admin/sessions/modify",
-        "method": "POST",
-        "description": "Modifies a specific field from a user's profile, excluding protected fields.",
-        "params": {
-            "private": false,
-            "needsauth": true,
-            "adminonly": true,
-            "params": [
-                {
-                    "type": "string",
-                    "name": "key"
-                },
-                {
-                    "type": "string",
-                    "name": "target"
-                },
-                {
-                    "type": "string",
-                    "name": "field"
-                },
-                {
-                    "type": "string",
-                    "name": "value"
-                }
-            ],
-            "returns": "New value",
-            "returnexample": "{ \"success\": true, \"value\": \"\" }"
-        }
-    },
-    {
-        "path": "api/private/admin/sessions/remove",
-        "method": "GET",
-        "description": "Deletes a user.",
-        "params": {
-            "private": false,
-            "needsauth": true,
-            "adminonly": true,
-            "params": [
-                {
-                    "type": "string",
-                    "name": "key"
-                },
-                {
-                    "type": "string",
-                    "name": "target"
-                }
-            ],
-            "returns": "Nothing",
-            "returnexample": "{ \"success\": true }"
-        }
-    },
-    {
-        "path": "api/private/admin/sessions",
-        "method": "GET",
-        "description": "Returns all user's public and private profile data.",
-        "params": {
-            "private": false,
-            "needsauth": true,
-            "adminonly": true,
-            "params": [
-                {
-                    "type": "string",
-                    "name": "key"
-                }
-            ],
-            "returns": "Returns if key is valid",
-            "returnexample": "{ \"success\": true, \"data\": [...] }"
-        }
-    },
-    {
-        "path": "api/private/invites/info",
-        "method": "GET",
-        "description": "Returns the data about a valid invite code.",
-        "params": {
-            "private": false,
-            "needsauth": true,
-            "adminonly": true,
-            "params": [
-                {
-                    "type": "string",
-                    "name": "key"
-                },
-                {
-                    "type": "string",
-                    "name": "code"
-                }
-            ],
-            "returns": "Information about the invite",
-            "returnexample": "{ \"success\": true, \"data\": [...] }"
-        }
-    },
-    {
-        "path": "api/private/invites/new",
-        "method": "GET",
-        "description": "Creates a new invite code for a user with selected username by an eligible user.",
-        "params": {
-            "private": false,
-            "needsauth": true,
-            "adminonly": true,
-            "params": [
-                {
-                    "type": "string",
-                    "name": "key"
-                },
-                {
-                    "type": "string",
-                    "name": "target"
-                }
-            ],
-            "returns": "Invite code",
-            "returnexample": "{ \"success\": true, \"data\": { \"inviteCode\": \"00000000-2f6b-4f8b-8d5b-9b8f6b7c4d0a\", \"displayName\": \"test\", \"validUntil\": 1600000000000 } }"
-        }
-    },
-    {
-        "path": "api/private/invites/remove",
-        "method": "GET",
-        "description": "Removes the already existing invite code.",
-        "params": {
-            "private": false,
-            "needsauth": true,
-            "adminonly": true,
-            "params": [
-                {
-                    "type": "string",
-                    "name": "key"
-                },
-                {
-                    "type": "string",
-                    "name": "code"
-                }
-            ],
-            "returns": "Nothing",
-            "returnexample": "{ \"success\": true }"
-        }
-    },
-    {
-        "path": "api/private/invites/use",
-        "method": "GET",
-        "description": "Consumes an invite code and creates a new user with it, returning the access key.",
-        "params": {
-            "private": false,
-            "needsauth": false,
-            "adminonly": false,
-            "params": [
-                {
-                    "type": "string",
-                    "name": "code"
-                }
-            ],
-            "returns": "Returns a private user data",
-            "returnexample": "{ \"success\": true, \"data\": { \"displayName\": \"test\", \"accessKey\": \"vX2~!00000000-2f6b-4f8b-8d5b-9b8f6b7c4d0a\" }"
-        }
-    },
-    {
-        "path": "api/private/session/check",
-        "method": "GET",
-        "description": "Check if a session key is valid.",
-        "params": {
-            "private": false,
-            "needsauth": true,
-            "adminonly": false,
-            "params": [
-                {
-                    "type": "string",
-                    "name": "key"
-                }
-            ],
-            "returns": "Returns if key is valid",
-            "returnexample": "{ \"success\": true }"
-        }
-    },
-    {
-        "path": "api/private/session/info",
-        "method": "GET",
-        "description": "Gets publically available information about a user. (Internal use)",
-        "params": {
-            "private": false,
-            "needsauth": true,
-            "adminonly": false,
-            "params": [
-                {
-                    "type": "string",
-                    "name": "key"
-                }
-            ],
-            "returns": "Returns publically available information about a user.",
-            "returnexample": "{ \"success\": true, \"data\": { \"displayName\": \"username\", \"can_invite\": true, \"administrator\": false, \"isBanned\": false } }"
-        }
-    },
-    {
-        "path": "api/private/session/rating",
-        "method": "GET",
-        "description": "Recalculates and returns the rating of a user.",
-        "params": {
-            "private": false,
-            "needsauth": true,
-            "adminonly": false,
-            "params": [
-                {
-                    "type": "string",
-                    "name": "key"
-                }
-            ],
-            "returns": "Recalculates and returns the rating of a user.",
-            "returnexample": "{ \"success\": true, \"rating\": 0.58488221 }"
-        }
-    },
-    {
-        "path": "api/private/session/uploads",
-        "method": "GET",
-        "description": "Returns all user's uploads",
-        "params": {
-            "private": false,
-            "needsauth": true,
-            "adminonly": false,
-            "params": [
-                {
-                    "type": "string",
-                    "name": "key"
-                }
-            ],
-            "returns": "Returns all user's uploads",
-            "returnexample": "{ \"success\": true, \"data\": [...] }"
-        }
-    },
-    {
-        "path": "api/private/uploads/delete",
-        "method": "GET",
-        "description": "A route to request a file deletion.",
-        "params": {
-            "private": false,
-            "needsauth": true,
-            "adminonly": false,
-            "params": [
-                {
-                    "type": "string",
-                    "name": "key"
-                },
-                {
-                    "type": "string",
-                    "name": "filename"
-                }
-            ],
-            "returns": "Nothing",
-            "returnexample": "{ \"success\": true }"
-        }
-    },
-    {
-        "path": "api/private/uploads/new",
-        "method": "POST",
-        "description": "Upload a file to the server as an authenticated user.",
-        "params": {
-            "private": false,
-            "needsauth": true,
-            "adminonly": false,
-            "params": [
-                {
-                    "type": "byte",
-                    "name": "file"
-                }
-            ],
-            "returns": "Nothing",
-            "returnexample": "{ \"success\": true, \"data\": { \"link\": \"https://.../username/usIUSisdbQ\" } }"
-        }
-    },
-    {
-        "path": "api/public/session/get",
-        "method": "GET",
-        "description": "Gets publically available information about a user.",
-        "params": {
-            "private": false,
-            "needsauth": false,
-            "adminonly": false,
-            "params": [
-                {
-                    "type": "string",
-                    "name": "target"
-                }
-            ],
-            "returns": "Publically available information about a user.",
-            "returnexample": "{ \"success\": true, \"data\": { \"displayName\": \"test\", \"rating\": 0, \"uploads\": 0, \"invitedBy\": null, \"administrator\": false, \"views\": 0, \"badges\": [], \"paint\": null, \"isBanned\": false }"
-        }
-    },
-    {
-        "path": "api/public/session/sharex",
-        "method": "GET",
-        "description": "Generate a ShareX config file for the user.",
-        "params": {
-            "private": false,
-            "needsauth": true,
-            "adminonly": false,
-            "params": [
-                {
-                    "type": "string",
-                    "name": "key"
-                }
-            ],
-            "returns": "Returns a ShareX config file for the user.",
-            "returnexample": "ShareX file"
-        }
-    },
-    {
-        "path": "api/public/uploads/count",
-        "method": "GET",
-        "description": "Counts the number of uploads in the database.",
-        "params": {
-            "private": false,
-            "needsauth": false,
-            "adminonly": false,
-            "params": {},
-            "returns": "The number of uploads in the database.",
-            "returnexample": "{ \"count\": 123 }"
-        }
-    }
-]
+    ]
+}
