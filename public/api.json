@@ -1,5 +1,5 @@
 {
-    "generationTimestamp": "2023-09-27T17:16:52.444Z",
+    "generationTimestamp": "2023-09-27T17:32:41.783Z",
     "routes": [
         {
             "path": "api/private/admin/invites",
@@ -307,7 +307,7 @@
                         "name": "file"
                     }
                 ],
-                "returns": "Nothing",
+                "returns": "New upload's link",
                 "returnexample": "{ \"success\": true, \"data\": { \"link\": \"https://.../username/usIUSisdbQ\" } }"
             }
         },

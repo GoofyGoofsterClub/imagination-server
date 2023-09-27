@@ -14,7 +14,7 @@ import { promises as fs } from 'fs';
 @needsauth true
 @adminonly false
 @params [(byte) file]
-@returns Nothing
+@returns New upload's link
 @returnexample { "success": true, "data": { "link": "https://.../username/usIUSisdbQ" } }
 Upload a file to the server as an authenticated user.
 
