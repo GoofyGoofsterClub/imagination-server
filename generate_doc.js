@@ -123,6 +123,11 @@ for (var i = 0; i < files.length; i++)
 console.log("Generated API documentation for " + apiResult.length + " routes.");
 console.log("Saving into /public/api.json...");
 
+apiResult = {
+    "generationTimestamp": new Date().toISOString(),
+    "routes": apiResult
+}
+
 fs.writeFileSync(path.join(__dirname, 'public', 'api.json'), JSON.stringify(apiResult, null, 4));
 
 console.log("Done!");
