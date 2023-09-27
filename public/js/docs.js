@@ -46,7 +46,7 @@ window.onload = async function()
 
         // Create new endpoint title element
         const endpointElementMethod = document.createElement('p');
-        endpointElementMethod.innerHTML = `<span class="method-highlight">${endpoint.method}</span> <span class="code">${endpoint.path}</span>`;
+        endpointElementMethod.innerHTML = `<span class="tag tag-blue">${endpoint.method}</span> <a class="code" href="/${endpoint.path}">${endpoint.path}</a>`;
         endpointElementMethod.innerHTML += endpoint.params.needsauth ? ' <span class="tag tag-yellow">Authorization Required</span>' : '';
         endpointElementMethod.innerHTML += endpoint.params.adminonly ? ' <span class="tag tag-red">Permission Required</span>' : '';
         endpointElement.appendChild(endpointElementMethod);

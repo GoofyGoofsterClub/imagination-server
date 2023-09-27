@@ -515,6 +515,11 @@ ul.changelog > li.changelog-fix > div.icon
     background: rgba(0, 255, 0, 0.2) !important;
 }
 
+.tag.tag-blue
+{
+    background: rgba(0, 0, 255, 0.2) !important;
+}
+
 .endpoint-params > span
 {
     display: block;
@@ -538,8 +543,9 @@ ul.changelog > li.changelog-fix > div.icon
     100%{background-position:11% 0%}
 }
 
-span.code, pre.code
+span.code, pre.code, a.code
 {
+    vertical-align: middle;
     font-family: 'Courier New', Courier, monospace;
 }
 
