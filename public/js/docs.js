@@ -31,6 +31,11 @@ window.onload = async function()
 
     // Create new element for each endpoint
 
+    // Get the #__docs_date_update element to update the date
+    const dateUpdate = document.getElementById('__docs_date_update');
+    // Set the innerText to the date from apiJson.generationTimestamp
+    dateUpdate.innerText = new Date(apiJson.generationTimestamp).toLocaleString();
+
     // Get the container
     const endpoints = document.getElementById('__docs_endpoints');
 
