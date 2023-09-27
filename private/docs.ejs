@@ -9,6 +9,7 @@
     <link rel="icon" type="image/webp" href="/public/img/favicon.webp">
     <link rel="stylesheet" href="/public/css/new.css">
     <script src="/public/js/anime.min.js"></script>
+    <script src="/public/js/docs.js"></script>
 </head>
 <body style="opacity: 1 !important;">
     <div class="navbar">
@@ -18,7 +19,15 @@
     </div>
     <div class="content">
         <h1>API Documentation</h1>
-        <p>Use this page as a reference for API usage, please refrain from abusing the system and limit you requests to <b>60</b> per minute.</p>
+        <p>Use this page as a reference for API usage, please refrain from abusing the system and limit you requests to <b>60</b> per minute. I do not enforce it, but appreciate if you respect the imaginary limit.</p>
+        <br>
+        <h2>Authentication</h2>
+        <p>Whenever authentication is needed, you need to provide a parameter <span class="code">key</span> with value of a authentication key, depending on the method of the request. If you're uploading a file, it should be passed in a header as <span class="code">Authorization</span> parameter.</p>
+        <br><br>
+        <h2>Endpoints</h2>
+        <p>A raw list of endpoints is available <a href="/public/api.json">[using this link]</a>. The last time the documentation was updated was <span id="__docs_date_update">..</span>.</p>
+        <div class="endpoints-holder" id="__docs_endpoints">
+        </div>
     </div>
     <div class="legal"><a href="https://reze.moe/" class="me">reze.moe</a> ♥</div>
     <noscript>

@@ -248,6 +248,7 @@ input:disabled
 
 .dashboard-block
 {
+    overflow-x: hidden;
     background: rgba(40, 30, 40, 0.2);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 6px;
@@ -481,6 +482,43 @@ ul.changelog > li.changelog-fix > div.icon
     display: none;
 }
 
+.method-highlight
+{
+    color: #78b1fb;
+}
+
+.tag
+{
+    padding: 2px 4px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.1);
+    margin-right: 4px;
+    font-size: 12px;
+    font-weight: 400;
+    opacity: 0.8;
+}
+
+.tag.tag-red
+{
+    background: rgba(255, 0, 0, 0.2) !important;
+}
+
+.tag.tag-yellow
+{
+    background: rgba(255, 255, 0, 0.2) !important;
+}
+
+.tag.tag-green
+{
+    background: rgba(0, 255, 0, 0.2) !important;
+}
+
+.endpoint-params > span
+{
+    display: block;
+    margin: 8px 0;
+}
+
  @-webkit-keyframes bigshowoffanimaation {
     0%{background-position:11% 0%}
     50%{background-position:90% 100%}
@@ -497,7 +535,7 @@ ul.changelog > li.changelog-fix > div.icon
     100%{background-position:11% 0%}
 }
 
-span.code
+span.code, pre.code
 {
     font-family: 'Courier New', Courier, monospace;
 }
