@@ -496,6 +496,8 @@ ul.changelog > li.changelog-fix > div.icon
     font-size: 12px;
     font-weight: 400;
     opacity: 0.8;
+
+    vertical-align: middle;
 }
 
 .tag.tag-red
@@ -517,6 +519,7 @@ ul.changelog > li.changelog-fix > div.icon
 {
     display: block;
     margin: 8px 0;
+    vertical-align: middle;
 }
 
  @-webkit-keyframes bigshowoffanimaation {
