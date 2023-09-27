@@ -1,6 +1,17 @@
 import { APIRoute } from "http/routing";
 import { v4 as uuidv4 } from "uuid";
 
+/*--includedoc
+
+@private false
+@needsauth false
+@adminonly false
+@params [(string) code]
+@returns Returns a private user data
+@returnexample { "success": true, "data": { "displayName": "test", "accessKey": "vX2~!00000000-2f6b-4f8b-8d5b-9b8f6b7c4d0a" }
+Consumes an invite code and creates a new user with it, returning the access key.
+
+*/
 export default class InvitesUseAPIRoute extends APIRoute
 {
     constructor()

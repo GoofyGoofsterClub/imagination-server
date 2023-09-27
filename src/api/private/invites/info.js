@@ -1,5 +1,16 @@
 import { APIRoute } from "http/routing";
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly true
+@params [(string) key, (string) code]
+@returns Information about the invite
+@returnexample { "success": true, "data": [...] }
+Returns the data about a valid invite code.
+
+*/
 export default class InvitesInfoAPIRoute extends APIRoute
 {
     constructor()

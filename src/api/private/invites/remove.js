@@ -1,5 +1,16 @@
 import { APIRoute } from "http/routing";
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly true
+@params [(string) key, (string) code]
+@returns Nothing
+@returnexample { "success": true }
+Removes the already existing invite code.
+
+*/
 export default class InvitesRemoveAPIRoute extends APIRoute
 {
     constructor()
