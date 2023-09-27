@@ -1,6 +1,16 @@
 import { APIRoute } from "http/routing";
 
+/*--includedoc
 
+@private false
+@needsauth false
+@adminonly false
+@params [(string) target]
+@returns Publically available information about a user.
+@returnexample { "success": true, "data": { "displayName": "test", "rating": 0, "uploads": 0, "invitedBy": null, "administrator": false, "views": 0, "badges": [], "paint": null, "isBanned": false }
+Gets publically available information about a user.
+
+*/
 export default class PublicSessionGetAPIRoute extends APIRoute
 {
     constructor()

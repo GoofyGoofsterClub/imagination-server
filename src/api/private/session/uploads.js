@@ -1,6 +1,17 @@
 import { APIRoute } from "http/routing";
 import hash from "utilities/hash";
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly false
+@params [(string) key]
+@returns Returns all user's uploads
+@returnexample { "success": true, "data": [...] }
+Returns all user's uploads
+
+*/
 export default class SessionUploadsAPIRoute extends APIRoute
 {
     constructor()

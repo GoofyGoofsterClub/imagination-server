@@ -1,7 +1,17 @@
 import { APIRoute } from "http/routing";
 import CheckRating from "utilities/rating/conditions";
 
+/*--includedoc
 
+@private false
+@needsauth true
+@adminonly false
+@params [(string) key]
+@returns Returns publically available information about a user.
+@returnexample { "success": true, "data": { "displayName": "username", "can_invite": true, "administrator": false, "isBanned": false } }
+Gets publically available information about a user. (Internal use)
+
+*/
 export default class CheckSessionInfoAPIRoute extends APIRoute
 {
     constructor()

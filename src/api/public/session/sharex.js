@@ -1,5 +1,16 @@
 import { APIRoute } from "http/routing";
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly false
+@params [(string) key]
+@returns Returns a ShareX config file for the user.
+@returnexample ShareX file
+Generate a ShareX config file for the user.
+
+*/
 export default class CheckSessionInfoAPIRoute extends APIRoute
 {
     constructor()

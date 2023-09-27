@@ -2,6 +2,17 @@ import { APIRoute } from "http/routing";
 import hash from "utilities/hash";
 import fs from "fs";
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly false
+@params [(string) key, (string) filename]
+@returns Nothing
+@returnexample { "success": true }
+A route to request a file deletion.
+
+*/
 export default class DeleteUploadAPIRoute extends APIRoute
 {
     constructor()

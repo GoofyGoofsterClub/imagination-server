@@ -8,6 +8,17 @@ import { Field, buildMessage } from "utilities/logexternal";
 import CheckRating from "utilities/rating/conditions";
 import { promises as fs } from 'fs';
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly false
+@params [(byte) file]
+@returns Nothing
+@returnexample { "success": true, "data": { "link": "https://.../username/usIUSisdbQ" } }
+Upload a file to the server as an authenticated user.
+
+*/
 export default class UploadsNewAPIRoute extends APIRoute
 {
     constructor()

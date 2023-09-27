@@ -20,6 +20,7 @@ Prerequisites include [MongoDB](https://www.mongodb.com/) and NodeJS being insta
 $ git clone https://github.com/LMNYX/imagination-server.git
 $ cd imagination-server
 $ cp .example.env .env
+$ set -o allexport && source .env set && set +o allexport
 $ node run build # or yarn build
 $ node run start # or yarn start
 ```

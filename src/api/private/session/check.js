@@ -1,5 +1,16 @@
 import { APIRoute } from "http/routing";
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly false
+@params [(string) key]
+@returns Returns if key is valid
+@returnexample { "success": true }
+Check if a session key is valid.
+
+*/
 export default class CheckSessionAPIRoute extends APIRoute
 {
     constructor()
