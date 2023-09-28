@@ -31,7 +31,9 @@ Output.Log("Preparing the server...");
         await db.insertDocument("invites", {
             "hash": hash("initialuser"),
             "displayName": "uwu",
-            "isAdmin": true,
+            "is_administrator": true,
+            "protected": true,
+            "private": true,
             "invitedBy": null
         });
         Output.Warn("sys", `No users found in the database. Please go to /invite/${hash('initialuser')} to create an account.`);
