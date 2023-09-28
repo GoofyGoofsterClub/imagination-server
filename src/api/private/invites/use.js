@@ -62,7 +62,7 @@ export default class InvitesUseAPIRoute extends APIRoute
         await this.db.insertDocument("users", {
             "displayName": target.displayName,
             "key": accessKey,
-            "administrator": false,
+            "administrator": target.isAdmin ?? false,
             "can_invite": false,
             "isBanned": false,
             "invitedBy": target.invitedBy,
