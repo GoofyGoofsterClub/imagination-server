@@ -12,8 +12,6 @@ export default class DatabaseController
 
         this.client = null;
         this.database = null;
-
-        this.connect();
     }
 
     async connect()
@@ -23,11 +21,13 @@ export default class DatabaseController
             this.client = new MongoClient(`mongodb://${this.host}:${this.port}`);
             await this.client.connect();
             this.database = this.client.db(this.databaseName);
-            return;
+            return this;
         }
         this.client = new MongoClient(`mongodb://${this.username}:${this.password}@${this.host}:${this.port}`);
         await this.client.connect();
         this.database = this.client.db(this.database);
+
+        return this;
     }
 
     async getCollection(collection)
