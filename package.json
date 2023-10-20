@@ -15,7 +15,7 @@
     "@fastify/url-data": "^5.2.0",
     "axios": "^1.5.0",
     "colors": "^1.4.0",
-    "eta": "^1.12.3",
+    "eta": "^2.0.0",
     "fastify": "^3.28.0",
     "fastify-cookie": "^5.7.0",
     "fastify-multipart": "^5.3.1",
