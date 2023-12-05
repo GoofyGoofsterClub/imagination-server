@@ -153,6 +153,22 @@ async function CheckLogin()
         document.getElementById("__dashboard_loggen_invite_result").classList.remove("error-text");
     }
 
+    document.getElementById("__dashboard_logged_recalc_all").onclick = async function()
+    {
+        document.getElementById("__dashboard_logged_recalc_all").disabled = true;
+        let _resp = await fetch("/api/private/admin/sessions/recalculate?key=" + key);
+        _resp = await _resp.json();
+
+        if (!_resp.success)
+        {
+            alert("Welp. It failed!");
+            document.getElementById("__dashboard_logged_recalc_all").disabled = false;
+            return;
+        }
+        alert("All done!");
+        document.getElementById("__dashboard_logged_recalc_all").disabled = false;
+    }
+
     GetUploads();
 
     if(userInfo.administrator)
