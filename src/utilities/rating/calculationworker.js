@@ -27,7 +27,6 @@ export default async function CalculateRatingWorker(db, output)
             "uploads": user.uploads,
             "lastUpload": user.lastUpload
         } });
-        output.Log(`Calculated rating for ${user.displayName}: ${rating}   ((uploads to view ratio)-${Date.now()} - ${user.lastUpload} / 86400000)`);
         await CheckRating(db, user.displayName);
     }
     output.Log("Rating calculation worker finished.");
