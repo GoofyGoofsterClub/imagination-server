@@ -1,5 +1,5 @@
 {
-    "generationTimestamp": "2023-09-27T17:32:41.783Z",
+    "generationTimestamp": "2023-12-05T18:33:09.027Z",
     "routes": [
         {
             "path": "api/private/admin/invites",
@@ -73,6 +73,19 @@
                 ],
                 "returns": "New value",
                 "returnexample": "{ \"success\": true, \"value\": \"\" }"
+            }
+        },
+        {
+            "path": "api/private/admin/sessions/recalculate",
+            "method": "GET",
+            "description": "Recalculates all sessions' rating.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": true,
+                "params": {},
+                "returns": "Nothing",
+                "returnexample": "{ \"success\": true }"
             }
         },
         {
