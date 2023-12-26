@@ -3,6 +3,7 @@ import CheckRating from 'utilities/rating/conditions';
 
 export default async function CalculateRatingWorker(db, output)
 {
+    return; // Temporarily paused until we find a better way to calculate rating.
     output.Log("Starting rating calculation worker...");
     let users = await db.getDocuments("users");
 
