@@ -28,7 +28,7 @@ export default async function CheckRating(db, user)
         }
     }
 
-    if (rating > 10000)
+    if (rating > 10.1 || rating < -0.1)
     {
         await db.updateDocument("users", {
                 "displayName": user
