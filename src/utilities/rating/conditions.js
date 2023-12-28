@@ -11,7 +11,7 @@ export default async function CheckRating(db, user)
         "displayName": user
     });
 
-    rating = _user.rating;
+    let rating = _user.rating;
 
     if (_user.protected)
         return true;
