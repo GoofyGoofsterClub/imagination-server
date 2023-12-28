@@ -97,7 +97,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
                 "displayName": requestData.target
             }, {
                 "$set": {
-                    "bannedBy": user.displayName
+                    "banFieldModificationBy": user.displayName
                 }
             });
         }
