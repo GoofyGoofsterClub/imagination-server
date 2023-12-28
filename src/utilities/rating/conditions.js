@@ -34,9 +34,8 @@ export default async function CheckRating(db, user)
                 "displayName": user
             }, { "$set": {
                 "rating": 0,
-                "views": 0,
-                "uploads": 0,
-                "isBanned": true
+                "isBanned": true,
+                "bannedBy": "uwu"
             } });
         return false;
     }
