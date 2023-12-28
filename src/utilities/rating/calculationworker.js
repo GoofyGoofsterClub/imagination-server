@@ -8,8 +8,6 @@ export default async function CalculateRatingWorker(db, output)
 
     for (let user of users)
     {
-        if(user.protected)
-            continue;
         if(!user.uploads)
             user.uploads = 0;
         if(!user.views)
