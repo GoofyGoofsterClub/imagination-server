@@ -91,6 +91,17 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
             }
         });
 
+        if (requestData.field == "isBanned")
+        {
+            this.db.updateDocument("users", {
+                "displayName": requestData.target
+            }, {
+                "$set": {
+                    "bannedBy": user.displayName
+                }
+            });
+        }
+
         // External logging
         this.externalLogging.Log(buildMessage(
             request.headers['host'],
