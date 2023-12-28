@@ -206,7 +206,6 @@ async function GetUserRating()
         if (rating.rating >= ranks2[i].rating)
             rank = ranks2[i];
     }
-    document.getElementById("__dashboard_logged_rank_name").innerText = rank.name;
     document.getElementById("__dashboard_logged_rating_image").src = "/public/img/rating/" + rank.image;
     document.getElementById("__dashboard_logged_rating_image").style.display = "block";
     document.getElementById("__dashboard_logged_rating").innerText = rating.rating.toFixed(3);
