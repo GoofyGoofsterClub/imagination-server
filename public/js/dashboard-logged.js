@@ -243,6 +243,7 @@ async function GetUsers()
         }
         image.setAttribute("data-tooltip", `${rank.name} - ${data.data[i].rating.toFixed(3)}`);
         image.src = "/public/img/rating/" + rank.image;
+        image.onclick = () => { location.href = `/profile/${data.data[i].displayName}`; }
         image.style = "max-width: 48px; max-height: 48px; vertical-align: middle; margin-right: 12px; border-radius: 999px;";
         if (data.data[i].isBanned)
             image.style.filter = "grayscale(100%)";
