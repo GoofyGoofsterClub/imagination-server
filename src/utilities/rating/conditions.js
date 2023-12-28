@@ -22,13 +22,6 @@ export default async function CheckRating(db, user)
                 case "WarningMessage":
                 case "LimitInvites":
                     break;
-                case "LimitAccess":
-                    await db.updateDocument("users", {
-                        "displayName": user
-                    }, { "$set": {
-                        "isBanned": true
-                    } });
-                    return false;
                 default:
                     break;
             }
