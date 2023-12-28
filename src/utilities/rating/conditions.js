@@ -7,11 +7,14 @@ export const RatingConditions =
 
 export default async function CheckRating(db, user)
 {
-    let rating = await db.getDocument("users", {
+    let _user = await db.getDocument("users", {
         "displayName": user
     });
 
-    rating = rating.rating;
+    rating = _user.rating;
+
+    if (_user.protected)
+        return true;
 
     for (let condition in RatingConditions)
     {
