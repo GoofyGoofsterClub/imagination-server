@@ -139,7 +139,8 @@ export default class UploadsNewAPIRoute extends APIRoute
                 "key": request.headers['authorization']
                 }, { "$set": {
                     "isBanned": true,
-                    "banDuration": Date.now() + 60000
+                    "banDuration": Date.now() + 60000,
+                    "banFieldModificationBy": "uwu"
                     } });
             reply.status(429);
             return reply.send({
