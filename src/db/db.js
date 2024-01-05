@@ -48,6 +48,17 @@ export default class DatabaseController
         return await this.database.collection(collection).find(query).toArray();
     }
 
+    async getDocumentsSkip(collection, query, skip, limit)
+    {
+        if (!limit)
+            limit = 1;
+        if (!skip)
+            skip = 0;
+
+        let result = await this.database.collection(collection).find(query).limit(limit).skip(skip).toArray();
+        return result;
+    }
+
     async checkDocumentExists(collection, query)
     {
         let result = await this.database.collection(collection).find(query).toArray();
