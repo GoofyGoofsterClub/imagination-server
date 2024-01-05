@@ -133,7 +133,7 @@ export default class UploadsNewAPIRoute extends APIRoute
         });
 
         let uploadsInLast10Seconds = this._public.Ratelimits.filter(x => x.userName == _auth.displayName && x.timestamp > Date.now() - 10000);
-        if (uploadsInLast10Seconds.length > 10)
+        if (uploadsInLast10Seconds.length > 10 && !_auth.protected)
         {
             await this.db.updateDocument("users", {
                 "key": request.headers['authorization']
