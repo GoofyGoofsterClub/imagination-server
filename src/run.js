@@ -3,6 +3,7 @@ import HTTPServer from "http/server";
 import HTTPRouting from "http/routing";
 import DatabaseController from "db/db";
 import CalculateRatingWorker from "utilities/rating/calculationworker";
+import HeartbeatManager from "utilities/heartbeat";
 // These imports are for when there is no users.
 import { v4 as uuidv4 } from "uuid";
 import hash from "utilities/hash";
@@ -16,6 +17,9 @@ Output.Log("Preparing the server...");
         process.env.MONGO_PORT,
         'boobspics'
     ).connect();
+
+    const heartbeat = new HeartbeatManager(process.env.HEARTBEAT_URL, process.env.HEARTBEAT_SECRET);
+    heartbeat.start();
 
     Output.Log("Connected to the database!");
 
