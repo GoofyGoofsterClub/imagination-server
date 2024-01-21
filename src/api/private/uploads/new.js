@@ -171,7 +171,7 @@ export default class UploadsNewAPIRoute extends APIRoute
         reply.send({
             "success": true,
             "data": {
-                "link": `https://${request.headers['host']}/${ids.public}`
+                "link": request.query['useLegacyStyling'] ? `https://${request.headers['host']}/${_auth.displayName}/${ids.public}` : `https://${request.headers['host']}/${ids.public}`
             }
         });
 
