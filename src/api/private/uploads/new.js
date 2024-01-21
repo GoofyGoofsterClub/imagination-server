@@ -99,7 +99,7 @@ export default class UploadsNewAPIRoute extends APIRoute
 
         let ids = {
             "private": GeneratePrivateID(),
-            "public": GeneratePublicID(8, _auth.displayName.slice(0, 2)),
+            "public": GeneratePublicID(8, hash(_auth.displayName.slice(0, 2)).slice(0, 2) + _auth.displayName.slice(0, 1)),
             "delete": GeneratePrivateID()
         };
         
@@ -171,7 +171,7 @@ export default class UploadsNewAPIRoute extends APIRoute
         reply.send({
             "success": true,
             "data": {
-                "link": `https://${request.headers['host']}/${_auth.displayName}/${ids.public}`
+                "link": `https://${request.headers['host']}/${ids.public}`
             }
         });
 
