@@ -186,5 +186,99 @@
 
         "banned-title": "Ой!",
         "banned-paragraph": "Ваш аккаунт был заблокирован одним из администраторов."
+    },
+    "jp": {
+        "language-name": "日本語",
+
+        "main-header": "mishashto's File Uploader",
+        "main-header-sub": "最高のファイルアップローダ",
+
+        "welcome-header": "いらっしゃいませ!",
+        "welcome-uploads-before": " ",
+        "welcome-uploads-after": "件のアップロードがある!",
+
+        "navbar-welcome": "いらっしゃいませ！",
+        "navbar-faq": "よくある質問",
+        "navbar-setup": "インストール",
+        "navbar-dashboard": "ダッシュボード",
+
+        "dashboard-login-title": "Log in",
+        "dashboard-login-paragraph": "Please provide your key to access the user dashboard.",
+        "dashboard-login-button": "Log in",
+        "dashboard-login-forgot": "Forgot key?",
+
+        "dashboard-title": "Dashboard",
+
+        "dashboard-sharex": "Download ShareX uploader",
+        "dashboard-logout": "Log out",
+
+        "dashboard-welcome": "Welcome back",
+        "dashboard-upload-title": "Upload",
+        "dashboard-upload-paragraph": "If you are the homie that doesn't have ShareX or doesn't want to use it.",
+        "dashboard-upload-button": "Upload",
+
+        "dashboard-ratio": "Your upload ratio is",
+        "dashboard-ratio-paragraph": "Ratio does not affect anything, it's just for cosmetic, for now at least.",
+
+        "dashboard-invite-title": "Invite users",
+        "dashboard-invite-paragraph": "You can invite new users to the service! Please choose carefully who you invite!",
+        "dashboard-invite-button": "Create invite",
+        "dashboard-invite-sub-paragraph": "Please only invite people you trust, that aren't too controversial :)",
+        "dashboard-invite-unavailable-paragraph": "You do not have access to invites :(",
+
+        "dashboard-users-title": "Users",
+        "dashboard-users-paragraph": "You can manipulate users' profiles! This is a big responsibility to take.",
+        "dashboard-users-username": "Username",
+        "dashboard-users-isadmin": "Is Admin",
+        "dashboard-users-caninvite": "Can Invite",
+        "dashboard-users-isbanned": "Is Banned",
+        "dashboard-users-actions": "Actions",
+        "dashboard-recalculate": "Recalculate ALL ratings",
+        "dashboard-users-unavailable": "You do not have access to user management :(",
+
+        "dashboard-uploads-title": "Uploads",
+        "dashboard-uploads-counter-before": "You have",
+        "dashboard-uploads-counter-after": "uploads!",
+        "dashboard-uploads-filename": "Filename",
+        "dashboard-uploads-uploaddate": "Uploaded",
+        "dashboard-uploads-through": "Through",
+        "dashboard-uploads-delete": "Delete ALL uploads",
+
+        "faq-title":"よくある質問",
+        "faq-q1":"何これ?",
+        "faq-a1":"これはファイルアップローダです。 GoogleドライブかMEGAnzのような. ９月１９日２０２３年から <a href=\"https://github.com/LMNYX/imagination-server\" class=\"code\">[GitHubページをあります]</a>.",
+        "faq-q2":"サーバーで著作物がホストされているのを見つけた",
+        "faq-a2":"<a href=\"mailto:me@reze.moe\" class=\"code\">me@reze.moe</a>に<span class=\"code\">[DMCA]</span>の件名メールを送ってください。",
+        "faq-q3":"これ名前は何ですか?",
+        "faq-a3":"違うドメインが有った前に、でも今は<span class=\"code\">uwu.so</span>を使えます。",
+        "faq-q4":"アップロードの方法は？",
+        "faq-a4":"これは招待制のサービスです。",
+        "faq-q5":"どこでサービスをホストしていますか？",
+        "faq-a5":"Hetznerでの前に、今は<a class=\"code\" href=\"https://pavel.gg\">[@NekoPavel]</a>の地下で. 本当にありがとう、パベルさん!",
+        "faq-q6":"APIはありますか?",
+        "faq-a6":"はい、 <a href=\"/docs\">[APIのページ]</a>がある、でもキーが必要です。",
+        "faq-q7":"キーが忘れちゃった",
+        "faq-a7":"メセジを送っておねがいします。",
+        "faq-q8":"禁止した？",
+        "faq-a8":"メセジを送ってもいいです。 沢山アプロードがあるなので、自動禁止しました。",
+        "faq-q9":"リミットがありますか？",
+        "faq-a9":"いいえ。",
+        "faq-q10":"なんでダウンタイムがありますか?",
+        "faq-a10":"毎朝にレスタートするやメンテナンスを行っております。",
+        "faq-q11":"リンクに名前がなくなったのはなぜですか?",
+        "faq-a11":"２０２４年１月から違うリンクが使えます、でも<span class=\"code\">?useLegacyStyling=1</span> をリンクに追加すると、以前と同じになります。",
+
+        "setup-title":"How to Setup",
+        "setup-paragraph":"To setup the file uploader using ShareX, you'll need to download ShareX file in your dashboard, on the top right and import it.",
+        "setup-step1":"Download the file",
+        "setup-step2":"Import to ShareX",
+        "setup-step3":"Select as custom uploader for everything",
+        "setup-step3-1":"If you've downloaded it not through a dashboard, enter your key in <span class=\"code\">Authorization</span> header field.",
+        "setup-step4":"Test the upload",
+        "setup-enjoy":"After these steps you should be all done and ready to upload files on here!",
+        "setup-chatterino":"If you want to use with Chatterino, just copy fields from ShareX.",
+
+        "banned-title": "Oops!",
+        "banned-paragraph": "Your account has been banned from accessing this service by one of the administrators."
     }
 }
