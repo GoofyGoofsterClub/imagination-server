@@ -36,7 +36,7 @@ class Translatable
 
     static translate(translatableElement, language)
     {
-        translatableElement.element.innerText = globalTranslationObject[language][translatableElement.translatableId];
+        translatableElement.element.innerText = globalTranslationObject[language][translatableElement.translatableId] ? globalTranslationObject[language][translatableElement.translatableId] : translatableElement.translatableId;
     }
 
     static translateGroup(translationElements, language)

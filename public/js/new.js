@@ -32,6 +32,10 @@ window.onload = async () => {
     var urlSplit = url.split('#');
     var urlHash = urlSplit[urlSplit.length - 1];
 
+    Translatable.setGlobalTranslationObject(await Translatable.getTranslationObject());
+    Translatable.setAvailableLanguages(Translatable.getLanguages(globalTranslationObject));
+    CurrentLanguage = availableLanguages[0]; // temporary
+
     // if there is no hash, set it to home
     if (urlHash == url) urlHash = 'welcome';
 
@@ -43,6 +47,9 @@ window.onload = async () => {
     var newData = await fetch('/public/popovers/' + target.getAttribute('data-content') + '.html');
     var newDataText = await newData.text();
     document.querySelector('body>.content').innerHTML = newDataText;
+
+    Translatable.translateGroup(Translatable.find("body"), CurrentLanguage);
+
     anime({
         targets: 'body>.content',
         opacity: 1,
@@ -214,6 +221,7 @@ async function ChangePage(page)
         easing: 'linear',
         delay: anime.stagger(120)
     });
+    Translatable.translateGroup(Translatable.find("body"), CurrentLanguage);
 }
 
 function SetContent(content)

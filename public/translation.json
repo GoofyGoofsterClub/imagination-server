@@ -1,4 +1,10 @@
 {
     "en": {
+        "main-header": "mishashto's File Uploader",
+        "main-header-sub": "The only way I know how to upload files now",
+
+        "welcome-header": "Welcome!",
+        "welcome-uploads-before": "We've got",
+        "welcome-uploads-after": "uploads so far!"
     }
 }

@@ -11,16 +11,16 @@
     <script src="/public/js/anime.min.js"></script>
     <script src="/public/js/tooltips.js"></script>
     <script src="/public/js/rankdata.js"></script>
-    <script src="/public/js/new.js"></script>
     <script src="/public/js/translatable.js"></script>
+    <script src="/public/js/new.js"></script>
 </head>
 <body>
     <div class="big-showoff">
         <div class="flex">
             <div class="content">
                 <span class="small-header-domain stagger-header" style="transform: translateY(-40px); opacity: 0;"><%= it.domain %></span>
-                <span class="big-header stagger-header" style="transform: translateY(-40px); opacity: 0;">mishashto's Image Uploader</span>
-                <span class="small-header stagger-header" style="transform: translateY(-40px); opacity: 0;">The only way I know how to upload files now</span>
+                <span class="big-header stagger-header" style="transform: translateY(-40px); opacity: 0;" translatable-id="main-header">mishashto's Image Uploader</span>
+                <span class="small-header stagger-header" style="transform: translateY(-40px); opacity: 0;" translatable-id="main-header-sub">The only way I know how to upload files now</span>
             </div>
         </div>
         <img src="/public/img/<%= it.haram ? 'censored-' : '' %>sagiri.png" class="anime-girl">
