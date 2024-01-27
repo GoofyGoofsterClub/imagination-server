@@ -1,27 +1,3 @@
-/* <div class="endpoint dashboard-block">
-                <p><span class="method-highlight">GET</span> <span class="code">/api/private/uploads/new</span> <span class="tag tag-yellow">Authorization Required</span><span class="tag tag-red">Administrator Required</span></p>
-                <p class="small-text">A method description, that describes what will happen.</p>
-                <hr>
-                <h4>Parameters</h4>
-                <div class="endpoint-params">
-                    <span><span class="tag">string</span> <span class="code">target</span></span>
-                    <span><span class="tag">string</span> <span class="code">target</span></span>
-                    <span><span class="tag">string</span> <span class="code">target</span></span>
-                </div>
-                <h4>Returns</h4>
-                <span class="code">Returns a private user data</span>
-                <h4>Return Example</h4>
-                <div class="dashboard-block">
-                    <pre class="code">{
-    "success": true,
-    "data": {
-        "id": 1,
-        "username": "mishashto"
-    }
-}</pre>
-                </div>
-            </div> */
-
 window.onload = async function()
 {
     // Get API documentation
