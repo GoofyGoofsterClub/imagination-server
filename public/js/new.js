@@ -34,7 +34,16 @@ window.onload = async () => {
 
     Translatable.setGlobalTranslationObject(await Translatable.getTranslationObject());
     Translatable.setAvailableLanguages(Translatable.getLanguages(globalTranslationObject));
-    Translatable.setLanguage(availableLanguages[0]);
+
+    let languageStored = localStorage.getItem("language");
+
+    if(languageStored && availableLanguages.includes(languageStored))
+        Translatable.setLanguage(languageStored);
+    else
+    {
+        Translatable.setLanguage(availableLanguages[0]);
+        localStorage.setItem("language", availableLanguages[0]);
+    }
 
     let languageSelector = document.querySelector("#__main_language_select");
     
@@ -52,6 +61,7 @@ window.onload = async () => {
     languageSelector.onchange = function(event)
     {
         Translatable.setLanguage(event.target.options[event.target.selectedIndex].id);
+        localStorage.setItem("language", event.target.options[event.target.selectedIndex].id);
         Translatable.translateGroup(Translatable.find("body"), CurrentLanguage);
     }
 
