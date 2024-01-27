@@ -53,7 +53,8 @@ window.onload = async () => {
         newLanguageOption.id = availableLanguages[l];
         newLanguageOption.innerText = Translatable.getTranslationKey(availableLanguages[l], "language-name");
 
-        if (l == 0) newLanguageOption.selected = true;
+        if (newLanguageOption.id == CurrentLanguage)
+            newLanguageOption.selected = true;
 
         languageSelector.appendChild(newLanguageOption);
     }

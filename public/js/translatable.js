@@ -48,7 +48,6 @@ class Translatable
 
     static translate(translatableElement, language)
     {
-
         translatableElement.element.innerHTML = globalTranslationObject[language][translatableElement.translatableId] ? globalTranslationObject[language][translatableElement.translatableId] : translatableElement.translatableId;
     }
 
