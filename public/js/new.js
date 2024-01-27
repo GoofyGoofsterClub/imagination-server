@@ -34,7 +34,26 @@ window.onload = async () => {
 
     Translatable.setGlobalTranslationObject(await Translatable.getTranslationObject());
     Translatable.setAvailableLanguages(Translatable.getLanguages(globalTranslationObject));
-    CurrentLanguage = availableLanguages[0]; // temporary
+    Translatable.setLanguage(availableLanguages[0]);
+
+    let languageSelector = document.querySelector("#__main_language_select");
+    
+    for (var l = 0; l < availableLanguages.length; l++)
+    {
+        let newLanguageOption = document.createElement("option");
+        newLanguageOption.id = availableLanguages[l];
+        newLanguageOption.innerText = Translatable.getTranslationKey(availableLanguages[l], "language-name");
+
+        if (l == 0) newLanguageOption.selected = true;
+
+        languageSelector.appendChild(newLanguageOption);
+    }
+
+    languageSelector.onchange = function(event)
+    {
+        Translatable.setLanguage(event.target.options[event.target.selectedIndex].id);
+        Translatable.translateGroup(Translatable.find("body"), CurrentLanguage);
+    }
 
     // if there is no hash, set it to home
     if (urlHash == url) urlHash = 'welcome';
@@ -113,7 +132,7 @@ window.onload = async () => {
         delay: anime.stagger(100)
     });
 
-    var navButtons = document.getElementsByClassName('nav-el');
+    var navButtons = document.querySelectorAll('.nav-el[data-content]');
     for (var i = 0; i < navButtons.length; i++) {
         navButtons[i].addEventListener('click', async (e) => {
             e.preventDefault();

@@ -108,7 +108,32 @@ body { opacity: 0; }
     margin-left: -5px;
 }
 
-.navbar > .content > a.nav-el:hover
+
+.navbar > .content > a.nav-el.bland
+{
+    display: inline-block;
+    position: relative;
+    height: 100%;
+    padding: 0 20px;
+
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 64px;
+
+    background: transparent;
+    transform: skewX(-20deg);
+    margin-left: -5px;
+}
+
+.navbar > .content > a.nav-el.bland.language-selector
+{
+    float: right;
+    vertical-align: middle;
+}
+
+.navbar > .content > a.nav-el:hover:not(.bland)
 {
     background: #362736;
 }

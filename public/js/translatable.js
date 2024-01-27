@@ -25,6 +25,13 @@ class Translatable
         globalTranslationObject = translationObject;
     }
 
+    static setLanguage(language)
+    {
+        if (!availableLanguages.includes(language)) return false;
+        CurrentLanguage = language;
+        return true;
+    }
+
     static find(query)
     {
         let el = document.querySelector(query);
@@ -34,9 +41,15 @@ class Translatable
         return Array.from(translatables).map(x => { return new TranslatableElement(x, x.getAttribute("translatable-id")); });
     }
 
+    static getTranslationKey(language, key)
+    {
+        return globalTranslationObject[language][key];
+    }
+
     static translate(translatableElement, language)
     {
-        translatableElement.element.innerText = globalTranslationObject[language][translatableElement.translatableId] ? globalTranslationObject[language][translatableElement.translatableId] : translatableElement.translatableId;
+
+        translatableElement.element.innerHTML = globalTranslationObject[language][translatableElement.translatableId] ? globalTranslationObject[language][translatableElement.translatableId] : translatableElement.translatableId;
     }
 
     static translateGroup(translationElements, language)

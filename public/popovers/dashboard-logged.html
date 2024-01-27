@@ -1,15 +1,15 @@
-<h1><button style="float: right;" class="input-button" onclick="logOutLoggedIn();">Log out</button> <button style="float: right;" class="input-button" onclick="DownloadSharex();" id="__dashboard_logged_sharex_button">Download ShareX config</button>Dashboard</h1>
-<p>Okaeri, <b id="__dashboard_logged_displayname">[loading]</b>!.</p>
+<h1><button style="float: right;" class="input-button" onclick="logOutLoggedIn();" translatable-id="dashboard-logout">Log out</button> <button style="float: right;" class="input-button" onclick="DownloadSharex();" id="__dashboard_logged_sharex_button" translatable-id="dashboard-sharex">Download ShareX config</button><span translatable-id="dashboard-title">Dashboard</span></h1>
+<p><span translatable-id="dashboard-welcome"></span>, <b id="__dashboard_logged_displayname">[loading]</b>!</p>
 <br>
 <hr>
 <br>
 <div class="dashboard-block" id="__dashboard_logged_web_upload">
     <img style="float: Left; width: 96px; margin-right: 24px;" src="/public/img/roji_yay.png">
-    <h2>Web Upload</h2>
-    <p>If you're a homie without ShareX.</p>
+    <h2 translatable-id="dashboard-upload-title">Web Upload</h2>
+    <p translatable-id="dashboard-upload-paragraph">If you're a homie without ShareX.</p>
     <input type="file" id="__dashboard_logged_web_upload_hidden_selector" style="display: none;">
     <br>
-    <button class="input-button" id="__dashboard_logged_web_upload_button"><div class="progressbar_button" id="__dashboard_logged_web_upload_progress"></div>Select a file</button>
+    <button class="input-button" id="__dashboard_logged_web_upload_button"><div class="progressbar_button" id="__dashboard_logged_web_upload_progress"></div><span translatable-id="dashboard-upload-button">Select a file</span></button>
     <p class="small-text" id="__dashboard_logged_web_upload_error"></p>
 </div>
 <br>
@@ -17,62 +17,62 @@
 <br>
 <div class="dashboard-block" id="__dashboard_logged_rating_block">
     <img style="display: none; float: Left; width: 96px; margin-right: 24px;" id="__dashboard_logged_rating_image">
-    <h2><span style="vertical-align: middle;">Your upload ratio is </span><button class="input-button" id="__dashboard_logged_rating" style="vertical-align: middle;">[...]</button></h2>
-    <p>There is no benefits or punishments you gain from your ratio, it's just for show!</p>
+    <h2><span style="vertical-align: middle;" translatable-id="dashboard-ratio">Your upload ratio is </span><button class="input-button" id="__dashboard_logged_rating" style="vertical-align: middle;">[...]</button></h2>
+    <p translatable-id="dashboard-ratio-paragraph">There is no benefits or punishments you gain from your ratio, it's just for show!</p>
 </div>
 <br>
 <hr>
 <br>
 <div class="dashboard-block" style="display: none;" id="__dashboard_logged_invite_block">
-    <h2>Invitiation</h2>
-    <p>You can invite people to use this service!</p>
-    <p><input placeholder="Display Name" id="__dashboard_logged_invite_displayname"> <button class="input-button" id="__dashboard_logged_invite_button">Create</button></p>
+    <h2 translatable-id="dashboard-invite-title">Invitiation</h2>
+    <p translatable-id="dashboard-invite-paragraph">You can invite people to use this service!</p>
+    <p><input placeholder="Display Name" id="__dashboard_logged_invite_displayname"> <button class="input-button" id="__dashboard_logged_invite_button" translatable-id="dashboard-invite-button">Create</button></p>
     <p class="small-text bold" id="__dashboard_loggen_invite_result"></p>
-    <p class="small-text">Please only invite people you trust, that aren't too controversial :)</p>
+    <p class="small-text" translatable-id="dashboard-invite-sub-paragraph">Please only invite people you trust, that aren't too controversial :)</p>
 </div>
-<p id="__dashboard_logged_invite_block_unavailable">You don't have access to invites ;(</p>
+<p id="__dashboard_logged_invite_block_unavailable" translatable-id="dashboard-invite-unavailable-paragraph">You don't have access to invites ;(</p>
 <br>
 <hr>
 <br>
 <div id="__dashboard_logged_users_block" style="display: none;">
-    <h2><button style="float: right;" class="input-button" id="__dashboard_logged_recalc_all">Recalculate ALL</button>Users</h2>
-    <p>You are an administrator, so you can manipulate other users' accounts!</p>
+    <h2><button style="float: right;" class="input-button" id="__dashboard_logged_recalc_all" translatable-id="dashboard-recalculate">Recalculate ALL</button><span translatable-id="dashboard-users-title">Users</span></h2>
+    <p translatable-id="dashboard-users-paragraph">You are an administrator, so you can manipulate other users' accounts!</p>
     <table id="__dashboard_logged_users_table">
         <thead>
             <tr>
-                <th>Username</th>
-                <th>Admin?</th>
-                <th>Can Invite?</th>
-                <th>Banned?</th>
-                <th>Actions</th>
+                <th translatable-id="dashboard-users-username">Username</th>
+                <th translatable-id="dashboard-users-isadmin">Admin?</th>
+                <th translatable-id="dashboard-users-caninvite">Can Invite?</th>
+                <th translatable-id="dashboard-users-isbanned">Banned?</th>
+                <th translatable-id="dashboard-users-actions">Actions</th>
                 <th>&nbsp;</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td colspan="5">Loading...</td>
+                <td colspan="5" translatable-id="loading">Loading...</td>
             </tr>
         </tbody>
     </table>
 </div>
-<p id="__dashboard_logged_users_block_unavailable">You don't have access to user management! ;(</p>
+<p id="__dashboard_logged_users_block_unavailable" translatable-id="dashboard-users-unavailable">You don't have access to user management! ;(</p>
 <br>
 <hr>
 <br>
-<h2><button style="float: right;" class="input-button" id="__dashboard_logged_delete_all">Delete all</button>Uploads</h2>
-<p>Your uploads man! You've got a total of <b id="__dashboard_logged_uploads_count">...</b> uploads!</p>
+<h2><button style="float: right;" class="input-button" id="__dashboard_logged_delete_all" translatable-id="dashboard-uploads-delete">Delete all</button><span translatable-id="dashboard-uploads-title">Uploads</span></h2>
+<p><span translatable-id="dashboard-uploads-counter-before">Your uploads man! You've got a total of</span> <b id="__dashboard_logged_uploads_count">...</b> <span translatable-id="dashboard-uploads-counter-after">uploads!</span></p>
 <table id="__dashboard_logged_uploads_table">
     <thead>
         <tr>
-            <th>File Name</th>
-            <th>Uploaded</th>
-            <th>Through</th>
+            <th translatable-id="dashboard-uploads-filename">File Name</th>
+            <th translatable-id="dashboard-uploads-uploaddate">Uploaded</th>
+            <th translatable-id="dashboard-uploads-through">Through</th>
             <th>&nbsp;</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td colspan="5" id="__dashboard_logged_uploads_table_info">Loading...</td>
+            <td colspan="5" id="__dashboard_logged_uploads_table_info" translatable-id="loading">Loading...</td>
         </tr>
     </tbody>
 </table>
