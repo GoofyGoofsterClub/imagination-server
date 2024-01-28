@@ -1,6 +1,7 @@
 var CurrentLanguage = "en";
 var availableLanguages = [];
 var globalTranslationObject = {};
+var defaultLanguage = {};
 
 class Translatable
 {
@@ -42,21 +43,23 @@ class Translatable
         return Array.from(translatables).map(x => { return new TranslatableElement(x, x.getAttribute("translatable-id")); });
     }
 
-    static getTranslationKey(language, key)
+    static getTranslationKey(key)
     {
+        if (!globalTranslationObject[key])
+            return defaultLanguage[key] ? defaultLanguage[key] : key;
         return globalTranslationObject[key];
     }
 
-    static translate(translatableElement, language)
+    static translate(translatableElement)
     {
-        translatableElement.element.innerHTML = globalTranslationObject[translatableElement.translatableId] ? globalTranslationObject[translatableElement.translatableId] : translatableElement.translatableId;
+        translatableElement.element.innerHTML = this.getTranslationKey(translatableElement.translatableId);
     }
 
-    static translateGroup(translationElements, language)
+    static translateGroup(translationElements)
     {
         for (var i = 0; i < translationElements.length; i++)
         {
-            this.translate(translationElements[i], language);
+            this.translate(translationElements[i]);
         }
     }
 }

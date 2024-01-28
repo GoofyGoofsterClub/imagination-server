@@ -46,6 +46,8 @@ window.onload = async () => {
 
     Translatable.setGlobalTranslationObject(await Translatable.getTranslationObject(CurrentLanguage));
 
+    defaultLanguage = await Translatable.getTranslationObject(availableLanguages[0].code);
+
     let languageSelector = document.querySelector("#__main_language_select");
     
     for (var l = 0; l < availableLanguages.length; l++)

@@ -263,6 +263,12 @@ input:disabled
     font-weight: 600;
 }
 
+.small-p
+{
+    padding: 1px;
+    margin: 1px;
+}
+
 .image-container
 {
     border-radius: 6px;
