@@ -13,6 +13,7 @@
     },
     {
         "name": "عربي",
-        "code": "sa"
+        "code": "sa",
+        "rtl": true
     }
 ]

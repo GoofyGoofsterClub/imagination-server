@@ -37,7 +37,15 @@ window.onload = async () => {
     let languageStored = localStorage.getItem("language");
 
     if(languageStored && availableLanguages.find(x => x.code == languageStored))
+    {
         Translatable.setLanguage(languageStored);
+        let languageBox = availableLanguages.find(x => x.code == languageStored);
+
+        if (languageBox.rtl)
+            document.body.style.setProperty("direction", "rtl");
+        else
+            document.body.style.setProperty("direction", "initial");
+    }
     else
     {
         Translatable.setLanguage(availableLanguages[0]);
@@ -64,10 +72,18 @@ window.onload = async () => {
 
     languageSelector.onchange = async function(event)
     {
-        Translatable.setLanguage(event.target.options[event.target.selectedIndex].id);
-        localStorage.setItem("language", event.target.options[event.target.selectedIndex].id);
+        let languageId = event.target.options[event.target.selectedIndex].id;
+        Translatable.setLanguage(languageId);
+        localStorage.setItem("language", languageId);
         Translatable.setGlobalTranslationObject(await Translatable.getTranslationObject(CurrentLanguage));
         Translatable.translateGroup(Translatable.find("body"), CurrentLanguage);
+
+        let languageBox = availableLanguages.find(x => x.code == CurrentLanguage);
+
+        if (languageBox.rtl)
+            document.body.style.setProperty("direction", "rtl");
+        else
+            document.body.style.setProperty("direction", "initial");
     }
 
     // if there is no hash, set it to home
