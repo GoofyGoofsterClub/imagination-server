@@ -4,15 +4,16 @@ var globalTranslationObject = {};
 
 class Translatable
 {
-    static async getTranslationObject()
+    static async getTranslationObject(language)
     {
-        let result = await fetch("/public/translation.json");
-        return await result.json();
+        let languageObject = await fetch(`/public/translations/${language}.json`);
+        return await languageObject.json();
     }
 
-    static getLanguages(translationObject)
+    static async getLanguages()
     {
-        return Object.keys(translationObject);
+        let _availableLanguages = await fetch("/public/languages.json");
+        return await _availableLanguages.json();
     }
 
     static setAvailableLanguages(languages)
@@ -27,7 +28,7 @@ class Translatable
 
     static setLanguage(language)
     {
-        if (!availableLanguages.includes(language)) return false;
+        if (!availableLanguages.find(x => x.code == language)) return false;
         CurrentLanguage = language;
         return true;
     }
@@ -43,12 +44,12 @@ class Translatable
 
     static getTranslationKey(language, key)
     {
-        return globalTranslationObject[language][key];
+        return globalTranslationObject[key];
     }
 
     static translate(translatableElement, language)
     {
-        translatableElement.element.innerHTML = globalTranslationObject[language][translatableElement.translatableId] ? globalTranslationObject[language][translatableElement.translatableId] : translatableElement.translatableId;
+        translatableElement.element.innerHTML = globalTranslationObject[translatableElement.translatableId] ? globalTranslationObject[translatableElement.translatableId] : translatableElement.translatableId;
     }
 
     static translateGroup(translationElements, language)

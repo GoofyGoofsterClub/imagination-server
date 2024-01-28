@@ -32,26 +32,27 @@ window.onload = async () => {
     var urlSplit = url.split('#');
     var urlHash = urlSplit[urlSplit.length - 1];
 
-    Translatable.setGlobalTranslationObject(await Translatable.getTranslationObject());
-    Translatable.setAvailableLanguages(Translatable.getLanguages(globalTranslationObject));
+    Translatable.setAvailableLanguages(await Translatable.getLanguages());
 
     let languageStored = localStorage.getItem("language");
 
-    if(languageStored && availableLanguages.includes(languageStored))
+    if(languageStored && availableLanguages.find(x => x.code == languageStored))
         Translatable.setLanguage(languageStored);
     else
     {
         Translatable.setLanguage(availableLanguages[0]);
-        localStorage.setItem("language", availableLanguages[0]);
+        localStorage.setItem("language", availableLanguages[0].code);
     }
+
+    Translatable.setGlobalTranslationObject(await Translatable.getTranslationObject(CurrentLanguage));
 
     let languageSelector = document.querySelector("#__main_language_select");
     
     for (var l = 0; l < availableLanguages.length; l++)
     {
         let newLanguageOption = document.createElement("option");
-        newLanguageOption.id = availableLanguages[l];
-        newLanguageOption.innerText = Translatable.getTranslationKey(availableLanguages[l], "language-name");
+        newLanguageOption.id = availableLanguages[l].code;
+        newLanguageOption.innerText = availableLanguages[l].name;
 
         if (newLanguageOption.id == CurrentLanguage)
             newLanguageOption.selected = true;
@@ -59,10 +60,11 @@ window.onload = async () => {
         languageSelector.appendChild(newLanguageOption);
     }
 
-    languageSelector.onchange = function(event)
+    languageSelector.onchange = async function(event)
     {
         Translatable.setLanguage(event.target.options[event.target.selectedIndex].id);
         localStorage.setItem("language", event.target.options[event.target.selectedIndex].id);
+        Translatable.setGlobalTranslationObject(await Translatable.getTranslationObject(CurrentLanguage));
         Translatable.translateGroup(Translatable.find("body"), CurrentLanguage);
     }
 
