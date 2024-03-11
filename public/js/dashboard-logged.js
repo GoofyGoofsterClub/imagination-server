@@ -118,6 +118,35 @@ async function CheckLogin()
         GetUploads();
     }
 
+    document.getElementById("__dashboard_logged_usernamechange_button").onclick = async function()
+    {
+        document.getElementById("__dashboard_logged_usernamechange_button").disabled = true;
+        document.getElementById("__dashboard_logged_usernamechange_displayname").disabled = true;
+
+        let key = localStorage.getItem("key");
+        let new_name = document.querySelector("#__dashboard_logged_usernamechange_displayname").value;
+        if (!new_name)
+        {
+            document.getElementById("__dashboard_logged_usernamechange_button").disabled = false;
+            document.getElementById("__dashboard_logged_usernamechange_displayname").disabled = false;
+            return;
+        }
+
+        let response = await fetch(`/api/private/session/changeusername?key=${key}&new_name=${new_name}`);
+        let data = await response.json();
+        if (!data.success)
+        {
+            document.querySelector("#__dashboard_logged_web_usernamechange_error").innerText = data.error ?? 'Unknown error occured';
+            document.getElementById("__dashboard_loggen_invite_result").classList.add("error-text");
+            document.getElementById("__dashboard_logged_usernamechange_button").disabled = false;
+            document.getElementById("__dashboard_logged_usernamechange_displayname").disabled = false;
+            return;
+        }
+
+        document.querySelector("#__dashboard_logged_web_usernamechange_error").innerText = 'Successfully changed display name! Please reload the page.';
+        document.getElementById("__dashboard_loggen_invite_result").classList.remove("error-text");
+    }
+
     document.querySelector("#__dashboard_logged_invite_displayname").onkeyup = function(e)
     {
         if (e.keyCode == 13)
