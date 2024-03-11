@@ -30,6 +30,15 @@ export default class ChangeUsername extends APIRoute
             "key": request.query.key
         });
 
+        let isUsernameTaken = await this.db.checkDocumentExists("users", {
+            "displayName": request.query.new_name
+        });
+
+        if (isUsernameTaken)
+        {
+            return {"success": false, "error": "Display name is already taken."};
+        }
+
         await this.db.updateDocument("users", {
             "key": request.query.key
         }, {
