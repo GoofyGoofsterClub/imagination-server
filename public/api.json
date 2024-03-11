@@ -1,5 +1,5 @@
 {
-    "generationTimestamp": "2023-12-05T18:33:09.027Z",
+    "generationTimestamp": "2024-03-11T17:34:30.972Z",
     "routes": [
         {
             "path": "api/private/admin/invites",
@@ -210,6 +210,28 @@
                 ],
                 "returns": "Returns a private user data",
                 "returnexample": "{ \"success\": true, \"data\": { \"displayName\": \"test\", \"accessKey\": \"vX2~!00000000-2f6b-4f8b-8d5b-9b8f6b7c4d0a\" }"
+            }
+        },
+        {
+            "path": "api/private/session/changeusername",
+            "method": "GET",
+            "description": "Changes the display name of a user.\nWARNING: All previous uploads will still use old name, due to hashing.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": false,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    },
+                    {
+                        "type": "string",
+                        "name": "new_name"
+                    }
+                ],
+                "returns": "Returns true in success if request was processed.",
+                "returnexample": "{ \"success\": true }"
             }
         },
         {
