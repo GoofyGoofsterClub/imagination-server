@@ -30,6 +30,21 @@ export default class ChangeUsername extends APIRoute
             "key": request.query.key
         });
 
+        let user = await this.db.getDocument("users", {
+            "key": request.query.key
+        });
+
+
+        if (!doesExist)
+        {
+            return {"success": false, "error": "User does not exist."};
+        }
+
+        if (user.usernameChangeBlockedUntil && user.usernameChangeBlockedUntil > Date.now())
+        {
+            return {"succses": false, "error": `You cannot change your username until ${Date(user.usernameChangeBlockedUntil)}`};
+        }
+
         let isUsernameTaken = await this.db.checkDocumentExists("users", {
             "displayName": request.query.new_name
         });
@@ -39,11 +54,15 @@ export default class ChangeUsername extends APIRoute
             return {"success": false, "error": "Display name is already taken."};
         }
 
+        let nameChangesTotal = user.nameChanges ?? 1;
+
         await this.db.updateDocument("users", {
             "key": request.query.key
         }, {
             "$set": {
-                "displayName": request.query.new_name 
+                "displayName": request.query.new_name,
+                "usernameChangeBlockedUntil": (Date.now() + 24 * 60 * 60 * 1000) * nameChangesTotal, // so people don't abuse it,
+                "nameChanges": nameChangesTotal
             }
         });
 
