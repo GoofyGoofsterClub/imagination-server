@@ -137,14 +137,14 @@ async function CheckLogin()
         if (!data.success)
         {
             document.querySelector("#__dashboard_logged_web_usernamechange_error").innerText = data.error ?? 'Unknown error occured';
-            document.getElementById("__dashboard_loggen_invite_result").classList.add("error-text");
+            document.getElementById("__dashboard_logged_web_usernamechange_error").classList.add("error-text");
             document.getElementById("__dashboard_logged_usernamechange_button").disabled = false;
             document.getElementById("__dashboard_logged_usernamechange_displayname").disabled = false;
             return;
         }
 
         document.querySelector("#__dashboard_logged_web_usernamechange_error").innerText = 'Successfully changed display name! Please reload the page.';
-        document.getElementById("__dashboard_loggen_invite_result").classList.remove("error-text");
+        document.getElementById("__dashboard_logged_web_usernamechange_error").classList.remove("error-text");
     }
 
     document.querySelector("#__dashboard_logged_invite_displayname").onkeyup = function(e)
