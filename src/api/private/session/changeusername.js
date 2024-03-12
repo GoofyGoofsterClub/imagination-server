@@ -37,7 +37,7 @@ export default class ChangeUsername extends APIRoute
             return {"success": false, "error": "User does not exist."};
 
         if (user.usernameChangeBlockedUntil && user.usernameChangeBlockedUntil > Date.now())
-            return {"succses": false, "error": `You cannot change your username until ${Date(user.usernameChangeBlockedUntil)}`};
+            return {"succses": false, "error": `You cannot change your username until ${new Date(user.usernameChangeBlockedUntil).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "long"})}.`};
 
         let isUsernameTaken = await this.db.checkDocumentExists("users", {
             "displayName": request.query.new_name
