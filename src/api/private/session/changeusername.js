@@ -22,9 +22,7 @@ export default class ChangeUsername extends APIRoute
     async call(request, reply)
     {
         if (!request.query.key || !request.query.new_name)
-        {
             return {"success": false, "error": "One of the fields is missing."};
-        }
 
         let doesExist = await this.db.checkDocumentExists("users", {
             "key": request.query.key
@@ -36,23 +34,17 @@ export default class ChangeUsername extends APIRoute
 
 
         if (!doesExist)
-        {
             return {"success": false, "error": "User does not exist."};
-        }
 
         if (user.usernameChangeBlockedUntil && user.usernameChangeBlockedUntil > Date.now())
-        {
             return {"succses": false, "error": `You cannot change your username until ${Date(user.usernameChangeBlockedUntil)}`};
-        }
 
         let isUsernameTaken = await this.db.checkDocumentExists("users", {
             "displayName": request.query.new_name
         });
 
         if (isUsernameTaken)
-        {
             return {"success": false, "error": "Display name is already taken."};
-        }
 
         let nameChangesTotal = user.nameChanges ?? 1;
 
