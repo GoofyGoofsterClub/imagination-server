@@ -54,8 +54,8 @@ export default class ChangeUsername extends APIRoute
         }, {
             "$set": {
                 "displayName": request.query.new_name,
-                "usernameChangeBlockedUntil": user.adminstrator ? -1 : (Date.now() + 24 * 60 * 60 * 1000) * nameChangesTotal, // so people don't abuse it,
-                "nameChanges": nameChangesTotal
+                "usernameChangeBlockedUntil": user.administrator ? -1 : (Date.now() + 24 * 60 * 60 * 1000) * nameChangesTotal, // so people don't abuse it,
+                "nameChanges": nameChangesTotal + 1
             }
         });
 
