@@ -65,7 +65,7 @@ export default class ChangeUsername extends APIRoute
             "info",
             "User changed their username.",
             `Username has been changed from \`${user.displayName}\` to \`${request.query.new_name}\``,
-            `https://${request.headers['host']}/${_auth.displayName}/${ids.public}`
+            `https://${request.headers['host']}`
         ));
 
         return {
