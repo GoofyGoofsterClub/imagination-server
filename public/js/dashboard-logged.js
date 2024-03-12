@@ -47,6 +47,14 @@ async function CheckLogin()
         document.getElementById("__dashboard_logged_invite_block_unavailable").style.display = "none";
     }
 
+    if(userInfo.usernameChangeBlockedUntil !== -1)
+    {
+        document.getElementById("__dashboard_logged_web_usernamechange_error").innerText = `You cannot change your username until ${new Date(userInfo.usernameChangeBlockedUntil).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "long"})}.`;
+        document.getElementById("__dashboard_logged_web_usernamechange_error").classList.add("error-text");
+        document.getElementById("__dashboard_logged_usernamechange_displayname").disabled = true;
+        document.getElementById("__dashboard_logged_usernamechange_button").disabled = true;
+    }
+
     document.getElementById("__dashboard_logged_web_upload_button").onclick = async function()
     {
         await document.getElementById("__dashboard_logged_web_upload_hidden_selector").click();
