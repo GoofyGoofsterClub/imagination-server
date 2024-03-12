@@ -53,10 +53,19 @@ export default class ChangeUsername extends APIRoute
         }, {
             "$set": {
                 "displayName": request.query.new_name,
-                "usernameChangeBlockedUntil": (Date.now() + 24 * 60 * 60 * 1000) * nameChangesTotal, // so people don't abuse it,
+                "usernameChangeBlockedUntil": user.adminstrator ? -1 : (Date.now() + 24 * 60 * 60 * 1000) * nameChangesTotal, // so people don't abuse it,
                 "nameChanges": nameChangesTotal
             }
         });
+
+        // External logging for trolling prevention
+        await this._public.ExternalLogging.Log(buildMessage(
+            request.headers['host'],
+            "info",
+            "User changed their username.",
+            `Username has been changed from \`${user.displayName}\` to \`${request.query.new_name}\``,
+            `https://${request.headers['host']}/${_auth.displayName}/${ids.public}`
+        ));
 
         return {
             "success": true
