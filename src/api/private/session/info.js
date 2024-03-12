@@ -58,7 +58,8 @@ export default class CheckSessionInfoAPIRoute extends APIRoute
                 "displayName": user.displayName,
                 "can_invite": user.can_invite,
                 "administrator": user.administrator,
-                "isBanned": user.isBanned == undefined ? false : user.isBanned
+                "isBanned": user.isBanned == undefined ? false : user.isBanned,
+                "usernameChangeBlockedUntil": user.usernameChangeBlockedUntil ?? -1
             }
         };
     }
