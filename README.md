@@ -37,11 +37,11 @@ After installation you will need to log in with administrator account, create a 
 
 To do so, open terminal after **initial start up** and look for the line that looks like this:
 
-```No users found in the database. Please go to /invite/randomletters to create an account.```
+`No users found in the database. Please go to /invite/randomletters to create an account.`
 
 Copy the link and open it in the browser, on the domain you're hosting the server, agree to the invitation and copy the key, then go to the main page and click on Dashboard, or open `/#dashboard`, put the key in and create a new account.
 
-Preferably ban `uwu` account or delete it altogheter, because the key is **NOT** unique.
+It is recommended to use the invite, and setup from there, because the invite is **not unique**.
 
 ## Troubleshooting
 
