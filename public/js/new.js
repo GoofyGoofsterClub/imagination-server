@@ -121,7 +121,7 @@ window.onload = async () => {
             height: 0,
             duration: 200,
             easing: 'linear',
-            onComplete: () => {
+            complete: () => {
                 document.querySelector('.big-showoff').style.display = 'none';
             }
         });
