@@ -26,6 +26,9 @@ export default class UploadsNewAPIRoute extends APIRoute
 
     async call(request, reply)
     {
+        // Needed for extension to work
+        reply.header("Access-Control-Allow-Origin", "*");
+
         let _auth = await this._public.Authenticate(this.db, request.headers["authorization"]);
         if (!_auth)
         {
