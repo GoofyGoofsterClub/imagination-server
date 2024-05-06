@@ -8,6 +8,16 @@ A file server with built-in user and file management, built on NodeJS.
 2. [NodeJS](https://nodejs.org/en) (Tested on 19+)
 3. [MongoDB](https://www.mongodb.com/) (Tested on 5.0.2)
 
+## Contributing
+
+Imagination server welcomes all contributors, but keep in mind that the project is mostly finished and no new features are being considered as of now. If you wish to add a new section, feature, or change design, please open an issue first, before creating a pull request, to insure that you don't waste your time for nothing.
+
+If you wish to help translate project, please use [POEditor](https://poeditor.com/join/project/GWroOdMlYw). If the project is full and you wish to contribute for a language that is not yet on the website, please email `me@reze.moe`.
+
+If you found a misspelling or incorrect grammar in template (`/public/popovers` and `/private/`), please create an issue. If you found a misspelling or incorrect grammar in translation (`/public/translations/`), please use [POEditor](https://poeditor.com/join/project/GWroOdMlYw).
+
+For code standards use the config provided for `Prettier`.
+
 ## Installation
 
 ### With Docker
