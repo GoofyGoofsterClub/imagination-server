@@ -18,9 +18,6 @@ Output.Log("Preparing the server...");
         'boobspics'
     ).connect();
 
-    const heartbeat = new HeartbeatManager(process.env.HEARTBEAT_URL, process.env.HEARTBEAT_SECRET);
-    heartbeat.start();
-
     Output.Log("Connected to the database!");
 
     let amountOfUsers = await (await db.getCollection("users")).countDocuments();
