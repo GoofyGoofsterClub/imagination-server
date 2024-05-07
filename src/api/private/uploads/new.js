@@ -174,7 +174,7 @@ export default class UploadsNewAPIRoute extends APIRoute
 
         if (process.env.SHORTENER_URI && request.query['shorten'])
         {
-            let shortenerRequest = await fetch(`https://${process.env.SHORTENER_URI}/api/link/shorten?key=${request.headers['authorization']}&link=${request.headers['host']}/${ids.public}`);
+            let shortenerRequest = await fetch(`https://${process.env.SHORTENER_URI}/api/link/shorten?key=${request.headers['authorization']}&link=https://${request.headers['host']}/${ids.public}`);
 
             if (shortenerRequest.status == 200)
             {
