@@ -169,10 +169,24 @@ export default class UploadsNewAPIRoute extends APIRoute
             ));
         }
 
+        let shortenedUrl = null;
+
+
+        if (process.env.SHORTENER_URI && request.query['shorten'])
+        {
+            let shortenerRequest = await fetch(`https://${process.env.SHORTENER_URI}/api/link/shorten?key=${request.headers['authorization']}&link=${request.headers['host']}/${ids.public}`);
+
+            if (shortenerRequest.status == 200)
+            {
+                let shortenerRequestJSON = await shortenerRequest.json();
+                shortenedUrl = shortenerRequestJSON.data.link;
+            }
+        }
+
         reply.send({
             "success": true,
             "data": {
-                "link": request.query['useLegacyStyling'] ? `https://${request.headers['host']}/${_auth.displayName}/${ids.public}` : `https://${request.headers['host']}/${ids.public}`
+                "link": shortenedUrl ?? request.query['useLegacyStyling'] ? `https://${request.headers['host']}/${_auth.displayName}/${ids.public}` : `https://${request.headers['host']}/${ids.public}`
             }
         });
 
