@@ -101,7 +101,8 @@ export default class HTTPServer
             method: 'GET',
             url: '/favicon.ico',
             handler: async (req, res) => {
-                res.sendFile(`${__dirname}/../../public/img/favicon.webp`);
+                res.status(200);
+                return;
             }
         })
     }
