@@ -14,7 +14,7 @@ export default class HTTPServer
     {
         this.db = db;
         this.server = fastify({
-            logger: false
+            logger: (process.env.ENV && process.env.ENV == 'DEV')
         });
         this.server.db = db;
         this.Output = new PresetOutput("http");
