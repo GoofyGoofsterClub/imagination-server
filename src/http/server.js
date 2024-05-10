@@ -95,6 +95,15 @@ export default class HTTPServer
             "ExternalLogging": this.externalLogging,
             "Ratelimits": []
         }
+
+        // This is added, so every time an image requested it does not return a 404 with it, causing logging and banning issues.
+        this.server.route({
+            method: 'GET',
+            url: '/favicon.ico',
+            handler: async (req, res) => {
+                res.sendFile(`${__dirname}/../../public/img/favicon.webp`);
+            }
+        })
     }
 
     async registerRoute(path, method, handler)
