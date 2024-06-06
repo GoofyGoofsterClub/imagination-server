@@ -37,7 +37,6 @@ export default class UploadsNewAPIRoute extends APIRoute
             _auth = await this.db.getDocument("services", {
                 "accessKey": request.headers['authorization']
             });
-            console.log(_auth);
             if (!_auth)
             {
                 reply.status(401);
