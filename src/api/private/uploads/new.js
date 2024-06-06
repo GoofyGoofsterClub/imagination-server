@@ -114,6 +114,7 @@ export default class UploadsNewAPIRoute extends APIRoute
         let collection = await this.db.getCollection("uploads");
         await collection.insertOne({
             "uploader": hash(_auth.displayName),
+            "uploaderId": _auth._id,
             "actual_filename": ids.private,
             "original_filename": data.filename,
             "filename": ids.public,
