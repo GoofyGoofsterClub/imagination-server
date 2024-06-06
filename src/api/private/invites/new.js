@@ -75,7 +75,8 @@ export default class InvitesNewAPIRoute extends APIRoute
         await this.db.insertDocument("invites", {
             "hash": inviteCode,
             "displayName": request.query.target,
-            "invitedBy": user.displayName
+            "invitedBy": user.displayName,
+            "invitedById": user._id
         });
 
         return {
