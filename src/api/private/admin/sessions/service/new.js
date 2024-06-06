@@ -56,12 +56,14 @@ export default class AdminCreateServiceAccount extends APIRoute
             "accessKey": GeneratePrivateID(),
             "internalKey": GeneratePublicID(16, "v2S.~"),
             "owner": user._id,
+            "subowners": [],
             "limits": { // TO-DO(mishashto): Needs to be implemented, as well as UI for this.
                 "ratelimit": 0,
                 "whitelistedMime": null,
                 "blacklistedMime": [],
                 "userAgent": null
-            }
+            },
+            "disabled": false
         };
 
         let _r = await this.db.insertDocument("services", newServiceAccount);
