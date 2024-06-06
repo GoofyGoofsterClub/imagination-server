@@ -61,9 +61,11 @@ export default class AdminCreateServiceAccount extends APIRoute
                 "ratelimit": 0,
                 "whitelistedMime": null,
                 "blacklistedMime": [],
-                "userAgent": null
+                "userAgent": null,
+                "allowDirectExtension": false
             },
-            "disabled": false
+            "disabled": false,
+            "forcedDisabled": false
         };
 
         let _r = await this.db.insertDocument("services", newServiceAccount);
