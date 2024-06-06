@@ -1,5 +1,5 @@
 {
-    "generationTimestamp": "2024-03-11T17:34:30.972Z",
+    "generationTimestamp": "2024-06-06T14:02:15.302Z",
     "routes": [
         {
             "path": "api/private/admin/invites",
@@ -108,6 +108,28 @@
                 ],
                 "returns": "Nothing",
                 "returnexample": "{ \"success\": true }"
+            }
+        },
+        {
+            "path": "api/private/admin/sessions/service/new",
+            "method": "GET",
+            "description": "Returns specific field from a user's profile.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": true,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    },
+                    {
+                        "type": "string",
+                        "name": "internal_name"
+                    }
+                ],
+                "returns": "New service account authentication information or an error",
+                "returnexample": "{ \"success\": true, \"data\": { \"access_key\": \"\", \"internal_key\": \"\" } }"
             }
         },
         {
@@ -304,6 +326,24 @@
                 ],
                 "returns": "Returns all user's uploads",
                 "returnexample": "{ \"success\": true, \"data\": [...] }"
+            }
+        },
+        {
+            "path": "api/private/uploads/beta/new",
+            "method": "POST",
+            "description": "Upload a file to the server as an authenticated user.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": false,
+                "params": [
+                    {
+                        "type": "byte",
+                        "name": "file"
+                    }
+                ],
+                "returns": "New upload's link",
+                "returnexample": "{ }"
             }
         },
         {
