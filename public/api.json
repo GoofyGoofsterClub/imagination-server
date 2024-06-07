@@ -1,5 +1,5 @@
 {
-    "generationTimestamp": "2024-06-06T14:02:15.302Z",
+    "generationTimestamp": "2024-06-07T11:52:22.159Z",
     "routes": [
         {
             "path": "api/private/admin/invites",
@@ -271,6 +271,28 @@
                     }
                 ],
                 "returns": "Returns if key is valid",
+                "returnexample": "{ \"success\": true }"
+            }
+        },
+        {
+            "path": "api/private/session/delete",
+            "method": "GET",
+            "description": "Deletes key owner's account completely. Extremely dangerous API call.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": false,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    },
+                    {
+                        "type": "string",
+                        "name": "confirmation"
+                    }
+                ],
+                "returns": "Deletes key owner's account completely. Extremely dangerous API call.",
                 "returnexample": "{ \"success\": true }"
             }
         },
