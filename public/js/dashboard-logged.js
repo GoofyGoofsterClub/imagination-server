@@ -206,6 +206,23 @@ async function CheckLogin()
         document.getElementById("__dashboard_logged_recalc_all").disabled = false;
     }
 
+    document.getElementById("__dashboard_logged_delete_account_button_DO_NOT_CLICK").onclick = async function ()
+    {
+        document.getElementById("__dashboard_logged_delete_account_button_DO_NOT_CLICK").disabled = true;
+        let confirmationUsername = document.getElementById("__dashboard_logged_delete_account_input").value;
+        let _resp = await fetch('/api/private/session/delete?key=' + key + '&confirmation=' + confirmationUsername);
+        _resp = await _resp.json();
+
+        if (!_resp.success)
+        {
+            document.getElementById("__dashboard_logged_delete_account_error_text").innerText = _resp.error;
+            document.getElementById("__dashboard_logged_delete_account_button_DO_NOT_CLICK").disabled = false;
+            return;
+        }
+
+        location.reload();
+    }
+
     GetUploads();
 
     if(userInfo.administrator)
