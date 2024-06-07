@@ -1,91 +1,263 @@
-<h1><button style="float: right;" class="input-button" onclick="logOutLoggedIn();" translatable-id="dashboard-logout">Log out</button> <button style="float: right;" class="input-button" onclick="DownloadSharex();" id="__dashboard_logged_sharex_button" translatable-id="dashboard-sharex">Download ShareX config</button><span translatable-id="dashboard-title">Dashboard</span></h1>
-<p><span translatable-id="dashboard-welcome"></span>, <b id="__dashboard_logged_displayname">[loading]</b>!</p>
-<br>
-<hr>
-<br>
+<h1>
+  <button
+    style="float: right"
+    class="input-button"
+    onclick="logOutLoggedIn();"
+    translatable-id="dashboard-logout"
+  >
+    Log out
+  </button>
+  <button
+    style="float: right"
+    class="input-button"
+    onclick="DownloadSharex();"
+    id="__dashboard_logged_sharex_button"
+    translatable-id="dashboard-sharex"
+  >
+    Download ShareX config</button
+  ><span translatable-id="dashboard-title">Dashboard</span>
+</h1>
+<p>
+  <span translatable-id="dashboard-welcome"></span>,
+  <b id="__dashboard_logged_displayname">[loading]</b>!
+</p>
+<br />
+<hr />
+<br />
 <div class="dashboard-block" id="__dashboard_logged_web_upload">
-    <img style="float: Left; width: 96px; margin-right: 24px;" src="/public/img/roji_yay.png">
-    <h2 translatable-id="dashboard-upload-title">Web Upload</h2>
-    <p translatable-id="dashboard-upload-paragraph">If you're a homie without ShareX.</p>
-    <input type="file" id="__dashboard_logged_web_upload_hidden_selector" style="display: none;">
-    <br>
-    <button class="input-button" id="__dashboard_logged_web_upload_button"><div class="progressbar_button" id="__dashboard_logged_web_upload_progress"></div><span translatable-id="dashboard-upload-button">Select a file</span></button>
-    <p class="small-text" id="__dashboard_logged_web_upload_error"></p>
+  <img
+    style="float: Left; width: 96px; margin-right: 24px"
+    src="/public/img/roji_yay.png"
+  />
+  <h2 translatable-id="dashboard-upload-title">Web Upload</h2>
+  <p translatable-id="dashboard-upload-paragraph">
+    If you're a homie without ShareX.
+  </p>
+  <input
+    type="file"
+    id="__dashboard_logged_web_upload_hidden_selector"
+    style="display: none"
+  />
+  <br />
+  <button class="input-button" id="__dashboard_logged_web_upload_button">
+    <div
+      class="progressbar_button"
+      id="__dashboard_logged_web_upload_progress"
+    ></div>
+    <span translatable-id="dashboard-upload-button">Select a file</span>
+  </button>
+  <p class="small-text" id="__dashboard_logged_web_upload_error"></p>
 </div>
-<br>
-<hr>
-<br>
+<br />
+<hr />
+<br />
 <div class="dashboard-block" id="__dashboard_logged_web_usernamechange">
-    <img style="float: Left; width: 96px; margin-right: 24px;" src="/public/img/wowzers.png">
-    <h2 translatable-id="dashboard-usernamechange-title"></h2>
-    <p translatable-id="dashboard-usernamechange-paragraph"></p>
-    <br>
-    <p><input placeholder="Display Name" id="__dashboard_logged_usernamechange_displayname"> <button class="input-button" id="__dashboard_logged_usernamechange_button" translatable-id="dashboard-usernamechange-button">Change</button></p>
-    <br>
-    <p class="small-text" id="__dashboard_logged_web_usernamechange_error"></p>
+  <img
+    style="float: Left; width: 96px; margin-right: 24px"
+    src="/public/img/wowzers.png"
+  />
+  <h2 translatable-id="dashboard-usernamechange-title"></h2>
+  <p translatable-id="dashboard-usernamechange-paragraph"></p>
+  <br />
+  <p>
+    <input
+      placeholder="Display Name"
+      id="__dashboard_logged_usernamechange_displayname"
+    />
+    <button
+      class="input-button"
+      id="__dashboard_logged_usernamechange_button"
+      translatable-id="dashboard-usernamechange-button"
+    >
+      Change
+    </button>
+  </p>
+  <br />
+  <p class="small-text" id="__dashboard_logged_web_usernamechange_error"></p>
 </div>
-<br>
-<hr>
-<br>
+<br />
+<hr />
+<br />
 <div class="dashboard-block" id="__dashboard_logged_rating_block">
-    <img style="display: none; float: Left; width: 96px; margin-right: 24px;" id="__dashboard_logged_rating_image">
-    <h2><span style="vertical-align: middle;" translatable-id="dashboard-ratio">Your upload ratio is </span><button class="input-button" id="__dashboard_logged_rating" style="vertical-align: middle;">[...]</button></h2>
-    <p translatable-id="dashboard-ratio-paragraph">There is no benefits or punishments you gain from your ratio, it's just for show!</p>
+  <img
+    style="display: none; float: Left; width: 96px; margin-right: 24px"
+    id="__dashboard_logged_rating_image"
+  />
+  <h2>
+    <span style="vertical-align: middle" translatable-id="dashboard-ratio"
+      >Your upload ratio is </span
+    ><button
+      class="input-button"
+      id="__dashboard_logged_rating"
+      style="vertical-align: middle"
+    >
+      [...]
+    </button>
+  </h2>
+  <p translatable-id="dashboard-ratio-paragraph">
+    There is no benefits or punishments you gain from your ratio, it's just for
+    show!
+  </p>
 </div>
-<br>
-<hr>
-<br>
-<div class="dashboard-block" style="display: none;" id="__dashboard_logged_invite_block">
-    <h2 translatable-id="dashboard-invite-title">Invitiation</h2>
-    <p translatable-id="dashboard-invite-paragraph">You can invite people to use this service!</p>
-    <p><input placeholder="Display Name" id="__dashboard_logged_invite_displayname"> <button class="input-button" id="__dashboard_logged_invite_button" translatable-id="dashboard-invite-button">Create</button></p>
-    <p class="small-text bold" id="__dashboard_loggen_invite_result"></p>
-    <p class="small-text" translatable-id="dashboard-invite-sub-paragraph">Please only invite people you trust, that aren't too controversial :)</p>
+<br />
+<hr />
+<br />
+<div
+  class="dashboard-block"
+  style="display: none"
+  id="__dashboard_logged_invite_block"
+>
+  <h2 translatable-id="dashboard-invite-title">Invitiation</h2>
+  <p translatable-id="dashboard-invite-paragraph">
+    You can invite people to use this service!
+  </p>
+  <p>
+    <input
+      placeholder="Display Name"
+      id="__dashboard_logged_invite_displayname"
+    />
+    <button
+      class="input-button"
+      id="__dashboard_logged_invite_button"
+      translatable-id="dashboard-invite-button"
+    >
+      Create
+    </button>
+  </p>
+  <p class="small-text bold" id="__dashboard_loggen_invite_result"></p>
+  <p class="small-text" translatable-id="dashboard-invite-sub-paragraph">
+    Please only invite people you trust, that aren't too controversial :)
+  </p>
 </div>
-<p id="__dashboard_logged_invite_block_unavailable" translatable-id="dashboard-invite-unavailable-paragraph">You don't have access to invites ;(</p>
-<br>
-<hr>
-<br>
-<div id="__dashboard_logged_users_block" style="display: none;">
-    <h2><button style="float: right;" class="input-button" id="__dashboard_logged_recalc_all" translatable-id="dashboard-recalculate">Recalculate ALL</button><span translatable-id="dashboard-users-title">Users</span></h2>
-    <p translatable-id="dashboard-users-paragraph">You are an administrator, so you can manipulate other users' accounts!</p>
-    <table id="__dashboard_logged_users_table">
-        <thead>
-            <tr>
-                <th translatable-id="dashboard-users-username">Username</th>
-                <th translatable-id="dashboard-users-isadmin">Admin?</th>
-                <th translatable-id="dashboard-users-caninvite">Can Invite?</th>
-                <th translatable-id="dashboard-users-isbanned">Banned?</th>
-                <th translatable-id="dashboard-users-actions">Actions</th>
-                <th>&nbsp;</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td colspan="5" translatable-id="loading">Loading...</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-<p id="__dashboard_logged_users_block_unavailable" translatable-id="dashboard-users-unavailable">You don't have access to user management! ;(</p>
-<br>
-<hr>
-<br>
-<h2><button style="float: right;" class="input-button" id="__dashboard_logged_delete_all" translatable-id="dashboard-uploads-delete">Delete all</button><span translatable-id="dashboard-uploads-title">Uploads</span></h2>
-<p><span translatable-id="dashboard-uploads-counter-before">Your uploads man! You've got a total of</span> <b id="__dashboard_logged_uploads_count">...</b> <span translatable-id="dashboard-uploads-counter-after">uploads!</span></p>
-<table id="__dashboard_logged_uploads_table">
+<p
+  id="__dashboard_logged_invite_block_unavailable"
+  translatable-id="dashboard-invite-unavailable-paragraph"
+>
+  You don't have access to invites ;(
+</p>
+<br />
+<hr />
+<br />
+<div id="__dashboard_logged_users_block" style="display: none">
+  <h2>
+    <button
+      style="float: right"
+      class="input-button"
+      id="__dashboard_logged_recalc_all"
+      translatable-id="dashboard-recalculate"
+    >
+      Recalculate ALL</button
+    ><span translatable-id="dashboard-users-title">Users</span>
+  </h2>
+  <p translatable-id="dashboard-users-paragraph">
+    You are an administrator, so you can manipulate other users' accounts!
+  </p>
+  <table id="__dashboard_logged_users_table">
     <thead>
-        <tr>
-            <th translatable-id="dashboard-uploads-filename">File Name</th>
-            <th translatable-id="dashboard-uploads-uploaddate">Uploaded</th>
-            <th translatable-id="dashboard-uploads-through">Through</th>
-            <th>&nbsp;</th>
-        </tr>
+      <tr>
+        <th translatable-id="dashboard-users-username">Username</th>
+        <th translatable-id="dashboard-users-isadmin">Admin?</th>
+        <th translatable-id="dashboard-users-caninvite">Can Invite?</th>
+        <th translatable-id="dashboard-users-isbanned">Banned?</th>
+        <th translatable-id="dashboard-users-actions">Actions</th>
+        <th>&nbsp;</th>
+      </tr>
     </thead>
     <tbody>
-        <tr>
-            <td colspan="5" id="__dashboard_logged_uploads_table_info" translatable-id="loading">Loading...</td>
-        </tr>
+      <tr>
+        <td colspan="5" translatable-id="loading">Loading...</td>
+      </tr>
     </tbody>
+  </table>
+</div>
+<p
+  id="__dashboard_logged_users_block_unavailable"
+  translatable-id="dashboard-users-unavailable"
+>
+  You don't have access to user management! ;(
+</p>
+<br />
+<hr />
+<br />
+<h2>
+  <button
+    style="float: right"
+    class="input-button"
+    id="__dashboard_logged_delete_all"
+    translatable-id="dashboard-uploads-delete"
+  >
+    Delete all</button
+  ><span translatable-id="dashboard-uploads-title">Uploads</span>
+</h2>
+<p>
+  <span translatable-id="dashboard-uploads-counter-before"
+    >Your uploads man! You've got a total of</span
+  >
+  <b id="__dashboard_logged_uploads_count">...</b>
+  <span translatable-id="dashboard-uploads-counter-after">uploads!</span>
+</p>
+<table id="__dashboard_logged_uploads_table">
+  <thead>
+    <tr>
+      <th translatable-id="dashboard-uploads-filename">File Name</th>
+      <th translatable-id="dashboard-uploads-uploaddate">Uploaded</th>
+      <th translatable-id="dashboard-uploads-through">Through</th>
+      <th>&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td
+        colspan="5"
+        id="__dashboard_logged_uploads_table_info"
+        translatable-id="loading"
+      >
+        Loading...
+      </td>
+    </tr>
+  </tbody>
 </table>
+<br />
+<hr />
+<br />
+<h2>Delete account</h2>
+<p>
+  To delete your account type your display name in the field and click the
+  confirmation button.
+</p>
+<p>
+  <input type="text" placeholder="..." />
+  <button
+    class="input-button"
+    id="__dashboard_logged_delete_account_button_DO_NOT_CLICK"
+  >
+    Confirm and delete
+  </button>
+</p>
+<p class="small-text">
+  IMPORTANT: Account data is removed fully, except uploads, which if you don't
+  want to keep, we recommend to delete beforehand. You will NOT be able to
+  recover your account.
+</p>
+<p class="small-text">
+  Deleting an account will <span class="error-text">NOT</span> delete the files
+  you have uploaded.
+</p>
+<p class="small-text">
+  We will not be able to verify ownership of files after the account is deleted.
+  Delete them yourself, or inform us before deleting an account.
+</p>
+<p class="small-text error-text">
+  Your account will be deleted immediately. Think twice before clicking the
+  button,
+  <b class="error-text">there will be NO CONFIRMATION</b> of intention.
+</p>
+<p class="small-text error-text">
+  After the account is deleted, you are revoked of the right to get invited and
+  will have to find someone willing to invite you again, which in of itself
+  might be declined per decision of administrators.
+</p>
+<br />
+<hr />
+<br />
 <preload-script src="/public/js/dashboard-logged.js"></preload-script>
