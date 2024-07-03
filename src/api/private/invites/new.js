@@ -20,9 +20,9 @@ export default class InvitesNewAPIRoute extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
-        let doesExist = await this.db.checkDocumentExists("users", {
+        let doesExist = await server.db.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -32,7 +32,7 @@ export default class InvitesNewAPIRoute extends APIRoute
                 "error": "Invalid key."
             };
         
-        let user = await this.db.getDocument("users", {
+        let user = await server.db.getDocument("users", {
             "key": request.query.key
         });
 
@@ -60,7 +60,7 @@ export default class InvitesNewAPIRoute extends APIRoute
                 "error": "Invalid username."
             };
 
-        let target = await this.db.getDocument("users", {
+        let target = await server.db.getDocument("users", {
             "displayName": request.query.target
         });
         
@@ -72,7 +72,7 @@ export default class InvitesNewAPIRoute extends APIRoute
         
         let inviteCode = hash(uuidv4());
 
-        await this.db.insertDocument("invites", {
+        await server.db.insertDocument("invites", {
             "hash": inviteCode,
             "displayName": request.query.target,
             "invitedBy": user.displayName,

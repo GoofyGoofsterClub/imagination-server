@@ -24,17 +24,17 @@ export default class UploadsNewAPIRoute extends APIRoute
         super("POST");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
         // Needed for extension to work
         reply.header("Access-Control-Allow-Origin", "*");
 
         let isServiceUpload = false;
 
-        let _auth = await this._public.Authenticate(this.db, request.headers["authorization"]);
+        let _auth = await server.server._public.Authenticate(server.db, request.headers["authorization"]);
         if (!_auth)
         {
-            _auth = await this.db.getDocument("services", {
+            _auth = await server.db.getDocument("services", {
                 "accessKey": request.headers['authorization']
             });
             if (!_auth)
@@ -50,7 +50,7 @@ export default class UploadsNewAPIRoute extends APIRoute
 
         if (!isServiceUpload)
         {
-            let ratingResponse = await CheckRating(this.db, _auth.displayName);
+            let ratingResponse = await CheckRating(server.db, _auth.displayName);
             if (!ratingResponse)
             {   
                 reply.status(403);
@@ -65,7 +65,7 @@ export default class UploadsNewAPIRoute extends APIRoute
             // if has ban duration and it passed then unban
             if (_auth.banDuration && _auth.banDuration < Date.now())
             {
-                await this.db.updateDocument("users", {
+                await server.db.updateDocument("users", {
                     "key": request.headers['authorization']
                 }, { "$set": {
                     "isBanned": false,
@@ -102,7 +102,7 @@ export default class UploadsNewAPIRoute extends APIRoute
         
         }
 
-        const existance = await this.db.getDocument("uploads", {
+        const existance = await server.db.getDocument("uploads", {
             "uploader": hash(_auth.displayName ?? _auth.internalKey),
             "hash": datahash
         });
@@ -133,7 +133,7 @@ export default class UploadsNewAPIRoute extends APIRoute
 
         let fileSizeInBytes = stats.size;
 
-        let collection = await this.db.getCollection("uploads");
+        let collection = await server.db.getCollection("uploads");
         await collection.insertOne({
             "uploader": hash(_auth.displayName ?? _auth.internalKey),
             "uploaderId": _auth._id,
@@ -149,19 +149,19 @@ export default class UploadsNewAPIRoute extends APIRoute
             "size": fileSizeInBytes
         });
 
-        if (this._public.Ratelimits.length > 100)
-            this._public.Ratelimits.shift();
-        this._public.Ratelimits.push({
+        if (server.server._public.Ratelimits.length > 100)
+            server.server._public.Ratelimits.shift();
+        server.server._public.Ratelimits.push({
             "userName": _auth.displayName ?? _auth.internalKey,
             "timestamp": Date.now()
         });
 
         if (!isServiceUpload) // TO-DO(mishashto): Add another ratelimit for services.
         {
-            let uploadsInLast10Seconds = this._public.Ratelimits.filter(x => x.userName == _auth.displayName && x.timestamp > Date.now() - 10000);
+            let uploadsInLast10Seconds = server.server._public.Ratelimits.filter(x => x.userName == _auth.displayName && x.timestamp > Date.now() - 10000);
             if (uploadsInLast10Seconds.length > 10 && !_auth.protected)
             {
-                await this.db.updateDocument("users", {
+                await server.db.updateDocument("users", {
                     "key": request.headers['authorization']
                     }, { "$set": {
                         "isBanned": true,
@@ -173,10 +173,10 @@ export default class UploadsNewAPIRoute extends APIRoute
                     "error": "You are uploading too fast."
                 });
             }
-            await addUpload(this.db, _auth.displayName);
+            await addUpload(server.db, _auth.displayName);
             if(_auth.isMonitored)
             {
-                await this._public.ExternalLogging.Log(buildMessage(
+                await server.server._public.ExternalLogging.Log(buildMessage(
                     request.headers['host'],
                     "info",
                     "A file has been uploaded.",

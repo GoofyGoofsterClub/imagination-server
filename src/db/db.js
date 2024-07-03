@@ -80,10 +80,10 @@ export default class DatabaseController
         await this.database.collection(collection).deleteMany(query);
     }
 
-    async updateDocument(collection, query, update)
+    async updateDocument(collection, query, update, upsert = false)
     {
         let _collection = await this.getCollection(collection, query);
-        let result = await _collection.updateOne(query, update);
+        let result = await _collection.updateOne(query, update, { upsert: upsert });
         return result;
     }
 }

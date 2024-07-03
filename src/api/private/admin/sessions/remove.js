@@ -18,9 +18,9 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
-        let doesExist = await this.db.checkDocumentExists("users", {
+        let doesExist = await server.db.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -30,7 +30,7 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute
                 "error": "Invalid key."
             };
         
-        let user = await this.db.getDocument("users", {
+        let user = await server.db.getDocument("users", {
             "key": request.query.key
         });
 
@@ -46,7 +46,7 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute
                 "error": "Missing parameters."
             };
 
-        let target = await this.db.getDocument("users", {
+        let target = await server.db.getDocument("users", {
             "displayName": request.query.target
         });
 
@@ -71,7 +71,7 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute
             };
         }
 
-        let zxv = await this.db.deleteDocument("users", {
+        let zxv = await server.db.deleteDocument("users", {
             "key": target.key
         });
 

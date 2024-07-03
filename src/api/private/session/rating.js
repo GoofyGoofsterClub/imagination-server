@@ -19,9 +19,9 @@ export default class CheckRatingSessionAPIRoute extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
-        let doesExist = await this.db.checkDocumentExists("users", {
+        let doesExist = await server.db.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -31,7 +31,7 @@ export default class CheckRatingSessionAPIRoute extends APIRoute
                 "error": "Invalid key."
             };
         
-        let user = await this.db.getDocument("users", {
+        let user = await server.db.getDocument("users", {
             "key": request.query.key
         });
         
@@ -43,7 +43,7 @@ export default class CheckRatingSessionAPIRoute extends APIRoute
         if (user.rating == Infinity) // nah bro no trolling.
             user.rating = 0;
 
-        await this.db.updateDocument("users", {
+        await server.db.updateDocument("users", {
             "key": request.query.key
         }, { "$set": {
             "views": user.views,

@@ -19,9 +19,9 @@ export default class CheckSessionInfoAPIRoute extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
-        let doesExist = await this.db.checkDocumentExists("users", {
+        let doesExist = await server.db.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -30,16 +30,16 @@ export default class CheckSessionInfoAPIRoute extends APIRoute
                 "success": false
             };
         
-        let user = await this.db.getDocument("users", {
+        let user = await server.db.getDocument("users", {
             "key": request.query.key
         });
 
-        let ratingResponse = await CheckRating(this.db, user.displayName);
+        let ratingResponse = await CheckRating(server.db, user.displayName);
 
         // if is banned but duration has passed current time, unban
         if (user.isBanned && user.banDuration < Date.now() && user.banDuration != null)
         {
-            await this.db.updateDocument("users", {
+            await server.db.updateDocument("users", {
                 "key": request.query.key
             }, {
                 "$set": {

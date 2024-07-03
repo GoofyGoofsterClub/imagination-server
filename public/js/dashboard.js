@@ -24,7 +24,7 @@ document.getElementById("__dashboard_login_button").onclick = function() {
         }
         else
         {
-            setDashboardResult("ERROR: Invalid key.");
+            setDashboardResult("ERROR: " + data.error);
             UnlockInput();
         }
     });
@@ -48,6 +48,12 @@ async function CheckLogin()
     }
     else
     {
+        if (data.maintenance)
+        {
+            ChangePage("maintenance");
+            window.maintenanceReason = data.error;
+            return;
+        }
         UnlockInput();
         localStorage.removeItem("key");
     }

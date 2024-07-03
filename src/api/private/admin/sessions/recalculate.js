@@ -21,10 +21,10 @@ export default class AdminRecalculateRating extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
         let tempOutput = new PresetOutput("forcedrecalculation");
-        let doesExist = await this.db.checkDocumentExists("users", {
+        let doesExist = await server.db.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -34,11 +34,11 @@ export default class AdminRecalculateRating extends APIRoute
                 "error": "Invalid key."
             };
         
-        let user = await this.db.getDocument("users", {
+        let user = await server.db.getDocument("users", {
             "key": request.query.key
         });
 
-        let ratingResponse = await CheckRating(this.db, user.displayName);
+        let ratingResponse = await CheckRating(server.db, user.displayName);
         if (!ratingResponse)
             return {
                 "success": false,
@@ -54,7 +54,7 @@ export default class AdminRecalculateRating extends APIRoute
 
         try
         {
-            await CalculateRatingWorker(this.db, tempOutput);
+            await CalculateRatingWorker(server.db, tempOutput);
         } catch(e)
         {
             return {

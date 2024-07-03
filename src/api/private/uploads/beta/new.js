@@ -24,7 +24,7 @@ export default class UploadsNewAPIRoute extends APIRoute
         super("POST");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
         reply.status(403);
         return {};

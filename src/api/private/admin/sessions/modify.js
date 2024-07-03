@@ -25,11 +25,11 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
         super("POST");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
         const requestData = request.body;
         
-        let doesExist = await this.db.checkDocumentExists("users", {
+        let doesExist = await server.db.checkDocumentExists("users", {
             "key": requestData.key
         });
 
@@ -39,7 +39,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
                 "error": "Invalid key."
             };
         
-        let user = await this.db.getDocument("users", {
+        let user = await server.db.getDocument("users", {
             "key": requestData.key
         });
 
@@ -61,7 +61,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
                 "error": "You cannot modify this field."
             };
 
-        let target = await this.db.getDocument("users", {
+        let target = await server.db.getDocument("users", {
             "displayName": requestData.target
         });
 
@@ -83,7 +83,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
                 "error": "You cannot ban an administrator."
             };
 
-        this.db.updateDocument("users", {
+        server.db.updateDocument("users", {
             "displayName": requestData.target
         }, {
             "$set": {
@@ -93,7 +93,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
 
         if (requestData.field == "isBanned")
         {
-            this.db.updateDocument("users", {
+            server.db.updateDocument("users", {
                 "displayName": requestData.target
             }, {
                 "$set": {
@@ -103,7 +103,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
         }
 
         // External logging
-        this.externalLogging.Log(buildMessage(
+        server.externalLogging.Log(buildMessage(
             request.headers['host'],
             "info",
             "A user's session has been modified.",

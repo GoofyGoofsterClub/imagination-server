@@ -23,9 +23,9 @@ export default class AdminCreateServiceAccount extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
-        let doesExist = await this.db.checkDocumentExists("users", {
+        let doesExist = await server.db.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -35,7 +35,7 @@ export default class AdminCreateServiceAccount extends APIRoute
                 "error": "Invalid key."
             };
         
-        let user = await this.db.getDocument("users", {
+        let user = await server.db.getDocument("users", {
             "key": request.query.key
         });
 
@@ -57,7 +57,7 @@ export default class AdminCreateServiceAccount extends APIRoute
             "internalKey": GeneratePublicID(16, "v2S.~"),
             "owner": user._id,
             "subowners": [],
-            "limits": { // TO-DO(mishashto): Needs to be implemented, as well as UI for this.
+            "limits": { // TO-DO(mishashto): Needs to be implemented, as well as UI for server.
                 "ratelimit": 0,
                 "whitelistedMime": null,
                 "blacklistedMime": [],
@@ -68,7 +68,7 @@ export default class AdminCreateServiceAccount extends APIRoute
             "forcedDisabled": false
         };
 
-        let _r = await this.db.insertDocument("services", newServiceAccount);
+        let _r = await server.db.insertDocument("services", newServiceAccount);
 
         return {
             "success": true,

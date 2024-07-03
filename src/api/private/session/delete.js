@@ -19,9 +19,9 @@ export default class DeleteSessionAPIRoute extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
-        let doesExist = await this.db.checkDocumentExists("users", {
+        let doesExist = await server.db.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -30,7 +30,7 @@ export default class DeleteSessionAPIRoute extends APIRoute
                 "success": false
             };
         
-        let user = await this.db.getDocument("users", {
+        let user = await server.db.getDocument("users", {
             "key": request.query.key
         });
 
@@ -42,7 +42,7 @@ export default class DeleteSessionAPIRoute extends APIRoute
         // if is banned but duration has passed current time, unban
         if (user.isBanned && user.banDuration < Date.now() && user.banDuration != null)
         {
-            await this.db.updateDocument("users", {
+            await server.db.updateDocument("users", {
                 "key": request.query.key
             }, {
                 "$set": {
@@ -54,7 +54,7 @@ export default class DeleteSessionAPIRoute extends APIRoute
             user.banDuration = null;
         }
 
-        await this.db.deleteDocument("users", { "key": request.query.key });
+        await server.db.deleteDocument("users", { "key": request.query.key });
 
         return {
             "success": true

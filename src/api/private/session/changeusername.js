@@ -20,16 +20,16 @@ export default class ChangeUsername extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
         if (!request.query.key || !request.query.new_name)
             return {"success": false, "error": "One of the fields is missing."};
 
-        let doesExist = await this.db.checkDocumentExists("users", {
+        let doesExist = await server.db.checkDocumentExists("users", {
             "key": request.query.key
         });
 
-        let user = await this.db.getDocument("users", {
+        let user = await server.db.getDocument("users", {
             "key": request.query.key
         });
 
@@ -40,7 +40,7 @@ export default class ChangeUsername extends APIRoute
         if (user.usernameChangeBlockedUntil && user.usernameChangeBlockedUntil > Date.now())
             return {"succses": false, "error": `You cannot change your username until ${new Date(user.usernameChangeBlockedUntil).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "long"})}.`};
 
-        let isUsernameTaken = await this.db.checkDocumentExists("users", {
+        let isUsernameTaken = await server.db.checkDocumentExists("users", {
             "displayName": request.query.new_name
         });
 
@@ -49,7 +49,7 @@ export default class ChangeUsername extends APIRoute
 
         let nameChangesTotal = user.nameChanges ?? 1;
 
-        await this.db.updateDocument("users", {
+        await server.db.updateDocument("users", {
             "key": request.query.key
         }, {
             "$set": {
@@ -60,7 +60,7 @@ export default class ChangeUsername extends APIRoute
         });
 
         // External logging for trolling prevention
-        await this._public.ExternalLogging.Log(buildMessage(
+        await server.server._public.ExternalLogging.Log(buildMessage(
             request.headers['host'],
             "info",
             "User changed their username.",

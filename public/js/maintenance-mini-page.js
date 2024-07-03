@@ -1,0 +1,1 @@
+document.getElementById("maintenance-tag").innerText = window.maintenanceReason;

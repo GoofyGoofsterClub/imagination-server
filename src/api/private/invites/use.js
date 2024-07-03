@@ -19,7 +19,7 @@ export default class InvitesUseAPIRoute extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
         if (!request.query.code)
             return {
@@ -27,7 +27,7 @@ export default class InvitesUseAPIRoute extends APIRoute
                 "error": "Missing parameters."
             };
         
-        let target = await this.db.getDocument("invites", {
+        let target = await server.db.getDocument("invites", {
             "hash": request.query.code
         });
 
@@ -43,7 +43,7 @@ export default class InvitesUseAPIRoute extends APIRoute
                 "error": "Code expired."
             };
 
-        let targetUser = await this.db.getDocument("users", {
+        let targetUser = await server.db.getDocument("users", {
             "displayName": target.displayName
         });
 
@@ -53,13 +53,13 @@ export default class InvitesUseAPIRoute extends APIRoute
                 "error": "User already exists."
             };
 
-        await this.db.deleteDocuments("invites", {
+        await server.db.deleteDocuments("invites", {
             "hash": request.query.code
         });
 
         let accessKey = "vX2~!" + uuidv4();
 
-        await this.db.insertDocument("users", {
+        await server.db.insertDocument("users", {
             "displayName": target.displayName,
             "key": accessKey,
             "administrator": target.is_administrator ?? false,

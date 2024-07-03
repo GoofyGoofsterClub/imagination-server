@@ -93,10 +93,18 @@ export default class HTTPServer
             "Authenticate": Authenticate,
             "Output": this.Output,
             "ExternalLogging": this.externalLogging,
-            "Ratelimits": []
+            "Ratelimits": [],
+            "Maintenance": false
+        };
+
+        let isMaintenance = await this.db.getDocument("globals", {
+            "field": "maintenance"
+        });
+
+        if (isMaintenance && isMaintenance.value && isMaintenance.value.enabled)
+        {
+            this.server._public.Maintenance = isMaintenance;
         }
-
-
     }
 
     async registerRoute(path, method, handler)

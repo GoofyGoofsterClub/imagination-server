@@ -40,26 +40,53 @@ export class Route
         this.handler = this.call;
     }
 
-    async call(request, reply) {}
-
-    async register(server)
+    async call(request, reply) { }
+    
+    async callWrapper(request, reply, server, handler)
     {
-        await server.registerRoute(this.path, this.method, this.handler);
+        if (server.server._public.Maintenance && server.server._public.Maintenance.value.mode >= 2)
+        {
+            reply.status(503);
+            return reply.view('maintenance.ejs', { reason: server.server._public.Maintenance.value.message });
+        }
+        return await handler(request, reply);
+    }
+
+    async register(server, routeName)
+    {
+        await server.registerRoute(this.path, this.method, async (request, reply) =>
+        {
+            return await this.callWrapper(request, reply, server, this.handler);
+        });
     }
 }
 
 export class APIRoute
 {
-    constructor(method)
+    constructor(method, excludeFromMaintenance)
     {
         this.method = method;
         this.handler = this.call;
+        this.excludeFromMaintenance = excludeFromMaintenance ?? false;
     }
 
-    async call(request, reply) {}
+    async call(request, reply) { }
+    
+    async callWrapper(request, reply, server, handler)
+    {
+        if (server.server._public.Maintenance && server.server._public.Maintenance.value.mode >= 2 && !this.excludeFromMaintenance)
+        {
+            reply.status(503);
+            return reply.send({ success: false, error: `503 - Maintenance: ${server.server._public.Maintenance.value.message}` });
+        }
+        return await handler(request, reply, server);
+    }
 
     async register(server, path)
     {
-        await server.registerRoute(path, this.method, this.handler);
+        await server.registerRoute(path, this.method, async (request, reply) =>
+        {
+            return await this.callWrapper(request, reply, server, this.handler);
+        });
     }
 }

@@ -18,9 +18,9 @@ export default class AdminGetSessionsAPIRoute extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
-        let doesExist = await this.db.checkDocumentExists("users", {
+        let doesExist = await server.db.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -29,7 +29,7 @@ export default class AdminGetSessionsAPIRoute extends APIRoute
                 "success": false
             };
         
-        let user = await this.db.getDocument("users", {
+        let user = await server.db.getDocument("users", {
             "key": request.query.key
         });
 
@@ -39,7 +39,7 @@ export default class AdminGetSessionsAPIRoute extends APIRoute
             };
 
 
-        let sessions = await this.db.getDocuments("users", {});
+        let sessions = await server.db.getDocuments("users", {});
 
         for (let i = 0; i < sessions.length; i++)
         {
