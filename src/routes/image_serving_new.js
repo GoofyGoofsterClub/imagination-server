@@ -8,9 +8,9 @@ export default class NewImageServing extends Route
         super("/:filename", "GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
-        let doesFileExist = await this.db.checkDocumentExists("uploads", {
+        let doesFileExist = await server.db.checkDocumentExists("uploads", {
             "filename": request.params.filename
         });
 
@@ -23,11 +23,11 @@ export default class NewImageServing extends Route
             });
         }
 
-        let file = await this.db.getDocument("uploads", {
+        let file = await server.db.getDocument("uploads", {
             "filename": request.params.filename
         });
 
-        await addView(this.db, file.filename, file.uploader);
+        await addView(server.db, file.filename, file.uploader);
 
         let fileMimetype = file.mimetype;
         if (

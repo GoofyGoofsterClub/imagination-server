@@ -49,7 +49,7 @@ export class Route
             reply.status(503);
             return reply.view('maintenance.ejs', { reason: server.server._public.Maintenance.value.message });
         }
-        return await handler(request, reply);
+        return await handler(request, reply, server);
     }
 
     async register(server, routeName)
