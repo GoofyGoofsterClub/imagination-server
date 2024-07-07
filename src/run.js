@@ -26,21 +26,17 @@ Output.Log("Preparing the server...");
 
     Output.Log("Registering routes...");
     const server = new HTTPServer(db);
+
+    let isInitialSetup = !(await db.checkDocumentExists("globals", { "field": "_initialSetup" }));
     
     if (amountOfUsers < 1)
     {
-        await db.insertDocument("invites", {
-            "hash": hash("initialuser"),
-            "displayName": "uwu",
-            "is_administrator": true,
-            "protected": true,
-            "private": true,
-            "invitedBy": null
-        });
-        Output.Warn("sys", `No users found in the database. Please go to /invite/${hash('initialuser')} to create an account.`);
+        Output.Warn("sys", `No users found in the database. Please complete the initial user setup.`);
     }
 
     HTTPRouting.RegisterRoutes(server);
+
+    server.server._public['initialSetup'] = isInitialSetup;
 
     server.start(process.env.HTTP_PORT).then(() => {
         Output.Log("Server started!");

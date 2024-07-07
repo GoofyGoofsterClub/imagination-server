@@ -287,6 +287,11 @@ input:disabled
     margin: 16px 0;
 }
 
+.dashboard-block.solid-background
+{
+    background: rgba(40, 30, 40, 1) !important;
+}
+
 hr
 {
     border: 1px solid rgba(255,255,255,0.1);
@@ -506,6 +511,14 @@ ul.changelog > li.changelog-fix > div.icon
     padding-right: 16px;
     border-bottom: 1px solid #3A2C3A;
     margin-bottom: 8px;
+}
+
+.centerized
+{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .profile
