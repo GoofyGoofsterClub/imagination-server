@@ -1,61 +1,89 @@
 <head>
-    <title>mishashto's Image Uploader - Documentation</title>
-    <meta name="og:title" content="mishashto's Image Uploader - Documentation">
-    <meta name="og:description" content="The only way I know how to upload files now">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@mishashto">
-    <meta name="twitter:title" content="mishashto's Image Uploader - Documentation">
-    <meta name="twitter:description" content="The only way I know how to upload files now">
-    <link rel="icon" type="image/webp" href="/public/img/favicon.webp">
-    <link rel="stylesheet" href="/public/css/new.css">
-    <script src="/public/js/anime.min.js"></script>
-    <script src="/public/js/docs.js"></script>
-    <!-- Matomo -->
-    <script>
-        var _paq = window._paq = window._paq || [];
-        /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-        _paq.push(["setCookieDomain", "*.uwu.so"]);
-        _paq.push(["setDoNotTrack", true]);
-        _paq.push(['trackPageView']);
-        _paq.push(['enableLinkTracking']);
-        (function() {
-        var u="//analytics.uwu.so/";
-        _paq.push(['setTrackerUrl', u+'matomo.php']);
-        _paq.push(['setSiteId', '1']);
-        var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-        g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
-        })();
-    </script>
-    <!-- End Matomo Code -->
+  <title>mishashto's Image Uploader - Documentation</title>
+  <meta name="og:title" content="mishashto's Image Uploader - Documentation" />
+  <meta
+    name="og:description"
+    content="The only way I know how to upload files now"
+  />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@mishashto" />
+  <meta
+    name="twitter:title"
+    content="mishashto's Image Uploader - Documentation"
+  />
+  <meta
+    name="twitter:description"
+    content="The only way I know how to upload files now"
+  />
+  <link rel="icon" type="image/webp" href="/public/img/favicon.webp" />
+  <link rel="stylesheet" href="/public/css/new.css" />
+  <script src="/public/js/anime.min.js"></script>
+  <script src="/public/js/docs.js"></script>
 </head>
-<body style="opacity: 1 !important;">
-    <div class="navbar">
-        <div class="content">
-            <a class="nav-el" href="#docs" data-content="404" onclick="return false;" style="opacity: 1 !important;"><span>API Documentation</span></a>
-        </div>
-    </div>
+<body style="opacity: 1 !important">
+  <div class="navbar">
     <div class="content">
-        <h1>API Documentation</h1>
-        <p>Use this page as a reference for API usage, please refrain from abusing the system and limit you requests to <b>60</b> per minute. I do not enforce it, but appreciate if you respect the imaginary limit.</p>
-        <br>
-        <h2>Guidelines</h2>
-        <p>There are a few guidelines you should follow when using the API:</p>
-        <p><span class="tag">1</span> <span class="small-text">Respect the rate limit of 60 requests per minute (more below);</span></p>
-        <p><span class="tag">2</span> <span class="small-text">Abuse of API will result in IP (and/or) user ban;</span></p>
-        <p><span class="tag">3</span> <span class="small-text">Mass upload of content is generally allowed, but may result in temporary restriction.</span></p>
-        <br>
-        <h2>Authentication</h2>
-        <p>Whenever authentication is needed, you need to provide a parameter <span class="code">key</span> with value of a authentication key, depending on the method of the request. If you're uploading a file, it should be passed in a header as <span class="code">Authorization</span> parameter.</p>
-        <br><br>
-        <h2>Endpoints</h2>
-        <p>A raw list of endpoints is available <a href="/public/api.json">[using this link]</a>. The last time the documentation was updated was <span id="__docs_date_update">..</span>.</p>
-        <div class="endpoints-holder" id="__docs_endpoints">
-        </div>
+      <a
+        class="nav-el"
+        href="#docs"
+        data-content="404"
+        onclick="return false;"
+        style="opacity: 1 !important"
+        ><span>API Documentation</span></a
+      >
     </div>
-    <div class="legal"><a href="https://reze.moe/" class="me">reze.moe</a> ♥</div>
+  </div>
+  <div class="content">
+    <h1>API Documentation</h1>
+    <p>
+      Use this page as a reference for API usage, please refrain from abusing
+      the system and limit you requests to <b>60</b> per minute. I do not
+      enforce it, but appreciate if you respect the imaginary limit.
+    </p>
+    <br />
+    <h2>Guidelines</h2>
+    <p>There are a few guidelines you should follow when using the API:</p>
+    <p>
+      <span class="tag">1</span>
+      <span class="small-text"
+        >Respect the rate limit of 60 requests per minute (more below);</span
+      >
+    </p>
+    <p>
+      <span class="tag">2</span>
+      <span class="small-text"
+        >Abuse of API will result in IP (and/or) user ban;</span
+      >
+    </p>
+    <p>
+      <span class="tag">3</span>
+      <span class="small-text"
+        >Mass upload of content is generally allowed, but may result in
+        temporary restriction.</span
+      >
+    </p>
+    <br />
+    <h2>Authentication</h2>
+    <p>
+      Whenever authentication is needed, you need to provide a parameter
+      <span class="code">key</span> with value of a authentication key,
+      depending on the method of the request. If you're uploading a file, it
+      should be passed in a header as
+      <span class="code">Authorization</span> parameter.
+    </p>
+    <br /><br />
+    <h2>Endpoints</h2>
+    <p>
+      A raw list of endpoints is available
+      <a href="/public/api.json">[using this link]</a>. The last time the
+      documentation was updated was <span id="__docs_date_update">..</span>.
+    </p>
+    <div class="endpoints-holder" id="__docs_endpoints"></div>
+  </div>
+  <div class="legal"><a href="https://reze.moe/" class="me">reze.moe</a> ♥</div>
+  <noscript>
     <noscript>
-        <noscript>
-            <meta http-equiv="refresh" content="0;url=/please/enable.js">
-          </noscript>
+      <meta http-equiv="refresh" content="0;url=/please/enable.js" />
     </noscript>
+  </noscript>
 </body>
