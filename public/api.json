@@ -1,6 +1,19 @@
 {
-    "generationTimestamp": "2024-07-03T14:25:15.442Z",
+    "generationTimestamp": "2024-07-21T15:17:00.177Z",
     "routes": [
+        {
+            "path": "api/initial",
+            "method": "POST",
+            "description": "Sets up the initial configuration of the server, creating a new user and giving access to it.",
+            "params": {
+                "private": false,
+                "needsauth": false,
+                "adminonly": false,
+                "params": {},
+                "returns": "Key of an initial user",
+                "returnexample": "{ \"key\": \"XXXX-XXXX-XXXX-XXXX\" }"
+            }
+        },
         {
             "path": "api/private/admin/invites",
             "method": "GET",
