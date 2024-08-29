@@ -71,6 +71,8 @@
     "faq-a10": "We do maintenance every so often and server reboots every morning, if you want stability on a free service, consider donating to <a class=\"code\" href=\"https://pavel.gg\">[@NekoPavel's]</a> basement funds.",
     "faq-q11": "Why my link does not include my username anymore?",
     "faq-a11": "We changed how URLs work. Your username is still is in the link, it's just encoded. If you wish to have your username visible, you can add <span class=\"code\">?useLegacyStyling=1</span> to your custom uploader URL.",
+    "faq-q12": "Is there API?",
+    "faq-a12": "Yes, you can find documentation <a class=\"code\" href=\"/docs\">[over here]</a>.",
     "setup-title": "How to Setup",
     "setup-paragraph": "To setup the file uploader using ShareX, you'll need to download ShareX file in your dashboard, on the top right and import it.",
     "setup-step1": "Download the file",
