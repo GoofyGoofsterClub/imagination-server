@@ -2,6 +2,17 @@ import { APIRoute } from "http/routing";
 import hash from "utilities/hash";
 import fs from "fs";
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly false
+@params [(string) key, (string) filename]
+@returns Nothing
+@returnexample { "success": true }
+A route to request a file deletion.
+
+*/
 export default class DeleteUploadAPIRoute extends APIRoute
 {
     constructor()
@@ -9,9 +20,9 @@ export default class DeleteUploadAPIRoute extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
-        let _auth = await this._public.Authenticate(this.db, request.query.key);
+        let _auth = await server.server._public.Authenticate(server.db, request.query.key);
         if (!_auth)
         {
             reply.status(401);
@@ -38,7 +49,7 @@ export default class DeleteUploadAPIRoute extends APIRoute
         if (request.query.filename == "*")
         {
             // delete all of theirs
-            let collection = await this.db.getCollection("uploads");
+            let collection = await server.db.getCollection("uploads");
             let uploads = await collection.find({
                 "uploader": hash(_auth.displayName)
             }).toArray();
@@ -57,7 +68,7 @@ export default class DeleteUploadAPIRoute extends APIRoute
             };
         }
         
-        let doesExist = await this.db.checkDocumentExists("uploads", {
+        let doesExist = await server.db.checkDocumentExists("uploads", {
             "filename": request.query.filename
         });
 
@@ -67,7 +78,7 @@ export default class DeleteUploadAPIRoute extends APIRoute
                 "error": "File does not exist."
             };
         
-        let upload = await this.db.getDocument("uploads", {
+        let upload = await server.db.getDocument("uploads", {
             "filename": request.query.filename
         });
 
@@ -77,7 +88,7 @@ export default class DeleteUploadAPIRoute extends APIRoute
                 "error": "You do not own this file."
             };
         
-        let collection = await this.db.getCollection("uploads");
+        let collection = await server.db.getCollection("uploads");
         await collection.deleteOne({
             "filename": request.query.filename
         });

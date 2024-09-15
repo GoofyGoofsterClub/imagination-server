@@ -1,5 +1,16 @@
 import { APIRoute } from "http/routing";
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly true
+@params [(string) key, (string) code]
+@returns Information about the invite
+@returnexample { "success": true, "data": [...] }
+Returns the data about a valid invite code.
+
+*/
 export default class InvitesInfoAPIRoute extends APIRoute
 {
     constructor()
@@ -7,9 +18,9 @@ export default class InvitesInfoAPIRoute extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
-        let doesExist = await this.db.checkDocumentExists("users", {
+        let doesExist = await server.db.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -19,7 +30,7 @@ export default class InvitesInfoAPIRoute extends APIRoute
                 "error": "Invalid key."
             };
         
-        let user = await this.db.getDocument("users", {
+        let user = await server.db.getDocument("users", {
             "key": request.query.key
         });
 
@@ -35,7 +46,7 @@ export default class InvitesInfoAPIRoute extends APIRoute
                 "error": "Missing parameters."
             };
         
-        let target = await this.db.getDocument("invites", {
+        let target = await server.db.getDocument("invites", {
             "hash": request.query.code
         });
 

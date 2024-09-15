@@ -1,6 +1,16 @@
 import { APIRoute } from "http/routing";
 
+/*--includedoc
 
+@private false
+@needsauth false
+@adminonly false
+@params [(string) target]
+@returns Publically available information about a user.
+@returnexample { "success": true, "data": { "displayName": "test", "rating": 0, "uploads": 0, "invitedBy": null, "administrator": false, "views": 0, "badges": [], "paint": null, "isBanned": false }
+Gets publically available information about a user.
+
+*/
 export default class PublicSessionGetAPIRoute extends APIRoute
 {
     constructor()
@@ -8,7 +18,7 @@ export default class PublicSessionGetAPIRoute extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
         if (!request.query.target)
             return {
@@ -16,7 +26,7 @@ export default class PublicSessionGetAPIRoute extends APIRoute
                 "error": "No target specified"
             };
         
-        let doesExist = await this.db.checkDocumentExists("users", {
+        let doesExist = await server.db.checkDocumentExists("users", {
             "displayName": request.query.target
         });
 
@@ -26,7 +36,7 @@ export default class PublicSessionGetAPIRoute extends APIRoute
                 "error": "User does not exist"
             };
         
-        let user = await this.db.getDocument("users", {
+        let user = await server.db.getDocument("users", {
             "displayName": request.query.target
         });
 

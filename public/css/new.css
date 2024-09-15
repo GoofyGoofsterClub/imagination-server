@@ -108,7 +108,32 @@ body { opacity: 0; }
     margin-left: -5px;
 }
 
-.navbar > .content > a.nav-el:hover
+
+.navbar > .content > a.nav-el.bland
+{
+    display: inline-block;
+    position: relative;
+    height: 100%;
+    padding: 0 20px;
+
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 64px;
+
+    background: transparent;
+    transform: skewX(-20deg);
+    margin-left: -5px;
+}
+
+.navbar > .content > a.nav-el.bland.language-selector
+{
+    float: right;
+    vertical-align: middle;
+}
+
+.navbar > .content > a.nav-el:hover:not(.bland)
 {
     background: #362736;
 }
@@ -238,6 +263,12 @@ input:disabled
     font-weight: 600;
 }
 
+.small-p
+{
+    padding: 1px;
+    margin: 1px;
+}
+
 .image-container
 {
     border-radius: 6px;
@@ -248,11 +279,17 @@ input:disabled
 
 .dashboard-block
 {
+    overflow-x: hidden;
     background: rgba(40, 30, 40, 0.2);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 6px;
     padding: 16px;
     margin: 16px 0;
+}
+
+.dashboard-block.solid-background
+{
+    background: rgba(40, 30, 40, 1) !important;
 }
 
 hr
@@ -476,9 +513,62 @@ ul.changelog > li.changelog-fix > div.icon
     margin-bottom: 8px;
 }
 
+.centerized
+{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
 .profile
 {
     display: none;
+}
+
+.method-highlight
+{
+    color: #78b1fb;
+}
+
+.tag
+{
+    padding: 2px 4px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.1);
+    margin-right: 4px;
+    font-size: 12px;
+    font-weight: 400;
+    opacity: 0.8;
+
+    vertical-align: middle;
+}
+
+.tag.tag-red
+{
+    background: rgba(255, 0, 0, 0.2) !important;
+}
+
+.tag.tag-yellow
+{
+    background: rgba(255, 255, 0, 0.2) !important;
+}
+
+.tag.tag-green
+{
+    background: rgba(0, 255, 0, 0.2) !important;
+}
+
+.tag.tag-blue
+{
+    background: rgba(0, 0, 255, 0.2) !important;
+}
+
+.endpoint-params > span
+{
+    display: block;
+    margin: 8px 0;
+    vertical-align: middle;
 }
 
  @-webkit-keyframes bigshowoffanimaation {
@@ -497,8 +587,9 @@ ul.changelog > li.changelog-fix > div.icon
     100%{background-position:11% 0%}
 }
 
-span.code
+span.code, pre.code, a.code
 {
+    vertical-align: middle;
     font-family: 'Courier New', Courier, monospace;
 }
 

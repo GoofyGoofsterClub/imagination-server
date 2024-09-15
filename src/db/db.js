@@ -12,8 +12,6 @@ export default class DatabaseController
 
         this.client = null;
         this.database = null;
-
-        this.connect();
     }
 
     async connect()
@@ -23,11 +21,13 @@ export default class DatabaseController
             this.client = new MongoClient(`mongodb://${this.host}:${this.port}`);
             await this.client.connect();
             this.database = this.client.db(this.databaseName);
-            return;
+            return this;
         }
         this.client = new MongoClient(`mongodb://${this.username}:${this.password}@${this.host}:${this.port}`);
         await this.client.connect();
         this.database = this.client.db(this.database);
+
+        return this;
     }
 
     async getCollection(collection)
@@ -46,6 +46,17 @@ export default class DatabaseController
     async getDocuments(collection, query)
     {
         return await this.database.collection(collection).find(query).toArray();
+    }
+
+    async getDocumentsSkip(collection, query, skip, limit)
+    {
+        if (!limit)
+            limit = 1;
+        if (!skip)
+            skip = 0;
+
+        let result = await this.database.collection(collection).find(query).limit(limit).skip(skip).toArray();
+        return result;
     }
 
     async checkDocumentExists(collection, query)
@@ -69,10 +80,10 @@ export default class DatabaseController
         await this.database.collection(collection).deleteMany(query);
     }
 
-    async updateDocument(collection, query, update)
+    async updateDocument(collection, query, update, upsert = false)
     {
         let _collection = await this.getCollection(collection, query);
-        let result = await _collection.updateOne(query, update);
+        let result = await _collection.updateOne(query, update, { upsert: upsert });
         return result;
     }
 }

@@ -14,14 +14,17 @@ export default async function CalculateRatingWorker(db, output)
             user.views = 0;
         if(!user.lastUpload)
             user.lastUpload = Date.now();
+
         
         let rating = await calculateRating(user.uploads, user.views, (Date.now() - user.lastUpload) / 86400000);
         await db.updateDocument("users", {
             "displayName": user.displayName
         }, { "$set": {
-            "rating": rating
+            "rating": rating,
+            "views": user.views,
+            "uploads": user.uploads,
+            "lastUpload": user.lastUpload
         } });
-        output.Log(`Calculated rating for ${user.displayName}: ${rating}`);
         await CheckRating(db, user.displayName);
     }
     output.Log("Rating calculation worker finished.");

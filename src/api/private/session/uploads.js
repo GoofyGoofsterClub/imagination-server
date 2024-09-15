@@ -1,6 +1,17 @@
 import { APIRoute } from "http/routing";
 import hash from "utilities/hash";
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly false
+@params [(string) key]
+@returns Returns all user's uploads
+@returnexample { "success": true, "data": [...] }
+Returns all user's uploads
+
+*/
 export default class SessionUploadsAPIRoute extends APIRoute
 {
     constructor()
@@ -8,9 +19,9 @@ export default class SessionUploadsAPIRoute extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
-        let doesExist = await this.db.checkDocumentExists("users", {
+        let doesExist = await server.db.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -19,13 +30,13 @@ export default class SessionUploadsAPIRoute extends APIRoute
                 "success": false
             };
         
-        let user = await this.db.getDocument("users", {
+        let user = await server.db.getDocument("users", {
             "key": request.query.key
         });
 
         let uploaderHash = hash(user.displayName);
 
-        let uploads = await this.db.getDocuments("uploads", {
+        let uploads = await server.db.getDocuments("uploads", {
             "uploader": uploaderHash
         });
 

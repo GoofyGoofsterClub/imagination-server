@@ -9,6 +9,17 @@ const administratorReplacements = {
     "key": "<redacted>"
 }
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly true
+@params [(string) key, (string) target, (string) field]
+@returns Requested data
+@returnexample { "success": true, "data": "" }
+Returns specific field from a user's profile.
+
+*/
 export default class AdminGetSessionsFieldAPIRoute extends APIRoute
 {
     constructor()
@@ -16,9 +27,9 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
-        let doesExist = await this.db.checkDocumentExists("users", {
+        let doesExist = await server.db.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -28,11 +39,11 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute
                 "error": "Invalid key."
             };
         
-        let user = await this.db.getDocument("users", {
+        let user = await server.db.getDocument("users", {
             "key": request.query.key
         });
 
-        let ratingResponse = await CheckRating(this.db, user.displayName);
+        let ratingResponse = await CheckRating(server.db, user.displayName);
         if (!ratingResponse)
             return {
                 "success": false,
@@ -59,7 +70,7 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute
                 "error": "You cannot get this field."
             };
 
-        let target = await this.db.getDocument("users", {
+        let target = await server.db.getDocument("users", {
             "displayName": request.query.target
         });
 

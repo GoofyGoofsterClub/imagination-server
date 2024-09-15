@@ -2,6 +2,17 @@ import { APIRoute } from "http/routing";
 import { v4 as uuidv4 } from "uuid";
 import hash from "utilities/hash";
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly true
+@params [(string) key, (string) target ]
+@returns Invite code
+@returnexample { "success": true, "data": { "inviteCode": "00000000-2f6b-4f8b-8d5b-9b8f6b7c4d0a", "displayName": "test", "validUntil": 1600000000000 } }
+Creates a new invite code for a user with selected username by an eligible user.
+
+*/
 export default class InvitesNewAPIRoute extends APIRoute
 {
     constructor()
@@ -9,9 +20,9 @@ export default class InvitesNewAPIRoute extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
-        let doesExist = await this.db.checkDocumentExists("users", {
+        let doesExist = await server.db.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -21,7 +32,7 @@ export default class InvitesNewAPIRoute extends APIRoute
                 "error": "Invalid key."
             };
         
-        let user = await this.db.getDocument("users", {
+        let user = await server.db.getDocument("users", {
             "key": request.query.key
         });
 
@@ -49,7 +60,7 @@ export default class InvitesNewAPIRoute extends APIRoute
                 "error": "Invalid username."
             };
 
-        let target = await this.db.getDocument("users", {
+        let target = await server.db.getDocument("users", {
             "displayName": request.query.target
         });
         
@@ -61,10 +72,11 @@ export default class InvitesNewAPIRoute extends APIRoute
         
         let inviteCode = hash(uuidv4());
 
-        await this.db.insertDocument("invites", {
+        await server.db.insertDocument("invites", {
             "hash": inviteCode,
             "displayName": request.query.target,
-            "invitedBy": user.displayName
+            "invitedBy": user.displayName,
+            "invitedById": user._id
         });
 
         return {

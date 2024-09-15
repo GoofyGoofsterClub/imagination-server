@@ -1,5 +1,16 @@
 import { APIRoute } from "http/routing";
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly true
+@params [(string) key, (string) code]
+@returns Nothing
+@returnexample { "success": true }
+Removes the already existing invite code.
+
+*/
 export default class InvitesRemoveAPIRoute extends APIRoute
 {
     constructor()
@@ -7,7 +18,7 @@ export default class InvitesRemoveAPIRoute extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
         if (!request.query.code)
             return {
@@ -15,7 +26,7 @@ export default class InvitesRemoveAPIRoute extends APIRoute
                 "error": "Missing parameters."
             };
         
-        let target = await this.db.getDocuments("invites", {
+        let target = await server.db.getDocuments("invites", {
             "hash": request.query.code
         });
 
@@ -25,7 +36,7 @@ export default class InvitesRemoveAPIRoute extends APIRoute
                 "error": "Invalid target."
             };
         
-        await this.db.deleteDocuments("invites", {
+        await server.db.deleteDocuments("invites", {
             "hash": request.query.code
         });
 

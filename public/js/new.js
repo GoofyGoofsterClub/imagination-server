@@ -11,17 +11,14 @@ document.addEventListener('keydown', (e) => {
     if (keystrokes.length > 10)
         keystrokes = keystrokes.substring(1);
 
-    if (keystrokes.includes("arab"))
-    {
+    if (keystrokes.includes("arab")) {
         document.querySelector('.anime-girl').src = "/public/img/censored-sagiri.png";
         keystrokes = "";
     }
-    if (keystrokes.includes("tv"))
-    {
+    if (keystrokes.includes("tv")) {
         document.querySelector('.anime-girl').src = "/public/img/censored-sagiri2.png";
     }
-    if (keystrokes.includes("scp"))
-    {
+    if (keystrokes.includes("scp")) {
         document.querySelector('.anime-girl').src = "/public/img/scp-sagiri.png";
     }
 });
@@ -31,6 +28,56 @@ window.onload = async () => {
     var url = window.location.href;
     var urlSplit = url.split('#');
     var urlHash = urlSplit[urlSplit.length - 1];
+
+    Translatable.setAvailableLanguages(await Translatable.getLanguages());
+
+    let languageStored = localStorage.getItem("language");
+
+    if (languageStored && availableLanguages.find(x => x.code == languageStored)) {
+        Translatable.setLanguage(languageStored);
+        let languageBox = availableLanguages.find(x => x.code == languageStored);
+
+        if (languageBox.rtl)
+            document.body.style.setProperty("direction", "rtl");
+        else
+            document.body.style.setProperty("direction", "initial");
+    }
+    else {
+        Translatable.setLanguage(availableLanguages[0]);
+        localStorage.setItem("language", availableLanguages[0].code);
+    }
+
+    Translatable.setGlobalTranslationObject(await Translatable.getTranslationObject(CurrentLanguage));
+
+    defaultLanguage = await Translatable.getTranslationObject(availableLanguages[0].code);
+
+    let languageSelector = document.querySelector("#__main_language_select");
+
+    for (var l = 0; l < availableLanguages.length; l++) {
+        let newLanguageOption = document.createElement("option");
+        newLanguageOption.id = availableLanguages[l].code;
+        newLanguageOption.innerText = availableLanguages[l].name;
+
+        if (newLanguageOption.id == CurrentLanguage)
+            newLanguageOption.selected = true;
+
+        languageSelector.appendChild(newLanguageOption);
+    }
+
+    languageSelector.onchange = async function (event) {
+        let languageId = event.target.options[event.target.selectedIndex].id;
+        Translatable.setLanguage(languageId);
+        localStorage.setItem("language", languageId);
+        Translatable.setGlobalTranslationObject(await Translatable.getTranslationObject(CurrentLanguage));
+        Translatable.translateGroup(Translatable.find("body"), CurrentLanguage);
+
+        let languageBox = availableLanguages.find(x => x.code == CurrentLanguage);
+
+        if (languageBox.rtl)
+            document.body.style.setProperty("direction", "rtl");
+        else
+            document.body.style.setProperty("direction", "initial");
+    }
 
     // if there is no hash, set it to home
     if (urlHash == url) urlHash = 'welcome';
@@ -43,6 +90,9 @@ window.onload = async () => {
     var newData = await fetch('/public/popovers/' + target.getAttribute('data-content') + '.html');
     var newDataText = await newData.text();
     document.querySelector('body>.content').innerHTML = newDataText;
+
+    Translatable.translateGroup(Translatable.find("body"), CurrentLanguage);
+
     anime({
         targets: 'body>.content',
         opacity: 1,
@@ -57,14 +107,13 @@ window.onload = async () => {
         duration: 600,
         easing: 'linear'
     });
-    if (urlHash != 'welcome')
-    {
+    if (urlHash != 'welcome') {
         anime({
             targets: '.big-showoff',
             height: 0,
             duration: 200,
             easing: 'linear',
-            onComplete: () => {
+            complete: () => {
                 document.querySelector('.big-showoff').style.display = 'none';
             }
         });
@@ -106,7 +155,7 @@ window.onload = async () => {
         delay: anime.stagger(100)
     });
 
-    var navButtons = document.getElementsByClassName('nav-el');
+    var navButtons = document.querySelectorAll('.nav-el[data-content]');
     for (var i = 0; i < navButtons.length; i++) {
         navButtons[i].addEventListener('click', async (e) => {
             e.preventDefault();
@@ -122,8 +171,7 @@ window.onload = async () => {
     }
 };
 
-async function ChangePage(page)
-{
+async function ChangePage(page) {
     var newData = await fetch('/public/popovers/' + page + '.html');
 
     anime({
@@ -136,15 +184,13 @@ async function ChangePage(page)
 
     let navButton = document.querySelector(`.nav-el[data-content="${page}"]`);
     if (navButton == null) navButton = null;
-    
-    if (navButton != null)
-    {
+
+    if (navButton != null) {
         document.querySelector('.nav-el.current').classList.remove('current');
         navButton.classList.add('current');
     }
 
-    if (page == "welcome")
-    {
+    if (page == "welcome") {
         document.querySelector('.big-showoff').style.display = 'block';
         anime({
             targets: '.big-showoff',
@@ -153,8 +199,7 @@ async function ChangePage(page)
             easing: 'linear'
         });
     }
-    else
-    {
+    else {
         anime({
             targets: '.big-showoff',
             height: 0,
@@ -166,12 +211,10 @@ async function ChangePage(page)
         });
     }
 
-    if (newData.status != 200)
-    {
+    if (newData.status != 200) {
         SetContent("<h1>Not Found</h1><p>No such page exists. Contact the server administrator if you think this is a mistake.</p>");
     }
-    else
-    {
+    else {
         newData = await newData.text();
 
         let parser = new DOMParser();
@@ -191,14 +234,14 @@ async function ChangePage(page)
         }
         document.querySelector('body>.content').innerHTML = newData;
     }
-    
+
     var els = document.querySelectorAll('body>.content>*');
     for (var i = 0; i < els.length; i++) {
         els[i].style.opacity = 0;
         els[i].style.transform = "translateY(-30px)";
     }
     document.querySelector('body>.content').getElementsByClassName.transform = "translateY(-100px)";
-    
+
     anime({
         targets: 'body>.content',
         opacity: 1,
@@ -214,15 +257,14 @@ async function ChangePage(page)
         easing: 'linear',
         delay: anime.stagger(120)
     });
+    Translatable.translateGroup(Translatable.find("body"), CurrentLanguage);
 }
 
-function SetContent(content)
-{
+function SetContent(content) {
     document.querySelector('body>.content').innerHTML = content;
 }
 
-async function GetUploadCount(event)
-{
+async function GetUploadCount(event) {
     const _v = await fetch('/api/public/uploads/count');
     const _v_json = await _v.json();
     document.getElementById("__upload_counter").innerText = _v_json.count;

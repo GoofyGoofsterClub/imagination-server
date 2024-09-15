@@ -1,37 +1,95 @@
 <head>
-    <title>mishashto's Image Uploader</title>
-    <link rel="icon" type="image/webp" href="/public/img/favicon.webp">
-    <link rel="stylesheet" href="/public/css/new.css">
-    <script src="/public/js/anime.min.js"></script>
-    <script src="/public/js/tooltips.js"></script>
-    <script src="/public/js/rankdata.js"></script>
-    <script src="/public/js/new.js"></script>
+  <title>mishashto's Image Uploader</title>
+  <link rel="icon" type="image/webp" href="/public/img/favicon.webp" />
+  <meta name="og:title" content="mishashto's Image Uploader" />
+  <meta
+    name="og:description"
+    content="The only way I know how to upload files now"
+  />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@mishashto" />
+  <meta name="twitter:title" content="mishashto's Image Uploader" />
+  <meta
+    name="twitter:description"
+    content="The only way I know how to upload files now"
+  />
+  <link rel="stylesheet" href="/public/css/new.css" />
+  <script src="/public/js/anime.min.js"></script>
+  <script src="/public/js/tooltips.js"></script>
+  <script src="/public/js/rankdata.js"></script>
+  <script src="/public/js/translatable.js"></script>
+  <script src="/public/js/new.js"></script>
 </head>
 <body>
-    <div class="big-showoff">
-        <div class="flex">
-            <div class="content">
-                <span class="small-header-domain stagger-header" style="transform: translateY(-40px); opacity: 0;"><%= it.domain %></span>
-                <span class="big-header stagger-header" style="transform: translateY(-40px); opacity: 0;">mishashto's Image Uploader</span>
-                <span class="small-header stagger-header" style="transform: translateY(-40px); opacity: 0;">The only way I know how to upload files now</span>
-            </div>
-        </div>
-        <img src="/public/img/<%= it.haram ? 'censored-' : '' %>sagiri.png" class="anime-girl">
+  <div class="big-showoff">
+    <div class="flex">
+      <div class="content" style="direction: initial">
+        <span
+          class="small-header-domain stagger-header"
+          style="transform: translateY(-40px); opacity: 0"
+          ><%= it.domain %></span
+        >
+        <span
+          class="big-header stagger-header"
+          style="transform: translateY(-40px); opacity: 0"
+          translatable-id="main-header"
+          >mishashto's Image Uploader</span
+        >
+        <span
+          class="small-header stagger-header"
+          style="transform: translateY(-40px); opacity: 0"
+          translatable-id="main-header-sub"
+          >The only way I know how to upload files now</span
+        >
+      </div>
     </div>
-    <div class="navbar">
-        <div class="content">
-            <a class="nav-el" href="#welcome" style="opacity: 0;" data-content="welcome"><span>Welcome</span></a>
-            <a class="nav-el" href="#faq" style="opacity: 0;" data-content="faq"><span>FAQ</span></a>
-            <a class="nav-el" href="#setup" style="opacity: 0;" data-content="setup"><span>Setup</span></a>
-            <a class="nav-el" href="#changelog" style="opacity: 0;" data-content="changelog"><span>What changed?</span></a>
-            <a class="nav-el" href="#dashboard" style="opacity: 0;" data-content="dashboard"><span>Dashboard</span></a>
-        </div>
+    <img
+      src="/public/img/<%= it.haram ? 'censored-' : '' %>sagiri.png"
+      class="anime-girl"
+    />
+  </div>
+  <div class="navbar">
+    <div class="content">
+      <a
+        class="nav-el"
+        href="#welcome"
+        style="opacity: 0"
+        data-content="welcome"
+        ><span translatable-id="navbar-welcome">Welcome</span></a
+      >
+      <a class="nav-el" href="#faq" style="opacity: 0" data-content="faq"
+        ><span translatable-id="navbar-faq">FAQ</span></a
+      >
+      <!-- <a class="nav-el" href="#setup" style="opacity: 0" data-content="setup"
+        ><span translatable-id="navbar-setup">Setup</span></a
+      > -->
+      <a
+        class="nav-el"
+        href="#dashboard"
+        style="opacity: 0"
+        data-content="dashboard"
+        ><span translatable-id="navbar-dashboard">Dashboard</span></a
+      >
+      <a class="nav-el bland language-selector" style="opacity: 0"
+        ><span
+          >&nbsp;<select
+            class="input-button"
+            id="__main_language_select"
+          ></select></span
+      ></a>
     </div>
+  </div>
+  <noscript>
     <noscript>
-        <noscript>
-            <meta http-equiv="refresh" content="0;url=/please/enable.js">
-          </noscript>
+      <meta http-equiv="refresh" content="0;url=/please/enable.js" />
     </noscript>
-    <div class="content" style="transform: translateY(-100px); opacity: 0;"></div>
-    <div class="legal"><a href="https://reze.moe/" class="me">reze.moe</a> ♥</div>
+  </noscript>
+  <div class="content" style="transform: translateY(-100px); opacity: 0"></div>
+  <div class="legal">
+    <a href="https://reze.moe/" class="me">reze.moe</a>
+    <a href="#" onclick="ChangePage('contribution'); return false;"
+      >contributors</a
+    >
+    ♥
+  </div>
 </body>

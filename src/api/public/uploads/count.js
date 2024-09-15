@@ -1,5 +1,16 @@
 import { APIRoute } from "http/routing";
 
+/*--includedoc
+
+@private false
+@needsauth false
+@adminonly false
+@params []
+@returns The number of uploads in the database.
+@returnexample { "count": 123 }
+Counts the number of uploads in the database.
+
+*/
 export default class UploadsCountAPIRoute extends APIRoute
 {
     constructor()
@@ -7,9 +18,9 @@ export default class UploadsCountAPIRoute extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
-        let collection = await this.db.getCollection("uploads");
+        let collection = await server.db.getCollection("uploads");
         let count = await collection.countDocuments();
         reply.send({
             "count": count

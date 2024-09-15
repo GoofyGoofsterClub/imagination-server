@@ -1,5 +1,16 @@
 import { APIRoute } from "http/routing";
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly true
+@params [(string) key]
+@returns All invites
+@returnexample { "success": true, "data": [...] }
+Returns all unused invites.
+
+*/
 export default class AdminGetSessionsAPIRoute extends APIRoute
 {
     constructor()
@@ -7,9 +18,9 @@ export default class AdminGetSessionsAPIRoute extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
-        let doesExist = await this.db.checkDocumentExists("users", {
+        let doesExist = await server.db.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -19,7 +30,7 @@ export default class AdminGetSessionsAPIRoute extends APIRoute
                 "error": "Invalid key."
             };
         
-        let user = await this.db.getDocument("users", {
+        let user = await server.db.getDocument("users", {
             "key": request.query.key
         });
 
@@ -29,7 +40,7 @@ export default class AdminGetSessionsAPIRoute extends APIRoute
                 "error": "You are not an administrator."
             };
 
-        let invites = await this.db.getDocuments("invites", {});
+        let invites = await server.db.getDocuments("invites", {});
 
         return {
             "success": true,

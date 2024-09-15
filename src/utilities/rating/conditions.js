@@ -7,11 +7,14 @@ export const RatingConditions =
 
 export default async function CheckRating(db, user)
 {
-    let rating = await db.getDocument("users", {
+    let _user = await db.getDocument("users", {
         "displayName": user
     });
 
-    rating = rating.rating;
+    let rating = _user.rating;
+
+    if (_user.protected)
+        return true;
 
     for (let condition in RatingConditions)
     {
@@ -22,28 +25,20 @@ export default async function CheckRating(db, user)
                 case "WarningMessage":
                 case "LimitInvites":
                     break;
-                case "LimitAccess":
-                    await db.updateDocument("users", {
-                        "displayName": user
-                    }, { "$set": {
-                        "isBanned": true
-                    } });
-                    return false;
                 default:
                     break;
             }
         }
     }
 
-    if (rating > 10000)
+    if (rating > 10.1 || rating < -0.1)
     {
         await db.updateDocument("users", {
                 "displayName": user
             }, { "$set": {
                 "rating": 0,
-                "views": 0,
-                "uploads": 0,
-                "isBanned": true
+                "isBanned": true,
+                "banFieldModificationBy": "uwu"
             } });
         return false;
     }

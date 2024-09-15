@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   mongo:
     image: mongo:5.0.2
@@ -27,6 +27,7 @@ services:
       - MONGO_PORT=$MONGO_PORT
       - MONGO_DB=$MONGO_DB
       - LOG_WEBHOOK=$LOG_WEBHOOK
+      - SHORTENER_URI=$SHORTENER_URI
     build: .
 
 volumes:

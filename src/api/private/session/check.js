@@ -1,5 +1,16 @@
 import { APIRoute } from "http/routing";
 
+/*--includedoc
+
+@private false
+@needsauth true
+@adminonly false
+@params [(string) key]
+@returns Returns if key is valid
+@returnexample { "success": true }
+Check if a session key is valid.
+
+*/
 export default class CheckSessionAPIRoute extends APIRoute
 {
     constructor()
@@ -7,14 +18,24 @@ export default class CheckSessionAPIRoute extends APIRoute
         super("GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
-        let doesExist = await this.db.checkDocumentExists("users", {
+        let isMaintenance = await server.db.getDocument("globals", {
+            "field": "maintenance"
+        });
+
+        if (isMaintenance && isMaintenance.value && isMaintenance.value.enabled)
+        {
+            return { "success": false, "error": isMaintenance.value.message, "maintenance": true };
+        }
+
+        let doesExist = await server.db.checkDocumentExists("users", {
             "key": request.query.key
         });
 
         return {
-            "success": doesExist
+            "success": doesExist,
+            "error": doesExist ? '' : 'Invalid key.'
         };
     }
 }

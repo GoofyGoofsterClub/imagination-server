@@ -1,18 +1,16 @@
 import { Route } from "http/routing";
-import hash from "utilities/hash";
 import addView from "utilities/addview";
 
-export default class ImageServing extends Route
+export default class NewImageServing extends Route
 {
     constructor()
     {
-        super("/:uploader/:filename", "GET");
+        super("/:filename", "GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
-        let doesFileExist = await this.db.checkDocumentExists("uploads", {
-            "uploader": hash(request.params.uploader),
+        let doesFileExist = await server.db.checkDocumentExists("uploads", {
             "filename": request.params.filename
         });
 
@@ -25,12 +23,11 @@ export default class ImageServing extends Route
             });
         }
 
-        let file = await this.db.getDocument("uploads", {
-            "uploader": hash(request.params.uploader),
+        let file = await server.db.getDocument("uploads", {
             "filename": request.params.filename
         });
 
-        await addView(this.db, file.filename, request.params.uploader);
+        await addView(server.db, file.filename, file.uploader);
 
         let fileMimetype = file.mimetype;
         if (
