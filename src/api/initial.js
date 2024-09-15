@@ -12,19 +12,15 @@ import { v4 as uuidv4 } from "uuid";
 Sets up the initial configuration of the server, creating a new user and giving access to it.
 
 */
-export default class InitialSetupAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class InitialSetupAPIRoute extends APIRoute {
+    constructor() {
         super("POST");
     }
 
-    async call(request, reply, server)
-    {
+    async call(request, reply, server) {
         let isInitialSetup = !(await server.db.checkDocumentExists("globals", { "field": "_initialSetup" }));
 
-        if (!isInitialSetup)
-        {
+        if (!isInitialSetup) {
             reply.status(403);
             return { "error": "Server is already setup." };
         }
@@ -42,6 +38,7 @@ export default class InitialSetupAPIRoute extends APIRoute
             private: true,
             isBanned: false,
             invitedBy: null,
+            superuser: true,
             uploads: 0,
             views: 0
         });
@@ -49,6 +46,6 @@ export default class InitialSetupAPIRoute extends APIRoute
         server.server._public.initialSetup = false;
         await server.db.insertDocument("globals", { "field": "_initialSetup", "value": false });
         await server.db.insertDocument("globals", { "field": "webTitle", "value": request.body.webTitle });
-        reply.send({"key": accessKey});
+        reply.send({ "key": accessKey });
     }
 }
