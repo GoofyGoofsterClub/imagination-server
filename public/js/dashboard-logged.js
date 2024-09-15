@@ -27,7 +27,7 @@ async function CheckLogin() {
         ChangePage("banned");
         return;
     }
-    await GetUserRating();
+
     document.getElementById("__dashboard_logged_displayname").innerText = userInfo.displayName;
 
     if (userInfo.administrator) {
@@ -227,28 +227,6 @@ async function GetUserInfo() {
     return data.data;
 }
 
-async function GetUserRating() {
-
-
-    let ratingData = await fetch("/api/private/session/rating?key=" + localStorage.getItem("key"));
-    let rating = await ratingData.json();
-    if (!rating.success) {
-        document.getElementById("__dashboard_logged_rating").innerText = "Unknown";
-        return;
-    }
-    // find the highest rank based on rating
-
-    let ranks2 = [...Ranks].reverse();
-    var rank = null;
-    for (var i = 0; i < ranks2.length; i++) {
-        if (rating.rating >= ranks2[i].rating)
-            rank = ranks2[i];
-    }
-    document.getElementById("__dashboard_logged_rating_image").src = "/public/img/rating/" + rank.image;
-    document.getElementById("__dashboard_logged_rating_image").style.display = "block";
-    document.getElementById("__dashboard_logged_rating").innerText = rating.rating.toFixed(3);
-}
-
 async function GetUsers() {
     let key = localStorage.getItem("key");
     let response = await fetch("/api/private/admin/sessions?key=" + key);
@@ -275,7 +253,7 @@ async function GetUsers() {
             if (data.data[i].rating >= ranks2[j].rating)
                 rank = ranks2[j];
         }
-        image.setAttribute("data-tooltip", `${rank.name} - ${data.data[i].rating.toFixed(3)}`);
+        image.setAttribute("data-tooltip", `Click to open profile`);
         image.src = "/public/img/rating/" + rank.image;
         image.onclick = () => { location.href = `/profile/${data.data[i].displayName}`; }
         image.style = "max-width: 48px; max-height: 48px; vertical-align: middle; margin-right: 12px; border-radius: 999px;";
