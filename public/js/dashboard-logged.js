@@ -169,6 +169,20 @@ async function CheckLogin() {
         document.getElementById("__dashboard_loggen_invite_result").classList.remove("error-text");
     }
 
+    let dangerZonePressed = false;
+
+    document.getElementById("__dashboard_logged_access_danger_zone").onclick = async function () {
+        if (!dangerZonePressed) {
+            document.getElementById("__dashboard_logged_access_danger_zone").disabled = true;
+            document.getElementById("__dashboard_logged_access_danger_zone").innerText = "Are you sure?";
+            dangerZonePressed = true;
+            setTimeout(() => { document.getElementById("__dashboard_logged_access_danger_zone").disabled = false; }, 3000);
+            return;
+        }
+
+        ChangePage("dangerzone");
+    }
+
     document.getElementById("__dashboard_logged_recalc_all").onclick = async function () {
         document.getElementById("__dashboard_logged_recalc_all").disabled = true;
         let _resp = await fetch("/api/private/admin/sessions/recalculate?key=" + key);
