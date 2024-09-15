@@ -12,15 +12,12 @@ import CheckRating from "utilities/rating/conditions";
 Gets publically available information about a user. (Internal use)
 
 */
-export default class CheckSessionInfoAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class CheckSessionInfoAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
+    async call(request, reply, server) {
         let doesExist = await server.db.checkDocumentExists("users", {
             "key": request.query.key
         });
@@ -29,7 +26,7 @@ export default class CheckSessionInfoAPIRoute extends APIRoute
             return {
                 "success": false
             };
-        
+
         let user = await server.db.getDocument("users", {
             "key": request.query.key
         });
@@ -37,8 +34,7 @@ export default class CheckSessionInfoAPIRoute extends APIRoute
         let ratingResponse = await CheckRating(server.db, user.displayName);
 
         // if is banned but duration has passed current time, unban
-        if (user.isBanned && user.banDuration < Date.now() && user.banDuration != null)
-        {
+        if (user.isBanned && user.banDuration < Date.now() && user.banDuration != null) {
             await server.db.updateDocument("users", {
                 "key": request.query.key
             }, {
@@ -59,7 +55,8 @@ export default class CheckSessionInfoAPIRoute extends APIRoute
                 "can_invite": user.can_invite,
                 "administrator": user.administrator,
                 "isBanned": user.isBanned == undefined ? false : user.isBanned,
-                "usernameChangeBlockedUntil": user.usernameChangeBlockedUntil ?? -1
+                "usernameChangeBlockedUntil": user.usernameChangeBlockedUntil ?? -1,
+                "superuser": user.superuser ?? false
             }
         };
     }
