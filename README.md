@@ -66,7 +66,7 @@ If this didn't help, check if your PostgreSQL credentials are correct in the `.e
 
 ### Server crashing after around 10 seconds (with docker)
 
-Environment variables are incorrectly configured, check `.env`, most likely, expose port is already used.
+Environment variables are incorrectly configured, check `.env`, or, most likely, expose port is already used.
 
 ### API endpoints in `/docs` are not correct.
 
