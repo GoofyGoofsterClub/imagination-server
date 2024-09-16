@@ -47,6 +47,11 @@ services:
       - MONGO_HOST=mongo
       - MONGO_PORT=$MONGO_PORT
       - MONGO_DB=$MONGO_DB
+      - POSTGRE_HOST=postgres
+      - POSTGRE_PORT=5432
+      - POSTGRE_USER=$POSTGRE_USER
+      - POSTGRE_PASSWORD=$POSTGRE_PASSWORD
+      - POSTGRE_DB=uwuso
       - LOG_WEBHOOK=$LOG_WEBHOOK
       - SHORTENER_URI=$SHORTENER_URI
     build: .
