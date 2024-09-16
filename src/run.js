@@ -2,11 +2,14 @@ import Output from "utilities/output";
 import HTTPServer from "http/server";
 import HTTPRouting from "http/routing";
 import DatabaseController from "db/old";
+import NewDatabaseController from "db/db";
 
 Output.Log("Preparing the server...");
 
 (async () => {
     Output.Log("Connecting to the database...");
+
+    const ndb = await new NewDatabaseController();
     const db = await new DatabaseController(
         process.env.MONGO_HOST,
         process.env.MONGO_PORT,
