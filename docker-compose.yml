@@ -1,5 +1,24 @@
-version: "3"
 services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_PASSWORD: boobies
+      POSTGRES_USER: database
+      POSTGRES_DB: uwuso
+    volumes:
+      - 'db:/var/lib/postgresql/data'
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 64M
+
   mongo:
     image: mongo:5.0.2
     restart: unless-stopped
@@ -9,8 +28,10 @@ services:
       - db:/data/db
     env_file:
       - ./.env
+
   web:
     depends_on:
+      - postgres
       - mongo
     image: boobspics-web
     ports:
