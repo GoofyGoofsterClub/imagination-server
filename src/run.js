@@ -1,7 +1,7 @@
 import Output from "utilities/output";
 import HTTPServer from "http/server";
 import HTTPRouting from "http/routing";
-import DatabaseController from "db/db";
+import DatabaseController from "db/old";
 
 Output.Log("Preparing the server...");
 
