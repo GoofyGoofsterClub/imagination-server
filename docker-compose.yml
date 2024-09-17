@@ -6,10 +6,11 @@ services:
       - '5432:5432'
     environment:
       POSTGRES_PASSWORD: boobies
-      POSTGRES_USER: database
+      POSTGRES_USER: dbuser
       POSTGRES_DB: uwuso
     volumes:
       - 'db:/var/lib/postgresql/data'
+      - './docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d'
     deploy:
       resources:
         limits:
