@@ -9,9 +9,8 @@ Output.Log("Preparing the server...");
 (async () => {
     Output.Log("Connecting to the database...");
 
-    const ndb = await new NewDatabaseController();
 
-    await Output.Log(`${await ndb.getAmountOfUsers()} users exists in database.`);
+    await Output.Log(`${amountOfUsers} users exists in database.`);
 
     const db = await new DatabaseController(
         process.env.MONGO_HOST,
@@ -19,23 +18,23 @@ Output.Log("Preparing the server...");
         'boobspics'
     ).connect();
 
+    const ndb = await new NewDatabaseController();
+
     Output.Log("Connected to the database!");
-
-    let amountOfUsers = await (await db.getCollection("users")).countDocuments();
-
 
     Output.Log("Registering routes...");
     const server = new HTTPServer(db);
 
-    let isInitialSetup = !(await db.checkDocumentExists("globals", { "field": "_initialSetup" }));
-
-    if (amountOfUsers < 1) {
-        Output.Warn("sys", `No users found in the database. Please complete the initial user setup.`);
-    }
-
     HTTPRouting.RegisterRoutes(server);
 
-    server.server._public['initialSetup'] = isInitialSetup;
+    let amountOfUsers = await ndb.getAmountOfUsers();
+
+    if (amountOfUsers < 1) {
+        Output.Warn("No users found in database, expecting an initial setup");
+        Output.Warn("Alternatively, migrate MongoDB database to PostgreSQL if you used it before.");
+    }
+
+    server.server._public['initialSetup'] = amountOfUsers < 1;
 
     server.start(process.env.HTTP_PORT).then(() => {
         Output.Log("Server started!");
