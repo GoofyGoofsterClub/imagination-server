@@ -1,10 +1,11 @@
 import { APIRoute } from "http/routing";
 import { v4 as uuidv4 } from "uuid";
+import { ALL_PERMISSIONS } from "utilities/permissions";
 import hash from "utilities/hash";
 
 /*--includedoc
 
-@private false
+@private falseexport
 @needsauth false
 @adminonly false
 @params []
@@ -36,7 +37,7 @@ export default class InitialSetupAPIRoute extends APIRoute {
             [
                 request.body.rootUsername,
                 hash(accessKey),
-                0x0,
+                ALL_PERMISSIONS,
                 true,
                 false,
                 0,
