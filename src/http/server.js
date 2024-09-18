@@ -9,12 +9,14 @@ import { ExternalLogging, Field, buildMessage } from "utilities/logexternal";
 import Authenticate from "utilities/authentication";
 
 export default class HTTPServer {
-    constructor(db) {
+    constructor(db, ndb) {
         this.db = db;
+        this.ndb = ndb;
         this.server = fastify({
             logger: (process.env.ENV && process.env.ENV == 'DEV')
         });
         this.server.db = db;
+        this.server.ndb = ndb;
         this.Output = new PresetOutput("http");
         this.externalLogging = new ExternalLogging(process.env.LOG_WEBHOOK);
         this.server.externalLogging = this.externalLogging;

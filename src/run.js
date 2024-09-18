@@ -9,9 +9,6 @@ Output.Log("Preparing the server...");
 (async () => {
     Output.Log("Connecting to the database...");
 
-
-    await Output.Log(`${amountOfUsers} users exists in database.`);
-
     const db = await new DatabaseController(
         process.env.MONGO_HOST,
         process.env.MONGO_PORT,
@@ -23,11 +20,12 @@ Output.Log("Preparing the server...");
     Output.Log("Connected to the database!");
 
     Output.Log("Registering routes...");
-    const server = new HTTPServer(db);
+    const server = new HTTPServer(db, ndb);
 
     HTTPRouting.RegisterRoutes(server);
 
     let amountOfUsers = await ndb.getAmountOfUsers();
+    await Output.Log(`${amountOfUsers} users exists in database.`);
 
     if (amountOfUsers < 1) {
         Output.Warn("No users found in database, expecting an initial setup");
