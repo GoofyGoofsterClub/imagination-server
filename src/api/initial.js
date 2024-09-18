@@ -43,20 +43,6 @@ export default class InitialSetupAPIRoute extends APIRoute {
             ]
         );
 
-        // await server.db.insertDocument("users", {
-        //     displayName: request.body.rootUsername,
-        //     key: accessKey,
-        //     administrator: true,
-        //     can_invite: true,
-        //     protected: true,
-        //     private: true,
-        //     isBanned: false,
-        //     invitedBy: null,
-        //     superuser: true,
-        //     uploads: 0,
-        //     views: 0
-        // });
-
         server.server._public.initialSetup = false;
         reply.send({ "key": accessKey });
     }
