@@ -5,7 +5,7 @@ import hash from "utilities/hash";
 
 /*--includedoc
 
-@private falseexport
+@private false
 @needsauth false
 @adminonly false
 @params []
