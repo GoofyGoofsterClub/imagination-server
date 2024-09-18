@@ -12,16 +12,13 @@ import calculateRating from "utilities/rating/calculate";
 Recalculates and returns the rating of a user.
 
 */
-export default class CheckRatingSessionAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class CheckRatingSessionAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
-        let doesExist = await server.db.checkDocumentExists("users", {
+    async call(request, reply, server) {
+        let doesExist = await server.odb.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -30,26 +27,28 @@ export default class CheckRatingSessionAPIRoute extends APIRoute
                 "success": false,
                 "error": "Invalid key."
             };
-        
-        let user = await server.db.getDocument("users", {
+
+        let user = await server.odb.getDocument("users", {
             "key": request.query.key
         });
-        
+
         if (!user.lastUploadTimestamp)
             user.lastUploadTimestamp = Date.now();
 
-        
+
         user.rating = calculateRating(user.uploads, user.views, Math.floor((Date.now() - user.lastUploadTimestamp) / 86400000)) ?? 0;
         if (user.rating == Infinity) // nah bro no trolling.
             user.rating = 0;
 
-        await server.db.updateDocument("users", {
+        await server.odb.updateDocument("users", {
             "key": request.query.key
-        }, { "$set": {
-            "views": user.views,
-            "lastUploadTimestamp": user.lastUploadTimestamp,
-            "rating": user.rating
-        } });
+        }, {
+            "$set": {
+                "views": user.views,
+                "lastUploadTimestamp": user.lastUploadTimestamp,
+                "rating": user.rating
+            }
+        });
 
         return {
             "success": true,

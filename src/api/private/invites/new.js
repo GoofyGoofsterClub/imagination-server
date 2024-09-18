@@ -13,16 +13,13 @@ import hash from "utilities/hash";
 Creates a new invite code for a user with selected username by an eligible user.
 
 */
-export default class InvitesNewAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class InvitesNewAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
-        let doesExist = await server.db.checkDocumentExists("users", {
+    async call(request, reply, server) {
+        let doesExist = await server.odb.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -31,8 +28,8 @@ export default class InvitesNewAPIRoute extends APIRoute
                 "success": false,
                 "error": "Invalid key."
             };
-        
-        let user = await server.db.getDocument("users", {
+
+        let user = await server.odb.getDocument("users", {
             "key": request.query.key
         });
 
@@ -42,12 +39,12 @@ export default class InvitesNewAPIRoute extends APIRoute
                 "error": "You are not an administrator or you cannot invite users."
             };
 
-        if(user.rating && user.rating < -3)
+        if (user.rating && user.rating < -3)
             return {
                 "success": false,
                 "error": "Your rating is too low to invite users."
             };
-        
+
         if (!request.query.target)
             return {
                 "success": false,
@@ -60,19 +57,19 @@ export default class InvitesNewAPIRoute extends APIRoute
                 "error": "Invalid username."
             };
 
-        let target = await server.db.getDocument("users", {
+        let target = await server.odb.getDocument("users", {
             "displayName": request.query.target
         });
-        
+
         if (target)
             return {
                 "success": false,
                 "error": "Specified name is taken."
             };
-        
+
         let inviteCode = hash(uuidv4());
 
-        await server.db.insertDocument("invites", {
+        await server.odb.insertDocument("invites", {
             "hash": inviteCode,
             "displayName": request.query.target,
             "invitedBy": user.displayName,

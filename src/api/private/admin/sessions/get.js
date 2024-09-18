@@ -20,16 +20,13 @@ const administratorReplacements = {
 Returns specific field from a user's profile.
 
 */
-export default class AdminGetSessionsFieldAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class AdminGetSessionsFieldAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
-        let doesExist = await server.db.checkDocumentExists("users", {
+    async call(request, reply, server) {
+        let doesExist = await server.odb.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -38,12 +35,12 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute
                 "success": false,
                 "error": "Invalid key."
             };
-        
-        let user = await server.db.getDocument("users", {
+
+        let user = await server.odb.getDocument("users", {
             "key": request.query.key
         });
 
-        let ratingResponse = await CheckRating(server.db, user.displayName);
+        let ratingResponse = await CheckRating(server.odb, user.displayName);
         if (!ratingResponse)
             return {
                 "success": false,
@@ -56,7 +53,7 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute
                 "success": false,
                 "error": "You are not an administrator."
             };
-        
+
         if (!request.query.target)
             return {
                 "success": false,
@@ -70,7 +67,7 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute
                 "error": "You cannot get this field."
             };
 
-        let target = await server.db.getDocument("users", {
+        let target = await server.odb.getDocument("users", {
             "displayName": request.query.target
         });
 
@@ -80,7 +77,7 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute
                 "error": "Invalid target."
             };
 
-        
+
         if (request.query.field && target.administrator)
             target[request.query.field] = administratorReplacements[request.query.field];
 

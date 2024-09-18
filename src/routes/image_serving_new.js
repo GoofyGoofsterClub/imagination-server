@@ -1,21 +1,17 @@
 import { Route } from "http/routing";
 import addView from "utilities/addview";
 
-export default class NewImageServing extends Route
-{
-    constructor()
-    {
+export default class NewImageServing extends Route {
+    constructor() {
         super("/:filename", "GET");
     }
 
-    async call(request, reply, server)
-    {
-        let doesFileExist = await server.db.checkDocumentExists("uploads", {
+    async call(request, reply, server) {
+        let doesFileExist = await server.odb.checkDocumentExists("uploads", {
             "filename": request.params.filename
         });
 
-        if (!doesFileExist)
-        {
+        if (!doesFileExist) {
             reply.status(404);
             return reply.view("error.ejs", {
                 "error_title": "Not Found",
@@ -23,11 +19,11 @@ export default class NewImageServing extends Route
             });
         }
 
-        let file = await server.db.getDocument("uploads", {
+        let file = await server.odb.getDocument("uploads", {
             "filename": request.params.filename
         });
 
-        await addView(server.db, file.filename, file.uploader);
+        await addView(server.odb, file.filename, file.uploader);
 
         let fileMimetype = file.mimetype;
         if (
@@ -37,7 +33,7 @@ export default class NewImageServing extends Route
             !fileMimetype.match(/application\/pdf/g)
         )
             reply.header("Content-Disposition", `attachment; filename="${file.filename}.${file.file_ext ? file.file_ext : ""}"`);
-        
+
         reply.type(file.mimetype);
 
         reply.sendFile(file.actual_filename, {

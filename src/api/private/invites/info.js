@@ -11,16 +11,13 @@ import { APIRoute } from "http/routing";
 Returns the data about a valid invite code.
 
 */
-export default class InvitesInfoAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class InvitesInfoAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
-        let doesExist = await server.db.checkDocumentExists("users", {
+    async call(request, reply, server) {
+        let doesExist = await server.odb.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -29,8 +26,8 @@ export default class InvitesInfoAPIRoute extends APIRoute
                 "success": false,
                 "error": "Invalid key."
             };
-        
-        let user = await server.db.getDocument("users", {
+
+        let user = await server.odb.getDocument("users", {
             "key": request.query.key
         });
 
@@ -45,8 +42,8 @@ export default class InvitesInfoAPIRoute extends APIRoute
                 "success": false,
                 "error": "Missing parameters."
             };
-        
-        let target = await server.db.getDocument("invites", {
+
+        let target = await server.odb.getDocument("invites", {
             "hash": request.query.code
         });
 
@@ -55,7 +52,7 @@ export default class InvitesInfoAPIRoute extends APIRoute
                 "success": false,
                 "error": "Invalid code."
             };
-        
+
         return {
             "success": true,
             "data": target

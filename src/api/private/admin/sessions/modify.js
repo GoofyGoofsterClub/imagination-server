@@ -18,18 +18,15 @@ const restrictedFields = [
 Modifies a specific field from a user's profile, excluding protected fields.
 
 */
-export default class AdminModifySessionsAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class AdminModifySessionsAPIRoute extends APIRoute {
+    constructor() {
         super("POST");
     }
 
-    async call(request, reply, server)
-    {
+    async call(request, reply, server) {
         const requestData = request.body;
-        
-        let doesExist = await server.db.checkDocumentExists("users", {
+
+        let doesExist = await server.odb.checkDocumentExists("users", {
             "key": requestData.key
         });
 
@@ -38,8 +35,8 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
                 "success": false,
                 "error": "Invalid key."
             };
-        
-        let user = await server.db.getDocument("users", {
+
+        let user = await server.odb.getDocument("users", {
             "key": requestData.key
         });
 
@@ -48,20 +45,20 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
                 "success": false,
                 "error": "You are not an administrator."
             };
-        
+
         if (!requestData.target || !requestData.field || 'value' in requestData == false)
             return {
                 "success": false,
                 "error": "Missing parameters."
             };
-        
+
         if (restrictedFields.includes(requestData.field))
             return {
                 "success": false,
                 "error": "You cannot modify this field."
             };
 
-        let target = await server.db.getDocument("users", {
+        let target = await server.odb.getDocument("users", {
             "displayName": requestData.target
         });
 
@@ -70,7 +67,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
                 "success": false,
                 "error": "Invalid target."
             };
-        
+
         if (target.protected)
             return {
                 "success": false,
@@ -83,7 +80,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
                 "error": "You cannot ban an administrator."
             };
 
-        server.db.updateDocument("users", {
+        server.odb.updateDocument("users", {
             "displayName": requestData.target
         }, {
             "$set": {
@@ -91,9 +88,8 @@ export default class AdminModifySessionsAPIRoute extends APIRoute
             }
         });
 
-        if (requestData.field == "isBanned")
-        {
-            server.db.updateDocument("users", {
+        if (requestData.field == "isBanned") {
+            server.odb.updateDocument("users", {
                 "displayName": requestData.target
             }, {
                 "$set": {

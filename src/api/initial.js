@@ -20,7 +20,7 @@ export default class InitialSetupAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let isInitialSetup = (await server.ndb.getAmountOfUsers()) < 1;
+        let isInitialSetup = (await server.db.getAmountOfUsers()) < 1;
 
         if (!isInitialSetup) {
             reply.status(403);
@@ -31,7 +31,7 @@ export default class InitialSetupAPIRoute extends APIRoute {
 
         let accessKey = "vX2~!" + uuidv4();
 
-        await server.ndb.query(`INSERT INTO uwuso.users (username, access_key, permissions, private_profile, banned, views, uploads)
+        await server.db.query(`INSERT INTO uwuso.users (username, access_key, permissions, private_profile, banned, views, uploads)
             VALUES ($1::text, $2::text, $3::bigint,
                     $4::boolean, $5::boolean, $6::bigint, $7::bigint)`,
             [

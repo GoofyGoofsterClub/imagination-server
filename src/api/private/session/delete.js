@@ -12,16 +12,13 @@ import CheckRating from "utilities/rating/conditions";
 Deletes key owner's account completely. Extremely dangerous API call.
 
 */
-export default class DeleteSessionAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class DeleteSessionAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
-        let doesExist = await server.db.checkDocumentExists("users", {
+    async call(request, reply, server) {
+        let doesExist = await server.odb.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -29,8 +26,8 @@ export default class DeleteSessionAPIRoute extends APIRoute
             return {
                 "success": false
             };
-        
-        let user = await server.db.getDocument("users", {
+
+        let user = await server.odb.getDocument("users", {
             "key": request.query.key
         });
 
@@ -40,9 +37,8 @@ export default class DeleteSessionAPIRoute extends APIRoute
         if (request.query.confirmation != user.displayName) return { "success": false, "error": "Confirmation username is missing or incorrect." };
 
         // if is banned but duration has passed current time, unban
-        if (user.isBanned && user.banDuration < Date.now() && user.banDuration != null)
-        {
-            await server.db.updateDocument("users", {
+        if (user.isBanned && user.banDuration < Date.now() && user.banDuration != null) {
+            await server.odb.updateDocument("users", {
                 "key": request.query.key
             }, {
                 "$set": {
@@ -54,7 +50,7 @@ export default class DeleteSessionAPIRoute extends APIRoute
             user.banDuration = null;
         }
 
-        await server.db.deleteDocument("users", { "key": request.query.key });
+        await server.odb.deleteDocument("users", { "key": request.query.key });
 
         return {
             "success": true

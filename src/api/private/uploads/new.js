@@ -17,42 +17,35 @@ import { promises as fs } from 'fs';
 Upload a file to the server as an authenticated user.
 
 */
-export default class UploadsNewAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class UploadsNewAPIRoute extends APIRoute {
+    constructor() {
         super("POST");
     }
 
-    async call(request, reply, server)
-    {
+    async call(request, reply, server) {
         // Needed for extension to work
         reply.header("Access-Control-Allow-Origin", "*");
 
         let isServiceUpload = false;
 
-        let _auth = await server.server._public.Authenticate(server.db, request.headers["authorization"]);
-        if (!_auth)
-        {
-            _auth = await server.db.getDocument("services", {
+        let _auth = await server.server._public.Authenticate(server.odb, request.headers["authorization"]);
+        if (!_auth) {
+            _auth = await server.odb.getDocument("services", {
                 "accessKey": request.headers['authorization']
             });
-            if (!_auth)
-            {
+            if (!_auth) {
                 reply.status(401);
                 return reply.send({
                     "error": "Unauthorized"
                 });
             }
-            
+
             isServiceUpload = true;
         }
 
-        if (!isServiceUpload)
-        {
-            let ratingResponse = await CheckRating(server.db, _auth.displayName);
-            if (!ratingResponse)
-            {   
+        if (!isServiceUpload) {
+            let ratingResponse = await CheckRating(server.odb, _auth.displayName);
+            if (!ratingResponse) {
                 reply.status(403);
                 return reply.send({
                     "error": "You are banned."
@@ -60,20 +53,19 @@ export default class UploadsNewAPIRoute extends APIRoute
             }
         }
 
-        if (!isServiceUpload && _auth.isBanned)
-        {
+        if (!isServiceUpload && _auth.isBanned) {
             // if has ban duration and it passed then unban
-            if (_auth.banDuration && _auth.banDuration < Date.now())
-            {
-                await server.db.updateDocument("users", {
+            if (_auth.banDuration && _auth.banDuration < Date.now()) {
+                await server.odb.updateDocument("users", {
                     "key": request.headers['authorization']
-                }, { "$set": {
-                    "isBanned": false,
-                    "banDuration": null
-                } });
+                }, {
+                    "$set": {
+                        "isBanned": false,
+                        "banDuration": null
+                    }
+                });
             }
-            else
-            {
+            else {
                 reply.status(403);
                 return reply.send({
                     "error": "You are banned."
@@ -81,34 +73,31 @@ export default class UploadsNewAPIRoute extends APIRoute
             }
         }
 
-        if (isServiceUpload && _auth.disabled)
-        {
+        if (isServiceUpload && _auth.disabled) {
             return {
                 "success": false,
                 "error": "This service is disabled. Please enable it in the dashboard or contact administrator."
-            }    
+            }
         }
 
         const data = await request.file();
         const dataBuffer = await data.toBuffer();
         const datahash = await hashBuffer(dataBuffer.slice(0, 1024 * 1024));
 
-        if (!data)
-        {
+        if (!data) {
             reply.status(400);
             return reply.send({
                 "error": "No file was provided"
             });
-        
+
         }
 
-        const existance = await server.db.getDocument("uploads", {
+        const existance = await server.odb.getDocument("uploads", {
             "uploader": hash(_auth.displayName ?? _auth.internalKey),
             "hash": datahash
         });
 
-        if (existance)
-        {
+        if (existance) {
             reply.send({
                 "success": true,
                 "data": {
@@ -125,7 +114,7 @@ export default class UploadsNewAPIRoute extends APIRoute
             "public": GeneratePublicID(8, publicKeySlice),
             "delete": GeneratePrivateID()
         };
-        
+
         // write dataBuffer to private
         await fs.writeFile(`${__dirname}/../../../../privateuploads/${ids.private}`, dataBuffer);
 
@@ -133,7 +122,7 @@ export default class UploadsNewAPIRoute extends APIRoute
 
         let fileSizeInBytes = stats.size;
 
-        let collection = await server.db.getCollection("uploads");
+        let collection = await server.odb.getCollection("uploads");
         await collection.insertOne({
             "uploader": hash(_auth.displayName ?? _auth.internalKey),
             "uploaderId": _auth._id,
@@ -159,23 +148,23 @@ export default class UploadsNewAPIRoute extends APIRoute
         if (!isServiceUpload) // TO-DO(mishashto): Add another ratelimit for services.
         {
             let uploadsInLast10Seconds = server.server._public.Ratelimits.filter(x => x.userName == _auth.displayName && x.timestamp > Date.now() - 10000);
-            if (uploadsInLast10Seconds.length > 10 && !_auth.protected)
-            {
-                await server.db.updateDocument("users", {
+            if (uploadsInLast10Seconds.length > 10 && !_auth.protected) {
+                await server.odb.updateDocument("users", {
                     "key": request.headers['authorization']
-                    }, { "$set": {
+                }, {
+                    "$set": {
                         "isBanned": true,
                         "banDuration": Date.now() + 60000,
                         "banFieldModificationBy": "uwu"
-                        } });
+                    }
+                });
                 reply.status(429);
                 return reply.send({
                     "error": "You are uploading too fast."
                 });
             }
-            await addUpload(server.db, _auth.displayName);
-            if(_auth.isMonitored)
-            {
+            await addUpload(server.odb, _auth.displayName);
+            if (_auth.isMonitored) {
                 await server.server._public.ExternalLogging.Log(buildMessage(
                     request.headers['host'],
                     "info",
@@ -196,12 +185,10 @@ export default class UploadsNewAPIRoute extends APIRoute
         let shortenedUrl = null;
 
 
-        if (process.env.SHORTENER_URI && request.query['shorten'] && !isServiceUpload)
-        {
+        if (process.env.SHORTENER_URI && request.query['shorten'] && !isServiceUpload) {
             let shortenerRequest = await fetch(`https://${process.env.SHORTENER_URI}/api/link/shorten?key=${request.headers['authorization']}&link=https://${request.headers['host']}/${ids.public}`);
 
-            if (shortenerRequest.status == 200)
-            {
+            if (shortenerRequest.status == 200) {
                 let shortenerRequestJSON = await shortenerRequest.json();
                 shortenedUrl = shortenerRequestJSON.data.link;
             }

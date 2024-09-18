@@ -11,16 +11,13 @@ import { APIRoute } from "http/routing";
 Generate a ShareX config file for the user.
 
 */
-export default class CheckSessionInfoAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class CheckSessionInfoAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
-        let doesExist = await server.db.checkDocumentExists("users", {
+    async call(request, reply, server) {
+        let doesExist = await server.odb.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -28,14 +25,14 @@ export default class CheckSessionInfoAPIRoute extends APIRoute
             return {
                 "success": false
             };
-        
-        let user = await server.db.getDocument("users", {
+
+        let user = await server.odb.getDocument("users", {
             "key": request.query.key
         });
 
 
         reply.header('Content-Disposition',
-        `attachment; filename=${user.displayName}.sxcu`);
+            `attachment; filename=${user.displayName}.sxcu`);
         return {
             "Version": "13.7.0",
             "Name": request.headers['host'],

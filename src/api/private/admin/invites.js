@@ -11,16 +11,13 @@ import { APIRoute } from "http/routing";
 Returns all unused invites.
 
 */
-export default class AdminGetSessionsAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class AdminGetSessionsAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
-        let doesExist = await server.db.checkDocumentExists("users", {
+    async call(request, reply, server) {
+        let doesExist = await server.odb.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -29,8 +26,8 @@ export default class AdminGetSessionsAPIRoute extends APIRoute
                 "success": false,
                 "error": "Invalid key."
             };
-        
-        let user = await server.db.getDocument("users", {
+
+        let user = await server.odb.getDocument("users", {
             "key": request.query.key
         });
 
@@ -40,7 +37,7 @@ export default class AdminGetSessionsAPIRoute extends APIRoute
                 "error": "You are not an administrator."
             };
 
-        let invites = await server.db.getDocuments("invites", {});
+        let invites = await server.odb.getDocuments("invites", {});
 
         return {
             "success": true,

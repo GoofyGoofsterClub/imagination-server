@@ -11,16 +11,13 @@ import { APIRoute } from "http/routing";
 Returns all user's public and private profile data.
 
 */
-export default class AdminGetSessionsAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class AdminGetSessionsAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
-        let doesExist = await server.db.checkDocumentExists("users", {
+    async call(request, reply, server) {
+        let doesExist = await server.odb.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -28,8 +25,8 @@ export default class AdminGetSessionsAPIRoute extends APIRoute
             return {
                 "success": false
             };
-        
-        let user = await server.db.getDocument("users", {
+
+        let user = await server.odb.getDocument("users", {
             "key": request.query.key
         });
 
@@ -39,16 +36,15 @@ export default class AdminGetSessionsAPIRoute extends APIRoute
             };
 
 
-        let sessions = await server.db.getDocuments("users", {});
+        let sessions = await server.odb.getDocuments("users", {});
 
-        for (let i = 0; i < sessions.length; i++)
-        {
+        for (let i = 0; i < sessions.length; i++) {
             let session = sessions[i];
 
             if (session.administrator)
                 session.key = "<redacted>";
         }
-        
+
         return {
             "success": true,
             "data": sessions

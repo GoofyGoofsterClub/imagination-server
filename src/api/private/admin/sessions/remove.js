@@ -11,16 +11,13 @@ import { APIRoute } from "http/routing";
 Deletes a user.
 
 */
-export default class AdminRemoveSessionAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class AdminRemoveSessionAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
-        let doesExist = await server.db.checkDocumentExists("users", {
+    async call(request, reply, server) {
+        let doesExist = await server.odb.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -29,8 +26,8 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute
                 "success": false,
                 "error": "Invalid key."
             };
-        
-        let user = await server.db.getDocument("users", {
+
+        let user = await server.odb.getDocument("users", {
             "key": request.query.key
         });
 
@@ -39,14 +36,14 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute
                 "success": false,
                 "error": "You are not an administrator."
             };
-        
+
         if (!request.query.target)
             return {
                 "success": false,
                 "error": "Missing parameters."
             };
 
-        let target = await server.db.getDocument("users", {
+        let target = await server.odb.getDocument("users", {
             "displayName": request.query.target
         });
 
@@ -55,10 +52,9 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute
                 "success": false,
                 "error": "Invalid target."
             };
-        
-        
-        if (target.administrator)
-        {
+
+
+        if (target.administrator) {
             if (user.displayName == target.displayName)
                 return {
                     "success": false,
@@ -71,7 +67,7 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute
             };
         }
 
-        let zxv = await server.db.deleteDocument("users", {
+        let zxv = await server.odb.deleteDocument("users", {
             "key": target.key
         });
 

@@ -13,43 +13,40 @@ Changes the display name of a user.
 WARNING: All previous uploads will still use old name, due to hashing.
 
 */
-export default class ChangeUsername extends APIRoute
-{
-    constructor()
-    {
+export default class ChangeUsername extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
+    async call(request, reply, server) {
         if (!request.query.key || !request.query.new_name)
-            return {"success": false, "error": "One of the fields is missing."};
+            return { "success": false, "error": "One of the fields is missing." };
 
-        let doesExist = await server.db.checkDocumentExists("users", {
+        let doesExist = await server.odb.checkDocumentExists("users", {
             "key": request.query.key
         });
 
-        let user = await server.db.getDocument("users", {
+        let user = await server.odb.getDocument("users", {
             "key": request.query.key
         });
 
 
         if (!doesExist)
-            return {"success": false, "error": "User does not exist."};
+            return { "success": false, "error": "User does not exist." };
 
         if (user.usernameChangeBlockedUntil && user.usernameChangeBlockedUntil > Date.now())
-            return {"succses": false, "error": `You cannot change your username until ${new Date(user.usernameChangeBlockedUntil).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "long"})}.`};
+            return { "succses": false, "error": `You cannot change your username until ${new Date(user.usernameChangeBlockedUntil).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "long" })}.` };
 
-        let isUsernameTaken = await server.db.checkDocumentExists("users", {
+        let isUsernameTaken = await server.odb.checkDocumentExists("users", {
             "displayName": request.query.new_name
         });
 
         if (isUsernameTaken)
-            return {"success": false, "error": "Display name is already taken."};
+            return { "success": false, "error": "Display name is already taken." };
 
         let nameChangesTotal = user.nameChanges ?? 1;
 
-        await server.db.updateDocument("users", {
+        await server.odb.updateDocument("users", {
             "key": request.query.key
         }, {
             "$set": {

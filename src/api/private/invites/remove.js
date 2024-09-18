@@ -11,22 +11,19 @@ import { APIRoute } from "http/routing";
 Removes the already existing invite code.
 
 */
-export default class InvitesRemoveAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class InvitesRemoveAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
+    async call(request, reply, server) {
         if (!request.query.code)
             return {
                 "success": false,
                 "error": "Missing parameters."
             };
-        
-        let target = await server.db.getDocuments("invites", {
+
+        let target = await server.odb.getDocuments("invites", {
             "hash": request.query.code
         });
 
@@ -35,8 +32,8 @@ export default class InvitesRemoveAPIRoute extends APIRoute
                 "success": false,
                 "error": "Invalid target."
             };
-        
-        await server.db.deleteDocuments("invites", {
+
+        await server.odb.deleteDocuments("invites", {
             "hash": request.query.code
         });
 

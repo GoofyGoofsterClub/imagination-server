@@ -14,17 +14,14 @@ import { PresetOutput } from "utilities/output";
 Recalculates all sessions' rating.
 
 */
-export default class AdminRecalculateRating extends APIRoute
-{
-    constructor()
-    {
+export default class AdminRecalculateRating extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
+    async call(request, reply, server) {
         let tempOutput = new PresetOutput("forcedrecalculation");
-        let doesExist = await server.db.checkDocumentExists("users", {
+        let doesExist = await server.odb.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -33,12 +30,12 @@ export default class AdminRecalculateRating extends APIRoute
                 "success": false,
                 "error": "Invalid key."
             };
-        
-        let user = await server.db.getDocument("users", {
+
+        let user = await server.odb.getDocument("users", {
             "key": request.query.key
         });
 
-        let ratingResponse = await CheckRating(server.db, user.displayName);
+        let ratingResponse = await CheckRating(server.odb, user.displayName);
         if (!ratingResponse)
             return {
                 "success": false,
@@ -52,11 +49,9 @@ export default class AdminRecalculateRating extends APIRoute
                 "error": "You are not an administrator."
             };
 
-        try
-        {
-            await CalculateRatingWorker(server.db, tempOutput);
-        } catch(e)
-        {
+        try {
+            await CalculateRatingWorker(server.odb, tempOutput);
+        } catch (e) {
             return {
                 "success": false
             }

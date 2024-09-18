@@ -13,27 +13,22 @@ import fs from "fs";
 A route to request a file deletion.
 
 */
-export default class DeleteUploadAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class DeleteUploadAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
-        let _auth = await server.server._public.Authenticate(server.db, request.query.key);
-        if (!_auth)
-        {
+    async call(request, reply, server) {
+        let _auth = await server.server._public.Authenticate(server.odb, request.query.key);
+        if (!_auth) {
             reply.status(401);
             return reply.send({
                 "error": "Unauthorized"
             });
-        
+
         }
 
-        if (_auth.isBanned)
-        {
+        if (_auth.isBanned) {
             reply.status(403);
             return reply.send({
                 "error": "You are banned."
@@ -45,11 +40,10 @@ export default class DeleteUploadAPIRoute extends APIRoute
                 "success": false,
                 "error": "No filename was provided."
             };
-        
-        if (request.query.filename == "*")
-        {
+
+        if (request.query.filename == "*") {
             // delete all of theirs
-            let collection = await server.db.getCollection("uploads");
+            let collection = await server.odb.getCollection("uploads");
             let uploads = await collection.find({
                 "uploader": hash(_auth.displayName)
             }).toArray();
@@ -58,8 +52,7 @@ export default class DeleteUploadAPIRoute extends APIRoute
                 "uploader": hash(_auth.displayName)
             });
 
-            for (let upload of uploads)
-            {
+            for (let upload of uploads) {
                 fs.unlinkSync(`${__dirname}/../../../../privateuploads/${upload.actual_filename}`);
             }
 
@@ -67,8 +60,8 @@ export default class DeleteUploadAPIRoute extends APIRoute
                 "success": true
             };
         }
-        
-        let doesExist = await server.db.checkDocumentExists("uploads", {
+
+        let doesExist = await server.odb.checkDocumentExists("uploads", {
             "filename": request.query.filename
         });
 
@@ -77,8 +70,8 @@ export default class DeleteUploadAPIRoute extends APIRoute
                 "success": false,
                 "error": "File does not exist."
             };
-        
-        let upload = await server.db.getDocument("uploads", {
+
+        let upload = await server.odb.getDocument("uploads", {
             "filename": request.query.filename
         });
 
@@ -87,8 +80,8 @@ export default class DeleteUploadAPIRoute extends APIRoute
                 "success": false,
                 "error": "You do not own this file."
             };
-        
-        let collection = await server.db.getCollection("uploads");
+
+        let collection = await server.odb.getCollection("uploads");
         await collection.deleteOne({
             "filename": request.query.filename
         });
@@ -98,6 +91,6 @@ export default class DeleteUploadAPIRoute extends APIRoute
         return {
             "success": true
         };
-        
+
     }
 }

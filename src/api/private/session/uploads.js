@@ -12,16 +12,13 @@ import hash from "utilities/hash";
 Returns all user's uploads
 
 */
-export default class SessionUploadsAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class SessionUploadsAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
-        let doesExist = await server.db.checkDocumentExists("users", {
+    async call(request, reply, server) {
+        let doesExist = await server.odb.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -29,14 +26,14 @@ export default class SessionUploadsAPIRoute extends APIRoute
             return {
                 "success": false
             };
-        
-        let user = await server.db.getDocument("users", {
+
+        let user = await server.odb.getDocument("users", {
             "key": request.query.key
         });
 
         let uploaderHash = hash(user.displayName);
 
-        let uploads = await server.db.getDocuments("uploads", {
+        let uploads = await server.odb.getDocuments("uploads", {
             "uploader": uploaderHash
         });
 

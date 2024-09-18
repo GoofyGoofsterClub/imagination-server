@@ -12,22 +12,19 @@ import { v4 as uuidv4 } from "uuid";
 Consumes an invite code and creates a new user with it, returning the access key.
 
 */
-export default class InvitesUseAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class InvitesUseAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
+    async call(request, reply, server) {
         if (!request.query.code)
             return {
                 "success": false,
                 "error": "Missing parameters."
             };
-        
-        let target = await server.db.getDocument("invites", {
+
+        let target = await server.odb.getDocument("invites", {
             "hash": request.query.code
         });
 
@@ -36,14 +33,14 @@ export default class InvitesUseAPIRoute extends APIRoute
                 "success": false,
                 "error": "Invalid code."
             };
-        
+
         if (target.validUntil < Date.now())
             return {
                 "success": false,
                 "error": "Code expired."
             };
 
-        let targetUser = await server.db.getDocument("users", {
+        let targetUser = await server.odb.getDocument("users", {
             "displayName": target.displayName
         });
 
@@ -53,13 +50,13 @@ export default class InvitesUseAPIRoute extends APIRoute
                 "error": "User already exists."
             };
 
-        await server.db.deleteDocuments("invites", {
+        await server.odb.deleteDocuments("invites", {
             "hash": request.query.code
         });
 
         let accessKey = "vX2~!" + uuidv4();
 
-        await server.db.insertDocument("users", {
+        await server.odb.insertDocument("users", {
             "displayName": target.displayName,
             "key": accessKey,
             "administrator": target.is_administrator ?? false,

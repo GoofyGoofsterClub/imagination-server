@@ -16,16 +16,13 @@ const restrictedFields = [
 Returns specific field from a user's profile.
 
 */
-export default class AdminCreateServiceAccount extends APIRoute
-{
-    constructor()
-    {
+export default class AdminCreateServiceAccount extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
-        let doesExist = await server.db.checkDocumentExists("users", {
+    async call(request, reply, server) {
+        let doesExist = await server.odb.checkDocumentExists("users", {
             "key": request.query.key
         });
 
@@ -34,8 +31,8 @@ export default class AdminCreateServiceAccount extends APIRoute
                 "success": false,
                 "error": "Invalid key."
             };
-        
-        let user = await server.db.getDocument("users", {
+
+        let user = await server.odb.getDocument("users", {
             "key": request.query.key
         });
 
@@ -44,7 +41,7 @@ export default class AdminCreateServiceAccount extends APIRoute
                 "success": false,
                 "error": "You are not an administrator."
             };
-        
+
         if (!request.query.internal_name)
             return {
                 "success": false,
@@ -68,7 +65,7 @@ export default class AdminCreateServiceAccount extends APIRoute
             "forcedDisabled": false
         };
 
-        let _r = await server.db.insertDocument("services", newServiceAccount);
+        let _r = await server.odb.insertDocument("services", newServiceAccount);
 
         return {
             "success": true,

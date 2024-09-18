@@ -11,22 +11,19 @@ import { APIRoute } from "http/routing";
 Gets publically available information about a user.
 
 */
-export default class PublicSessionGetAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class PublicSessionGetAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
+    async call(request, reply, server) {
         if (!request.query.target)
             return {
                 "success": false,
                 "error": "No target specified"
             };
-        
-        let doesExist = await server.db.checkDocumentExists("users", {
+
+        let doesExist = await server.odb.checkDocumentExists("users", {
             "displayName": request.query.target
         });
 
@@ -35,8 +32,8 @@ export default class PublicSessionGetAPIRoute extends APIRoute
                 "success": false,
                 "error": "User does not exist"
             };
-        
-        let user = await server.db.getDocument("users", {
+
+        let user = await server.odb.getDocument("users", {
             "displayName": request.query.target
         });
 
