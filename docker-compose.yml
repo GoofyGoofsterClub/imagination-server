@@ -2,14 +2,18 @@ services:
   postgres:
     image: postgres:latest
     container_name: postgres
+    restart: always
     ports:
       - '5432:5432'
+    expose:
+      - 5432
     environment:
       POSTGRES_PASSWORD: boobies
       POSTGRES_USER: dbuser
+      PGUSER: dbuser
       POSTGRES_DB: uwuso
     volumes:
-      - 'db:/var/lib/postgresql/data'
+      - 'pdb:/var/lib/postgresql/data'
       - './docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d'
     deploy:
       resources:
@@ -59,3 +63,4 @@ services:
 
 volumes:
   db:
+  pdb:
