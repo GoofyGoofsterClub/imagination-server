@@ -10,6 +10,9 @@ Output.Log("Preparing the server...");
     Output.Log("Connecting to the database...");
 
     const ndb = await new NewDatabaseController();
+
+    await Output.Log(`${await ndb.getAmountOfUsers()} users exists in database.`);
+
     const db = await new DatabaseController(
         process.env.MONGO_HOST,
         process.env.MONGO_PORT,
