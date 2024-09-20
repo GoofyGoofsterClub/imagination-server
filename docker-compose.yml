@@ -67,6 +67,7 @@ services:
       - PGUSER=$PGUSER
       - PGPASSWORD=$PGPASSWORD
       - PGDATABASE=uwuso
+      - REDISHOST=$REDIS_HOST
       - LOG_WEBHOOK=$LOG_WEBHOOK
       - SHORTENER_URI=$SHORTENER_URI
     build: .
