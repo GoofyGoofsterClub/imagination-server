@@ -20,6 +20,7 @@ CREATE TABLE uwuso.users (
 	banned boolean NOT NULL DEFAULT false,
 	views bigint NOT NULL DEFAULT 0,
 	uploads bigint NOT NULL DEFAULT 0,
+	superuser boolean NOT NULL DEFAULT false,
 	CONSTRAINT users_pk PRIMARY KEY (id)
 );
 ALTER TABLE uwuso.users OWNER TO dbuser;

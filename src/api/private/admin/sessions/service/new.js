@@ -1,5 +1,6 @@
 import { APIRoute } from "http/routing";
 import { GeneratePrivateID, GeneratePublicID } from "utilities/id";
+import { USER_PERMISSIONS, hasPermission, permissions } from "utilities/permissions";
 
 const restrictedFields = [
     // for future use
@@ -22,9 +23,7 @@ export default class AdminCreateServiceAccount extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let doesExist = await server.odb.checkDocumentExists("users", {
-            "key": request.query.key
-        });
+        let doesExist = await server.db.doesUserExistByAccessKey(request.query.key);
 
         if (!doesExist)
             return {
@@ -32,11 +31,9 @@ export default class AdminCreateServiceAccount extends APIRoute {
                 "error": "Invalid key."
             };
 
-        let user = await server.odb.getDocument("users", {
-            "key": request.query.key
-        });
+        let user = await server.db.findUserByAccessKey(request.query.key);
 
-        if (!user.administrator)
+        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
             return {
                 "success": false,
                 "error": "You are not an administrator."
@@ -48,32 +45,40 @@ export default class AdminCreateServiceAccount extends APIRoute {
                 "error": "Missing parameters."
             };
 
-        let newServiceAccount = {
-            "internalName": request.query.internal_name,
-            "accessKey": GeneratePrivateID(),
-            "internalKey": GeneratePublicID(16, "v2S.~"),
-            "owner": user._id,
-            "subowners": [],
-            "limits": { // TO-DO(mishashto): Needs to be implemented, as well as UI for server.
-                "ratelimit": 0,
-                "whitelistedMime": null,
-                "blacklistedMime": [],
-                "userAgent": null,
-                "allowDirectExtension": false
-            },
-            "disabled": false,
-            "forcedDisabled": false
-        };
+        let accessKey = GeneratePrivateID();
+        let internalKey = GeneratePublicID(16, "v2S.~");
 
-        let _r = await server.odb.insertDocument("services", newServiceAccount);
+        let _r = await server.db.query(`INSERT INTO uwuso.services (access_key, internal_key, display_name,
+                owner, permissions, disabled)
+                VALUES ($1::text, $2::text, $3::text,
+                $4::bigint, $5::bigint, $6::boolean);`,
+            [
+                accessKey,
+                internal_name,
+                request.query.internal_name,
+                user.id,
+                permissions(USER_PERMISSIONS.UPLOAD, USER_PERMISSIONS.VIEW_OWN_FILES)
+            ]);
 
         return {
             "success": true,
             "data": {
-                "access_key": newServiceAccount.accessKey,
-                "internal_key": newServiceAccount.internalKey,
-                "owner": newServiceAccount.owner
+                "access_key": accessKey,
+                "internal_key": internalKey,
+                "owner": user.username
             }
         }
     }
 }
+
+
+// CREATE TABLE uwuso.services(
+//     id integer NOT NULL GENERATED ALWAYS AS IDENTITY(INCREMENT BY 1 MINVALUE 0 MAXVALUE 2147483647 START WITH 1 CACHE 1),
+//     access_key text NOT NULL,
+//     internal_key text NOT NULL,
+//     display_name text NOT NULL,
+//     owner bigint NOT NULL,
+//     permissions bigint NOT NULL DEFAULT 0,
+//     disabled boolean NOT NULL DEFAULT false,
+//     CONSTRAINT services_pk PRIMARY KEY(id)
+// );

@@ -1,5 +1,6 @@
 import { APIRoute } from "http/routing";
 import CheckRating from "utilities/rating/conditions";
+import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 
 const restrictedFields = [
     // for future use
@@ -26,9 +27,8 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let doesExist = await server.odb.checkDocumentExists("users", {
-            "key": request.query.key
-        });
+        let doesExist = await server.db.doesUserExistByAccessKey(request.query.key);
+
 
         if (!doesExist)
             return {
@@ -36,19 +36,9 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute {
                 "error": "Invalid key."
             };
 
-        let user = await server.odb.getDocument("users", {
-            "key": request.query.key
-        });
+        let user = await server.db.findUserByAccessKey(request.query.key);
 
-        let ratingResponse = await CheckRating(server.odb, user.displayName);
-        if (!ratingResponse)
-            return {
-                "success": false,
-                "error": "You are banned."
-            };
-
-
-        if (!user.administrator)
+        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
             return {
                 "success": false,
                 "error": "You are not an administrator."
@@ -67,18 +57,17 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute {
                 "error": "You cannot get this field."
             };
 
-        let target = await server.odb.getDocument("users", {
-            "displayName": request.query.target
-        });
+        let target = await server.db.findUserByDisplayName(request.query.target);
 
-        if (!target)
+        if (target.rows.length < 1)
             return {
                 "success": false,
                 "error": "Invalid target."
             };
 
+        target = target.rows[0];
 
-        if (request.query.field && target.administrator)
+        if (request.query.field && hasPermission(target.permissions, USER_PERMISSIONS.ADMINISTRATOR))
             target[request.query.field] = administratorReplacements[request.query.field];
 
         return {

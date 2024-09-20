@@ -1,5 +1,6 @@
 import { APIRoute } from "http/routing";
 import { Field, buildMessage } from "utilities/logexternal";
+import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 
 const restrictedFields = [
     "key",
@@ -26,9 +27,8 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
     async call(request, reply, server) {
         const requestData = request.body;
 
-        let doesExist = await server.odb.checkDocumentExists("users", {
-            "key": requestData.key
-        });
+        let doesExist = await server.db.doesUserExistByAccessKey(request.query.key);
+
 
         if (!doesExist)
             return {
@@ -36,11 +36,9 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
                 "error": "Invalid key."
             };
 
-        let user = await server.odb.getDocument("users", {
-            "key": requestData.key
-        });
+        let user = await server.db.findUserByAccessKey(request.query.key);
 
-        if (!user.administrator)
+        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
             return {
                 "success": false,
                 "error": "You are not an administrator."
@@ -58,45 +56,29 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
                 "error": "You cannot modify this field."
             };
 
-        let target = await server.odb.getDocument("users", {
-            "displayName": requestData.target
-        });
+        let target = await server.db.findUserByDisplayName(requestData.target);
 
-        if (!target)
+        if (target.rows.length < 1)
             return {
                 "success": false,
                 "error": "Invalid target."
             };
 
-        if (target.protected)
+        target = target.rows[0];
+
+        if (target.superuser)
             return {
                 "success": false,
                 "error": "You cannot modify this user."
             };
 
-        if (target.administrator && requestData.field == "isBanned")
+        if (hasPermission(target.permissions, USER_PERMISSIONS.ADMINISTRATOR) && requestData.field == "isBanned")
             return {
                 "success": false,
                 "error": "You cannot ban an administrator."
             };
 
-        server.odb.updateDocument("users", {
-            "displayName": requestData.target
-        }, {
-            "$set": {
-                [requestData.field]: requestData.value
-            }
-        });
-
-        if (requestData.field == "isBanned") {
-            server.odb.updateDocument("users", {
-                "displayName": requestData.target
-            }, {
-                "$set": {
-                    "banFieldModificationBy": user.displayName
-                }
-            });
-        }
+        await server.db.query(`UPDATE uwuso.users SET $1 = $2 WHERE username = $3`, [requestData.field, requestData.value, target.username]);
 
         // External logging
         server.externalLogging.Log(buildMessage(

@@ -23,19 +23,15 @@ export default class InvitesRemoveAPIRoute extends APIRoute {
                 "error": "Missing parameters."
             };
 
-        let target = await server.odb.getDocuments("invites", {
-            "hash": request.query.code
-        });
+        let target = await server.db.query(`SELECT * FROM uwuso.invites WHERE hash = $1::text`, [request.query.code]);
 
-        if (!target)
+        if (target.rows.length < 0)
             return {
                 "success": false,
-                "error": "Invalid target."
+                "error": "Invalid code."
             };
 
-        await server.odb.deleteDocuments("invites", {
-            "hash": request.query.code
-        });
+        await server.db.query(`DELETE FROM uwuso.invites WHERE hash = $1::text`, [request.query.code])
 
         return {
             "success": true

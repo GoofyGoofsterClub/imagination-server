@@ -1,4 +1,5 @@
 import { APIRoute } from "http/routing";
+import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 
 /*--includedoc
 
@@ -17,9 +18,7 @@ export default class InvitesInfoAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let doesExist = await server.odb.checkDocumentExists("users", {
-            "key": request.query.key
-        });
+        let doesExist = await server.db.doesUserExistByAccessKey(request.query.key);
 
         if (!doesExist)
             return {
@@ -27,11 +26,9 @@ export default class InvitesInfoAPIRoute extends APIRoute {
                 "error": "Invalid key."
             };
 
-        let user = await server.odb.getDocument("users", {
-            "key": request.query.key
-        });
+        let user = await server.db.findUserByAccessKey(request.query.key);
 
-        if (!user.administrator)
+        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
             return {
                 "success": false,
                 "error": "You are not an administrator."
@@ -43,11 +40,9 @@ export default class InvitesInfoAPIRoute extends APIRoute {
                 "error": "Missing parameters."
             };
 
-        let target = await server.odb.getDocument("invites", {
-            "hash": request.query.code
-        });
+        let target = await server.db.query(`SELECT * FROM uwuso.invites WHERE hash = $1::text`, [request.query.code]);
 
-        if (!target)
+        if (target.rows.length < 1)
             return {
                 "success": false,
                 "error": "Invalid code."
@@ -55,7 +50,7 @@ export default class InvitesInfoAPIRoute extends APIRoute {
 
         return {
             "success": true,
-            "data": target
+            "data": target.rows
         };
 
 

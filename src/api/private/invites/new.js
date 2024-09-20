@@ -1,5 +1,6 @@
 import { APIRoute } from "http/routing";
 import { v4 as uuidv4 } from "uuid";
+import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 import hash from "utilities/hash";
 
 /*--includedoc
@@ -19,9 +20,7 @@ export default class InvitesNewAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let doesExist = await server.odb.checkDocumentExists("users", {
-            "key": request.query.key
-        });
+        let doesExist = await server.db.doesUserExistByAccessKey(request.query.key);
 
         if (!doesExist)
             return {
@@ -29,20 +28,12 @@ export default class InvitesNewAPIRoute extends APIRoute {
                 "error": "Invalid key."
             };
 
-        let user = await server.odb.getDocument("users", {
-            "key": request.query.key
-        });
+        let user = await server.db.findUserByAccessKey(request.query.key);
 
-        if (!user.administrator && !user.can_invite)
+        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR) && !hasPermission(user.permissions, USER_PERMISSIONS.INVITE_USERS))
             return {
                 "success": false,
                 "error": "You are not an administrator or you cannot invite users."
-            };
-
-        if (user.rating && user.rating < -3)
-            return {
-                "success": false,
-                "error": "Your rating is too low to invite users."
             };
 
         if (!request.query.target)
@@ -57,10 +48,7 @@ export default class InvitesNewAPIRoute extends APIRoute {
                 "error": "Invalid username."
             };
 
-        let target = await server.odb.getDocument("users", {
-            "displayName": request.query.target
-        });
-
+        let target = await server.db.findUserByDisplayName(request.query.target);
         if (target)
             return {
                 "success": false,
@@ -69,12 +57,14 @@ export default class InvitesNewAPIRoute extends APIRoute {
 
         let inviteCode = hash(uuidv4());
 
-        await server.odb.insertDocument("invites", {
-            "hash": inviteCode,
-            "displayName": request.query.target,
-            "invitedBy": user.displayName,
-            "invitedById": user._id
-        });
+        await server.db.query(`INSERT INTO uwuso.invites (hash, inviter, valid_until)
+            VALUES ($1::text, $2::bigint, $3::timestamp)`,
+            [
+                inviteCode,
+                user.id,
+                Math.floor(+Date.now() / 1000) + 604800
+            ]
+        );
 
         return {
             "success": true,

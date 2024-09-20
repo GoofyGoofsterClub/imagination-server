@@ -1,4 +1,5 @@
 import { APIRoute } from "http/routing";
+import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 
 /*--includedoc
 
@@ -17,9 +18,8 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let doesExist = await server.odb.checkDocumentExists("users", {
-            "key": request.query.key
-        });
+        let doesExist = await server.db.doesUserExistByAccessKey(request.query.key);
+
 
         if (!doesExist)
             return {
@@ -27,15 +27,14 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute {
                 "error": "Invalid key."
             };
 
-        let user = await server.odb.getDocument("users", {
-            "key": request.query.key
-        });
+        let user = await server.db.findUserByAccessKey(request.query.key);
 
-        if (!user.administrator)
+        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
             return {
                 "success": false,
                 "error": "You are not an administrator."
             };
+
 
         if (!request.query.target)
             return {
@@ -43,19 +42,18 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute {
                 "error": "Missing parameters."
             };
 
-        let target = await server.odb.getDocument("users", {
-            "displayName": request.query.target
-        });
+        let target = await server.db.findUserByDisplayName(request.query.target);
 
-        if (!target)
+        if (target.rows.length < 1)
             return {
                 "success": false,
                 "error": "Invalid target."
             };
 
+        target = target.rows[0];
 
-        if (target.administrator) {
-            if (user.displayName == target.displayName)
+        if (hasPermission(target.permissions, USER_PERMISSIONS.ADMINISTRATOR)) {
+            if (user.username == target.username)
                 return {
                     "success": false,
                     "error": "You cannot remove yourself."
@@ -67,9 +65,7 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute {
             };
         }
 
-        let zxv = await server.odb.deleteDocument("users", {
-            "key": target.key
-        });
+        await server.db.query(`DELETE FROM uwuso.users WHERE id = $1::bigint`, [target.id]);
 
         return {
             "success": true
