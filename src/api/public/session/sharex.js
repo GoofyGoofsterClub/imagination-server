@@ -1,4 +1,5 @@
 import { APIRoute } from "http/routing";
+import hash from "utilities/hash";
 
 /*--includedoc
 
