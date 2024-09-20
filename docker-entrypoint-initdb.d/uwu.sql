@@ -42,6 +42,8 @@ ALTER TABLE uwuso.uploads ADD COLUMN disk_filename text NOT NULL;
 
 ALTER TABLE uwuso.uploads ADD COLUMN mimetype text NOT NULL;
 
+ALTER TABLE uwuso.uploads ADD COLUMN filehash text NOT NULL;
+
 
 ALTER TABLE uwuso.uploads ADD COLUMN views integer NOT NULL DEFAULT 0;
 

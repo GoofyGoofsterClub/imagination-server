@@ -28,49 +28,32 @@ export default class UploadsNewAPIRoute extends APIRoute {
 
         let isServiceUpload = false;
 
-        let _auth = await server.server._public.Authenticate(server.odb, request.headers["authorization"]);
-        if (!_auth) {
-            _auth = await server.odb.getDocument("services", {
-                "accessKey": request.headers['authorization']
-            });
-            if (!_auth) {
-                reply.status(401);
-                return reply.send({
-                    "error": "Unauthorized"
-                });
-            }
+        let doesUserExist = await server.db.doesUserExistByAccessKey(hash(request.headers["authorization"]));
+
+        if (!doesUserExist) {
+            let serviceAccountAttempt = await server.db.query(`SELECT * FROM uwuso.services WHERE access_key = $1::text`, [hash(request.headers["authorization"])]);
+
+            if (serviceAccountAttempt.rows.length < 1)
+                return {
+                    "success": false,
+                    "error": "Invalid key."
+                };
 
             isServiceUpload = true;
         }
 
-        if (!isServiceUpload) {
-            let ratingResponse = await CheckRating(server.odb, _auth.displayName);
-            if (!ratingResponse) {
-                reply.status(403);
-                return reply.send({
-                    "error": "You are banned."
-                });
-            }
-        }
+        let user = await server.db.findUserByAccessKey(hash(request.headers["authorization"]));
 
-        if (!isServiceUpload && _auth.isBanned) {
-            // if has ban duration and it passed then unban
-            if (_auth.banDuration && _auth.banDuration < Date.now()) {
-                await server.odb.updateDocument("users", {
-                    "key": request.headers['authorization']
-                }, {
-                    "$set": {
-                        "isBanned": false,
-                        "banDuration": null
-                    }
-                });
-            }
-            else {
-                reply.status(403);
-                return reply.send({
-                    "error": "You are banned."
-                });
-            }
+        if (user.banned) return {
+            "success": false,
+            "error": "You are banned."
+        };
+
+        if (!isServiceUpload && _auth.banned) {
+            reply.status(403);
+            return reply.send({
+                "error": "You are banned."
+            });
         }
 
         if (isServiceUpload && _auth.disabled) {
