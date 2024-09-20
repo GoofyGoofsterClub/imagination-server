@@ -1,6 +1,7 @@
 import { APIRoute } from "http/routing";
 import { Field, buildMessage } from "utilities/logexternal";
 import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
+import { escapeIdentifier } from "pg";
 import hash from "utilities/hash";
 
 const restrictedFields = [
@@ -28,7 +29,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
     async call(request, reply, server) {
         const requestData = request.body;
 
-        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
+        let doesExist = await server.db.doesUserExistByAccessKey(hash(requestData.key));
 
 
         if (!doesExist)
@@ -37,7 +38,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
                 "error": "Invalid key."
             };
 
-        let user = await server.db.findUserByAccessKey(hash(hash(request.query.key)));
+        let user = await server.db.findUserByAccessKey(hash(requestData.key));
 
         if (user.banned) return {
             "success": false,
@@ -64,13 +65,11 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
 
         let target = await server.db.findUserByDisplayName(requestData.target);
 
-        if (target.rows.length < 1)
+        if (!target)
             return {
                 "success": false,
                 "error": "Invalid target."
             };
-
-        target = target.rows[0];
 
         if (target.superuser)
             return {
@@ -84,7 +83,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
                 "error": "You cannot ban an administrator."
             };
 
-        await server.db.query(`UPDATE uwuso.users SET $1 = $2 WHERE username = $3`, [requestData.field, requestData.value, target.username]);
+        await server.db.query(`UPDATE uwuso.users SET ` + escapeIdentifier(requestData.field) + ` = $1 WHERE username = $2`, [requestData.value, target.username]);
 
         // External logging
         server.externalLogging.Log(buildMessage(

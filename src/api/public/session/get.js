@@ -26,7 +26,7 @@ export default class PublicSessionGetAPIRoute extends APIRoute {
 
         let user = await server.db.findUserByDisplayName(request.query.target);
 
-        if (user.rows.length < 1)
+        if (!user)
             return {
                 "success": false,
                 "error": "User does not exist"
