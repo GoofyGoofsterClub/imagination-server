@@ -24,6 +24,16 @@ services:
           cpus: '0.25'
           memory: 64M
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdb:/data
+
+  # TO REMOVE
   mongo:
     image: mongo:5.0.2
     restart: unless-stopped
@@ -64,3 +74,4 @@ services:
 volumes:
   db:
   pdb:
+  redisdb:
