@@ -11,18 +11,15 @@ import { APIRoute } from "http/routing";
 Modifies the value of maintenance global variable. Parameter mode can be: 0 - Dashboard only, 1 - Dashboard and API (everything, except this, of course), 2 - Service-wide.
 
 */
-export default class ModifyGlobalsMaintenanceAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class ModifyGlobalsMaintenanceAPIRoute extends APIRoute {
+    constructor() {
         super("GET", true);
     }
 
-    async call(request, reply, server)
-    {
+    async call(request, reply, server) {
 
-        let doesExist = await server.db.checkDocumentExists("users", {
-            "key": request.query.key
+        let doesExist = await server.odb.checkDocumentExists("users", {
+            "key": hash(request.query.key)
         });
 
         if (!doesExist)
@@ -30,9 +27,9 @@ export default class ModifyGlobalsMaintenanceAPIRoute extends APIRoute
                 "success": false,
                 "error": "Invalid key."
             };
-        
-        let user = await server.db.getDocument("users", {
-            "key": request.query.key
+
+        let user = await server.odb.getDocument("users", {
+            "key": hash(request.query.key)
         });
 
         if (!user.administrator)
@@ -44,7 +41,7 @@ export default class ModifyGlobalsMaintenanceAPIRoute extends APIRoute
         if (request.query.enabled == undefined || !request.query.reason || request.query.mode == undefined || parseInt(request.query.mode) == NaN)
             return { "success": false, "error": "Not enough data." };
 
-        let isMaintenance = await server.db.updateDocument("globals", {
+        let isMaintenance = await server.odb.updateDocument("globals", {
             "field": "maintenance"
         }, {
             "$set": {

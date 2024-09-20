@@ -9,11 +9,13 @@ import { ExternalLogging, Field, buildMessage } from "utilities/logexternal";
 import Authenticate from "utilities/authentication";
 
 export default class HTTPServer {
-    constructor(db) {
-        this.db = db;
+    constructor(db, _db) {
+        this.odb = db;
+        this.db = _db;
         this.server = fastify({
             logger: (process.env.ENV && process.env.ENV == 'DEV')
         });
+        this.server.odb = db;
         this.server.db = db;
         this.Output = new PresetOutput("http");
         this.externalLogging = new ExternalLogging(process.env.LOG_WEBHOOK);
@@ -93,9 +95,7 @@ export default class HTTPServer {
             "Maintenance": false
         };
 
-        let isMaintenance = await this.db.getDocument("globals", {
-            "field": "maintenance"
-        });
+        let isMaintenance = false;
 
         if (isMaintenance && isMaintenance.value && isMaintenance.value.enabled) {
             this.server._public.Maintenance = isMaintenance;

@@ -45,13 +45,6 @@ async function CheckLogin() {
         document.querySelector("#__dashboard_logged_dangerzone").style.display = "block";
     }
 
-    if (userInfo.usernameChangeBlockedUntil !== -1) {
-        document.getElementById("__dashboard_logged_web_usernamechange_error").innerText = `You cannot change your username until ${new Date(userInfo.usernameChangeBlockedUntil).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "long" })}.`;
-        document.getElementById("__dashboard_logged_web_usernamechange_error").classList.add("error-text");
-        document.getElementById("__dashboard_logged_usernamechange_displayname").disabled = true;
-        document.getElementById("__dashboard_logged_usernamechange_button").disabled = true;
-    }
-
     document.getElementById("__dashboard_logged_web_upload_button").onclick = async function () {
         await document.getElementById("__dashboard_logged_web_upload_hidden_selector").click();
     }
@@ -248,21 +241,21 @@ async function GetUsers() {
         let image = document.createElement("img");
 
         let ranks2 = [...Ranks].reverse();
-        let rank = null;
+        data.data[i].rating = 1;
         for (var j = 0; j < ranks2.length; j++) {
             if (data.data[i].rating >= ranks2[j].rating)
                 rank = ranks2[j];
         }
         image.setAttribute("data-tooltip", `Click to open profile`);
         image.src = "/public/img/rating/" + rank.image;
-        image.onclick = () => { location.href = `/profile/${data.data[i].displayName}`; }
+        image.onclick = () => { location.href = `/profile/${data.data[i].username}`; }
         image.style = "max-width: 48px; max-height: 48px; vertical-align: middle; margin-right: 12px; border-radius: 999px;";
-        if (data.data[i].isBanned)
+        if (data.data[i].banned)
             image.style.filter = "grayscale(100%)";
         cell.appendChild(image);
 
         let userName = document.createElement("span");
-        userName.innerText = data.data[i].displayName;
+        userName.innerText = data.data[i].username;
         userName.style = "vertical-align: middle;";
         cell.appendChild(userName);
 
@@ -272,7 +265,7 @@ async function GetUsers() {
 
         // admin
         let b = document.createElement("button");
-        b.setAttribute("data-user", data.data[i].displayName);
+        b.setAttribute("data-user", data.data[i].username);
         b.setAttribute("data-value", data.data[i].administrator);
         b.classList.add("input-button");
         b.innerText = data.data[i].administrator ? "✔" : "✖";
@@ -318,7 +311,7 @@ async function GetUsers() {
 
         // invite
         b = document.createElement("button");
-        b.setAttribute("data-user", data.data[i].displayName);
+        b.setAttribute("data-user", data.data[i].username);
         b.setAttribute("data-value", data.data[i].can_invite);
         b.classList.add("input-button");
         b.innerText = data.data[i].can_invite ? "✔" : "✖";
@@ -364,8 +357,8 @@ async function GetUsers() {
         cell.style = "max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;";
 
         b = document.createElement("button");
-        b.setAttribute("data-user", data.data[i].displayName);
-        b.setAttribute("data-value", data.data[i].isBanned);
+        b.setAttribute("data-user", data.data[i].username);
+        b.setAttribute("data-value", data.data[i].banned);
 
         b.onclick = async function () {
             this.disabled = true;
@@ -382,7 +375,7 @@ async function GetUsers() {
                     body: JSON.stringify({
                         "key": key,
                         "target": user,
-                        "field": "isBanned",
+                        "field": "banned",
                         "value": Boolean(value)
                     })
                 });
@@ -403,7 +396,7 @@ async function GetUsers() {
         }
 
         b.classList.add("input-button");
-        b.innerText = data.data[i].isBanned ? "✔" : "✖";
+        b.innerText = data.data[i].banned ? "✔" : "✖";
         cell.appendChild(b);
 
         cell = row.insertCell();
@@ -425,7 +418,7 @@ async function GetUsers() {
 
         cell = row.insertCell();
         let button = document.createElement("button");
-        button.setAttribute("data-user", data.data[i].displayName);
+        button.setAttribute("data-user", data.data[i].username);
         button.innerText = "Confirm";
         button.classList.add("input-button");
         button.classList.add("button-green");
@@ -470,33 +463,6 @@ async function GetUsers() {
                     this.disabled = false;
                     break;
                 case "1984":
-                    let response3 = await fetch("/api/private/admin/sessions/modify",
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                "key": key,
-                                "target": user,
-                                "field": "isMonitored",
-                                "value": !(AllUsers.find(x => x.displayName == user).isMonitored)
-                            })
-                        });
-
-                    let data3 = await response3.json();
-                    if (!data3.success) {
-                        document.getElementById("__dashboard_logged_users_table_error_" + i).innerText = data3.error;
-                        document.getElementById("__dashboard_logged_users_table_error_" + i).style.display = "block";
-                        document.getElementById("__dashboard_logged_users_table_error_" + i).classList.add("error-text");
-                        this.disabled = false;
-                        return;
-                    }
-
-                    document.getElementById("__dashboard_logged_users_table_error_" + i).innerText = "User is now " + (data3.value ? "monitored." : "not monitored.");
-                    document.getElementById("__dashboard_logged_users_table_error_" + i).style.display = "block";
-                    document.getElementById("__dashboard_logged_users_table_error_" + i).classList.remove("error-text");
-                    AllUsers.find(x => x.displayName == user).isMonitored = data3.value;
                     this.disabled = false;
                     break;
                 case "none":
