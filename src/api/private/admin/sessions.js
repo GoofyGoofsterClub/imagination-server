@@ -1,4 +1,5 @@
 import { APIRoute } from "http/routing";
+import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 
 /*--includedoc
 
@@ -17,31 +18,36 @@ export default class AdminGetSessionsAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let doesExist = await server.odb.checkDocumentExists("users", {
-            "key": request.query.key
-        });
+        let doesExist = await server.db.doesUserExistByAccessKey(request.query.key);
+
 
         if (!doesExist)
             return {
-                "success": false
+                "success": false,
+                "error": "Invalid key."
             };
 
-        let user = await server.odb.getDocument("users", {
-            "key": request.query.key
-        });
+        let user = await server.db.findUserByAccessKey(request.query.key);
 
-        if (!user.administrator)
+        if (user.banned) return {
+            "success": false,
+            "error": "You are banned."
+        };
+
+        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR)
+            && !hasPermission(user.permissions, USER_PERMISSIONS.VIEW_OTHER_USERS))
             return {
-                "success": false
+                "success": false,
+                "error": "You are not an administrator."
             };
 
 
-        let sessions = await server.odb.getDocuments("users", {});
+        let sessions = await server.db.query(`SELECT * FROM uwuso.users`);
 
-        for (let i = 0; i < sessions.length; i++) {
-            let session = sessions[i];
+        for (let i = 0; i < sessions.rows.length; i++) {
+            let session = sessions.rows[i];
 
-            if (session.administrator)
+            if (hasPermission(sessions.permissions, USER_PERMISSIONS.ADMINISTRATOR))
                 session.key = "<redacted>";
         }
 

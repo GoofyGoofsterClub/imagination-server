@@ -57,7 +57,7 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute {
 
         target = target.rows[0];
 
-        if (hasPermission(target.permissions, USER_PERMISSIONS.ADMINISTRATOR)) {
+        if (hasPermission(target.permissions, USER_PERMISSIONS.ADMINISTRATOR) || hasPermission(target.permissions, USER_PERMISSIONS.DELETE_ACCOUNTS)) {
             if (user.username == target.username)
                 return {
                     "success": false,
@@ -66,7 +66,7 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute {
 
             return {
                 "success": false,
-                "error": "You cannot remove an administrator."
+                "error": "You cannot remove an administrator or a person with similar permissions."
             };
         }
 
