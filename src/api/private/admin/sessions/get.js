@@ -1,5 +1,4 @@
 import { APIRoute } from "http/routing";
-import CheckRating from "utilities/rating/conditions";
 import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 
 const restrictedFields = [
@@ -37,6 +36,11 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute {
             };
 
         let user = await server.db.findUserByAccessKey(request.query.key);
+
+        if (user.banned) return {
+            "success": false,
+            "error": "You are banned."
+        };
 
         if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
             return {

@@ -33,6 +33,11 @@ export default class AdminCreateServiceAccount extends APIRoute {
 
         let user = await server.db.findUserByAccessKey(request.query.key);
 
+        if (user.banned) return {
+            "success": false,
+            "error": "You are banned."
+        };
+
         if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
             return {
                 "success": false,
