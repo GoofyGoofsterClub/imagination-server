@@ -51,7 +51,7 @@ export default class ChangeUsername extends APIRoute {
             }
         }
 
-        let isUsernameTaken = await server.odb.findUserByDisplayName("users", request.query.new_name);
+        let isUsernameTaken = await server.db.findUserByDisplayName("users", request.query.new_name);
 
         if (isUsernameTaken.rows.length > 0)
             return { "success": false, "error": "Display name is already taken." };
