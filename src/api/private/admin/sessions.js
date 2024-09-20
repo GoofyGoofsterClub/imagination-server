@@ -54,7 +54,7 @@ export default class AdminGetSessionsAPIRoute extends APIRoute {
 
         return {
             "success": true,
-            "data": sessions
+            "data": sessions.rows
         };
     }
 }

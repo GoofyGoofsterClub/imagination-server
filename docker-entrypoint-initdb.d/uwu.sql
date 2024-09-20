@@ -50,6 +50,8 @@ ALTER TABLE uwuso.uploads ADD COLUMN views integer NOT NULL DEFAULT 0;
 
 ALTER TABLE uwuso.uploads ADD COLUMN filesize bigint NOT NULL DEFAULT 0;
 
+ALTER TABLE uwuso.uploads ADD COLUMN service_upload boolean NOT NULL DEFAULT false;
+
 
 
 ALTER TABLE uwuso.uploads ADD CONSTRAINT uploads_pk PRIMARY KEY (id);
