@@ -95,9 +95,7 @@ export default class HTTPServer {
             "Maintenance": false
         };
 
-        let isMaintenance = await this.odb.getDocument("globals", {
-            "field": "maintenance"
-        });
+        let isMaintenance = false;
 
         if (isMaintenance && isMaintenance.value && isMaintenance.value.enabled) {
             this.server._public.Maintenance = isMaintenance;

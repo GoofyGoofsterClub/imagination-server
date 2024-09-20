@@ -129,15 +129,6 @@ export default class UploadsNewAPIRoute extends APIRoute {
         {
             let uploadsInLast10Seconds = server.server._public.Ratelimits.filter(x => x.userName == user.username && x.timestamp > Date.now() - 10000);
             if (uploadsInLast10Seconds.length > 10 && !_auth.protected) {
-                await server.odb.updateDocument("users", {
-                    "key": request.headers['authorization']
-                }, {
-                    "$set": {
-                        "isBanned": true,
-                        "banDuration": Date.now() + 60000,
-                        "banFieldModificationBy": "uwu"
-                    }
-                });
                 reply.status(429);
                 return reply.send({
                     "error": "You are uploading too fast."

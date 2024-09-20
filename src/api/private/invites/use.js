@@ -1,6 +1,6 @@
 import { APIRoute } from "http/routing";
 import { v4 as uuidv4 } from "uuid";
-import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
+import { USER_PERMISSIONS, permissions } from "utilities/permissions";
 import hash from "utilities/hash";
 
 /*--includedoc
@@ -36,7 +36,7 @@ export default class InvitesUseAPIRoute extends APIRoute {
 
         target = target.rows[0];
 
-        if (target.valid_until < Date.now())
+        if (target.valid_until * 1000 < Date.now())
             return {
                 "success": false,
                 "error": "Code expired."
@@ -44,7 +44,7 @@ export default class InvitesUseAPIRoute extends APIRoute {
 
         let targetUser = await server.db.findUserByDisplayName(target.username);
 
-        if (targetUser.rows.length > 0)
+        if (targetUser)
             return {
                 "success": false,
                 "error": "User already exists."

@@ -8,23 +8,18 @@ export default class InviteRoute extends Route {
     async call(request, reply, server) {
         let inviteKey = request.params.key;
 
-        let doesExist = await server.odb.checkDocumentExists("invites", {
-            "hash": inviteKey
-        });
+        let inviteInfo = await server.db.query(`SELECT uwuso.invites.*, uwuso.users.username AS inviter_username
+                                                FROM uwuso.invites
+                                                JOIN uwuso.users ON uwuso.invites.inviter = uwuso.users.id
+                                                WHERE uwuso.invites.hash = $1::text;`, [request.params.key]);
 
-        if (!doesExist)
+        if (inviteInfo.rows.length < 1)
             return reply.view("error.ejs", {
                 "error_title": "Invalid invite",
                 "error_message": "The invite you have provided is invalid."
             });
 
-        let invite = await server.odb.getDocument("invites", {
-            "hash": inviteKey
-        });
-
-        let doesUserExist = await server.odb.checkDocumentExists("users", {
-            "displayName": invite.displayName
-        });
+        let doesUserExist = await server.db.findUserByDisplayName(inviteInfo.rows[0].username);
 
         if (doesUserExist)
             return reply.view("error.ejs", {
@@ -33,7 +28,7 @@ export default class InviteRoute extends Route {
             });
 
         return reply.view("invite.ejs", {
-            "invite": invite
+            "invite": inviteInfo.rows[0]
         });
     }
 }
