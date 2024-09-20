@@ -17,8 +17,8 @@ export default class UploadsCountAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let collection = await server.odb.getCollection("uploads");
-        let count = await collection.countDocuments();
+        let collection = await server.db.query(`SELECT COUNT(id) AS count FROM uwuso.uploads`);
+        let count = collection.rows[0].count;
         reply.send({
             "count": count
         });

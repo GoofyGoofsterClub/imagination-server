@@ -17,22 +17,19 @@ export default class CheckSessionInfoAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let doesExist = await server.odb.checkDocumentExists("users", {
-            "key": hash(request.query.key)
-        });
+        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
 
         if (!doesExist)
             return {
-                "success": false
+                "success": false,
+                "error": "Invalid key."
             };
 
-        let user = await server.odb.getDocument("users", {
-            "key": hash(request.query.key)
-        });
+        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
 
         reply.header('Content-Disposition',
-            `attachment; filename=${user.displayName}.sxcu`);
+            `attachment; filename=${user.username}.sxcu`);
         return {
             "Version": "13.7.0",
             "Name": request.headers['host'],
@@ -40,7 +37,7 @@ export default class CheckSessionInfoAPIRoute extends APIRoute {
             "RequestMethod": "POST",
             "RequestURL": `https://${request.headers['host']}/api/private/uploads/new`,
             "Headers": {
-                "Authorization": hash(request.query.key)
+                "Authorization": request.query.key
             },
             "Body": "MultipartFormData",
             "FileFormName": "image",
