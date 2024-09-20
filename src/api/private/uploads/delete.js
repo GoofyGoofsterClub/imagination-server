@@ -74,7 +74,7 @@ export default class DeleteUploadAPIRoute extends APIRoute {
 
         await server.db.query(`DELETE FROM uwuso.uploads WHERE uploader_id = $1::bigint AND filename = $2::text`, [user.id, request.query.filename]);
 
-        fs.unlinkSync(`${__dirname}/../../../../privateuploads/${upload.actual_filename}`);
+        fs.unlinkSync(`${__dirname}/../../../../privateuploads/${fileInfo.disk_filename}`);
 
         return {
             "success": true
