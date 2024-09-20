@@ -1,5 +1,6 @@
 import { APIRoute } from "http/routing";
 import { buildMessage } from "utilities/logexternal";
+import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 import hash from "utilities/hash";
 
 /*--includedoc
@@ -53,7 +54,7 @@ export default class ChangeUsername extends APIRoute {
 
         let isUsernameTaken = await server.db.findUserByDisplayName("users", request.query.new_name);
 
-        if (isUsernameTaken.rows.length > 0)
+        if (isUsernameTaken)
             return { "success": false, "error": "Display name is already taken." };
 
         await server.db.query(`UPDATE uwuso.users SET username = $1 WHERE id = $2`, [request.query.new_name, user.id]);
