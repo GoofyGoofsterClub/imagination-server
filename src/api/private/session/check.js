@@ -1,4 +1,5 @@
 import { APIRoute } from "http/routing";
+import hash from "utilities/hash";
 
 /*--includedoc
 
@@ -17,17 +18,9 @@ export default class CheckSessionAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let isMaintenance = await server.odb.getDocument("globals", {
-            "field": "maintenance"
-        });
+        // TO-DO: Add maintenance check? Idk why it was here but ig needed??
 
-        if (isMaintenance && isMaintenance.value && isMaintenance.value.enabled) {
-            return { "success": false, "error": isMaintenance.value.message, "maintenance": true };
-        }
-
-        let doesExist = await server.odb.checkDocumentExists("users", {
-            "key": request.query.key
-        });
+        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
 
         return {
             "success": doesExist,

@@ -20,7 +20,7 @@ export default class InvitesNewAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let doesExist = await server.db.doesUserExistByAccessKey(request.query.key);
+        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
 
         if (!doesExist)
             return {
@@ -28,7 +28,7 @@ export default class InvitesNewAPIRoute extends APIRoute {
                 "error": "Invalid key."
             };
 
-        let user = await server.db.findUserByAccessKey(request.query.key);
+        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
         if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR) && !hasPermission(user.permissions, USER_PERMISSIONS.INVITE_USERS))
             return {
@@ -57,12 +57,13 @@ export default class InvitesNewAPIRoute extends APIRoute {
 
         let inviteCode = hash(uuidv4());
 
-        await server.db.query(`INSERT INTO uwuso.invites (hash, inviter, valid_until)
-            VALUES ($1::text, $2::bigint, $3::timestamp)`,
+        await server.db.query(`INSERT INTO uwuso.invites (username, hash, inviter, valid_until)
+            VALUES ($1::text, $2::text, $3::bigint, $4::bigint)`,
             [
+                request.query.target,
                 inviteCode,
                 user.id,
-                Math.floor(+Date.now() / 1000) + 604800
+                parseInt(Math.floor(+Date.now() / 1000) + 604800)
             ]
         );
 

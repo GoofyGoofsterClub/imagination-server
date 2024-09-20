@@ -56,9 +56,10 @@ ALTER TABLE uwuso.uploads OWNER TO dbuser;
 
 CREATE TABLE uwuso.invites (
 	id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT BY 1 MINVALUE 0 MAXVALUE 2147483647 START WITH 1 CACHE 1 ),
+	username text NOT NULL,
 	hash text NOT NULL,
 	inviter bigserial NOT NULL,
-	valid_until timestamp NOT NULL,
+	valid_until bigint NOT NULL,
 	CONSTRAINT invites_pk PRIMARY KEY (id,inviter)
 );
 ALTER TABLE uwuso.invites OWNER TO dbuser;

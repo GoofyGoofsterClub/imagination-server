@@ -18,28 +18,24 @@ export default class SessionUploadsAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let doesExist = await server.odb.checkDocumentExists("users", {
-            "key": request.query.key
-        });
+        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
 
         if (!doesExist)
             return {
-                "success": false
+                "success": false,
+                "error": "Invalid key."
             };
 
-        let user = await server.odb.getDocument("users", {
-            "key": request.query.key
-        });
+        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
-        let uploaderHash = hash(user.displayName);
+        if (user.banned)
+            return { "success": false, "error": "You are banned." };
 
-        let uploads = await server.odb.getDocuments("uploads", {
-            "uploader": uploaderHash
-        });
+        let uploads = await server.db.query(`SELECT * FROM uwuso.uploads WHERE uploader_id = $1::bigint`, [user.id]);
 
         return {
             "success": true,
-            "data": uploads
+            "data": uploads.rows
         };
     }
 }

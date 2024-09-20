@@ -1,6 +1,7 @@
 import { APIRoute } from "http/routing";
 import { Field, buildMessage } from "utilities/logexternal";
 import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
+import hash from "utilities/hash";
 
 const restrictedFields = [
     "key",
@@ -27,7 +28,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
     async call(request, reply, server) {
         const requestData = request.body;
 
-        let doesExist = await server.db.doesUserExistByAccessKey(request.query.key);
+        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
 
 
         if (!doesExist)
@@ -36,7 +37,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
                 "error": "Invalid key."
             };
 
-        let user = await server.db.findUserByAccessKey(request.query.key);
+        let user = await server.db.findUserByAccessKey(hash(hash(request.query.key)));
 
         if (user.banned) return {
             "success": false,
@@ -90,10 +91,10 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
             request.headers['host'],
             "info",
             "A user's session has been modified.",
-            `A user's session has been modified by \`${user.displayName}\`:\n\`${requestData.target}\`'s \`${requestData.field}\` has been set to \`${requestData.value}\``,
+            `A user's session has been modified by \`${user.username}\`:\n\`${requestData.target}\`'s \`${requestData.field}\` has been set to \`${requestData.value}\``,
             null,
             new Field("Target", requestData.target, true),
-            new Field("Modified By", user.displayName, true),
+            new Field("Modified By", user.username, true),
             new Field("Field", requestData.field, true),
             new Field("Value", requestData.value, true)
         ));

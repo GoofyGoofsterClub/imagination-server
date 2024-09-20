@@ -19,7 +19,7 @@ export default class DeleteUploadAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let _auth = await server.server._public.Authenticate(server.odb, request.query.key);
+        let _auth = await server.server._public.Authenticate(server.odb, hash(request.query.key));
         if (!_auth) {
             reply.status(401);
             return reply.send({

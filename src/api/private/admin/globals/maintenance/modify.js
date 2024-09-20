@@ -19,7 +19,7 @@ export default class ModifyGlobalsMaintenanceAPIRoute extends APIRoute {
     async call(request, reply, server) {
 
         let doesExist = await server.odb.checkDocumentExists("users", {
-            "key": request.query.key
+            "key": hash(request.query.key)
         });
 
         if (!doesExist)
@@ -29,7 +29,7 @@ export default class ModifyGlobalsMaintenanceAPIRoute extends APIRoute {
             };
 
         let user = await server.odb.getDocument("users", {
-            "key": request.query.key
+            "key": hash(request.query.key)
         });
 
         if (!user.administrator)

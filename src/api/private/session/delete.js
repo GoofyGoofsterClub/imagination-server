@@ -1,5 +1,5 @@
 import { APIRoute } from "http/routing";
-import CheckRating from "utilities/rating/conditions";
+import hash from "utilities/hash";
 
 /*--includedoc
 
@@ -18,39 +18,31 @@ export default class DeleteSessionAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let doesExist = await server.odb.checkDocumentExists("users", {
-            "key": request.query.key
-        });
+        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
 
         if (!doesExist)
             return {
-                "success": false
+                "success": false,
+                "error": "Invalid key."
             };
 
-        let user = await server.odb.getDocument("users", {
-            "key": request.query.key
-        });
+        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
-        if (user.isBanned)
+        if (user.banned)
             return { "success": false, "error": "You are banned." };
 
-        if (request.query.confirmation != user.displayName) return { "success": false, "error": "Confirmation username is missing or incorrect." };
+        if (request.query.confirmation != user.username) return { "success": false, "error": "Confirmation username is missing or incorrect." };
 
-        // if is banned but duration has passed current time, unban
-        if (user.isBanned && user.banDuration < Date.now() && user.banDuration != null) {
-            await server.odb.updateDocument("users", {
-                "key": request.query.key
-            }, {
-                "$set": {
-                    "isBanned": false,
-                    "banDuration": null
-                }
-            });
-            user.isBanned = false;
-            user.banDuration = null;
-        }
+        await server.db.query(`DELETE FROM uwuso.users WHERE id = $1::text`, [user.id]);
 
-        await server.odb.deleteDocument("users", { "key": request.query.key });
+        // External logging for trolling prevention
+        await server.server._public.ExternalLogging.Log(buildMessage(
+            request.headers['host'],
+            "info",
+            "User changed deleted their profile.",
+            ` \`${user.username}\` has deleted their account forever. Goodbye.`,
+            `https://${request.headers['host']}`
+        ));
 
         return {
             "success": true

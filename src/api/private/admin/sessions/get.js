@@ -1,5 +1,6 @@
 import { APIRoute } from "http/routing";
 import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
+import hash from "utilities/hash";
 
 const restrictedFields = [
     // for future use
@@ -26,7 +27,7 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let doesExist = await server.db.doesUserExistByAccessKey(request.query.key);
+        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
 
 
         if (!doesExist)
@@ -35,7 +36,7 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute {
                 "error": "Invalid key."
             };
 
-        let user = await server.db.findUserByAccessKey(request.query.key);
+        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
         if (user.banned) return {
             "success": false,

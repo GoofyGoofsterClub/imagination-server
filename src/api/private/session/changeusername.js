@@ -1,5 +1,6 @@
 import { APIRoute } from "http/routing";
 import { buildMessage } from "utilities/logexternal";
+import hash from "utilities/hash";
 
 /*--includedoc
 
@@ -19,49 +20,50 @@ export default class ChangeUsername extends APIRoute {
     }
 
     async call(request, reply, server) {
-        if (!request.query.key || !request.query.new_name)
-            return { "success": false, "error": "One of the fields is missing." };
+        if (!hash(request.query.key) || !request.query.new_name)
+            return { "success": false, "error": "One or all of the required fields is missing." };
 
-        let doesExist = await server.odb.checkDocumentExists("users", {
-            "key": request.query.key
-        });
-
-        let user = await server.odb.getDocument("users", {
-            "key": request.query.key
-        });
-
+        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
 
         if (!doesExist)
-            return { "success": false, "error": "User does not exist." };
+            return {
+                "success": false,
+                "error": "Invalid key."
+            };
 
-        if (user.usernameChangeBlockedUntil && user.usernameChangeBlockedUntil > Date.now())
-            return { "succses": false, "error": `You cannot change your username until ${new Date(user.usernameChangeBlockedUntil).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "long" })}.` };
+        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
-        let isUsernameTaken = await server.odb.checkDocumentExists("users", {
-            "displayName": request.query.new_name
-        });
+        if (user.banned) return {
+            "success": false,
+            "error": "You are banned."
+        };
 
-        if (isUsernameTaken)
+        if (!hasPermission(user.permissions, USER_PERMISSIONS.CHANGE_DISPLAY_NAME))
+            return {
+                "success": false,
+                "error": "You cannot change your name."
+            };
+
+        if (request.query.new_name.length > 32 || !/^[a-zA-Z0-9_]+$/.test(request.query.new_name)) {
+            return {
+                "success": false,
+                "error": "Invalid username."
+            }
+        }
+
+        let isUsernameTaken = await server.odb.findUserByDisplayName("users", request.query.new_name);
+
+        if (isUsernameTaken.rows.length > 0)
             return { "success": false, "error": "Display name is already taken." };
 
-        let nameChangesTotal = user.nameChanges ?? 1;
-
-        await server.odb.updateDocument("users", {
-            "key": request.query.key
-        }, {
-            "$set": {
-                "displayName": request.query.new_name,
-                "usernameChangeBlockedUntil": user.administrator ? -1 : (Date.now() + 24 * 60 * 60 * 1000) * nameChangesTotal, // so people don't abuse it,
-                "nameChanges": nameChangesTotal + 1
-            }
-        });
+        await server.db.query(`UPDATE uwuso.users SET username = $1 WHERE id = $2`, [request.query.new_name, user.id]);
 
         // External logging for trolling prevention
         await server.server._public.ExternalLogging.Log(buildMessage(
             request.headers['host'],
             "info",
             "User changed their username.",
-            `Username has been changed from \`${user.displayName}\` to \`${request.query.new_name}\``,
+            `Username has been changed from \`${user.username}\` to \`${request.query.new_name}\``,
             `https://${request.headers['host']}`
         ));
 

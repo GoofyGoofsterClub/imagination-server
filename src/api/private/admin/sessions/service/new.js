@@ -1,6 +1,7 @@
 import { APIRoute } from "http/routing";
 import { GeneratePrivateID, GeneratePublicID } from "utilities/id";
 import { USER_PERMISSIONS, hasPermission, permissions } from "utilities/permissions";
+import hash from "utilities/hash";
 
 const restrictedFields = [
     // for future use
@@ -23,7 +24,7 @@ export default class AdminCreateServiceAccount extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let doesExist = await server.db.doesUserExistByAccessKey(request.query.key);
+        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
 
         if (!doesExist)
             return {
@@ -31,7 +32,7 @@ export default class AdminCreateServiceAccount extends APIRoute {
                 "error": "Invalid key."
             };
 
-        let user = await server.db.findUserByAccessKey(request.query.key);
+        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
         if (user.banned) return {
             "success": false,

@@ -31,9 +31,9 @@ export default class InitialSetupAPIRoute extends APIRoute {
 
         let accessKey = "vX2~!" + uuidv4();
 
-        await server.db.query(`INSERT INTO uwuso.users (username, access_key, permissions, private_profile, banned, views, uploads)
+        await server.db.query(`INSERT INTO uwuso.users (username, access_key, permissions, private_profile, banned, views, uploads, superuser)
             VALUES ($1::text, $2::text, $3::bigint,
-                    $4::boolean, $5::boolean, $6::bigint, $7::bigint)`,
+                    $4::boolean, $5::boolean, $6::bigint, $7::bigint, $8::boolean)`,
             [
                 request.body.rootUsername,
                 hash(accessKey),
@@ -41,7 +41,8 @@ export default class InitialSetupAPIRoute extends APIRoute {
                 true,
                 false,
                 0,
-                0
+                0,
+                true
             ]
         );
 
