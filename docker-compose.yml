@@ -48,6 +48,7 @@ services:
     depends_on:
       - postgres
       - mongo
+      - redis
     image: boobspics-web
     ports:
       - $HTTP_EXPOSE_PORT:$HTTP_PORT
