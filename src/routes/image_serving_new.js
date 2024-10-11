@@ -1,5 +1,4 @@
 import { Route } from "http/routing";
-import addView from "utilities/addview";
 
 export default class NewImageServing extends Route {
     constructor() {
