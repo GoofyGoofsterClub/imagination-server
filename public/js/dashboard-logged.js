@@ -4,9 +4,7 @@ var UserInfo = {};
 var AllUsers = [];
 
 var PossibleActions = {
-    "CopyKey": "Copy Key",
     "Delete": "Revoke access",
-    "1984": "Orwell"
 }
 
 async function CheckLogin() {
@@ -269,6 +267,7 @@ async function GetUsers() {
         b.setAttribute("data-value", data.data[i].administrator);
         b.classList.add("input-button");
         b.innerText = data.data[i].administrator ? "✔" : "✖";
+        b.disabled = true;
 
         b.onclick = async function () {
             this.disabled = true;
@@ -315,6 +314,7 @@ async function GetUsers() {
         b.setAttribute("data-value", data.data[i].can_invite);
         b.classList.add("input-button");
         b.innerText = data.data[i].can_invite ? "✔" : "✖";
+        b.disabled = true;
 
         b.onclick = async function () {
             this.disabled = true;
