@@ -266,7 +266,8 @@ async function GetUsers() {
         b.setAttribute("data-user", data.data[i].username);
         b.setAttribute("data-value", data.data[i].administrator);
         b.classList.add("input-button");
-        b.innerText = data.data[i].administrator ? "✔" : "✖";
+        // b.innerText = data.data[i].administrator ? "✔" : "✖";
+        b.innerText = "?";
         b.disabled = true;
 
         b.onclick = async function () {
@@ -313,7 +314,8 @@ async function GetUsers() {
         b.setAttribute("data-user", data.data[i].username);
         b.setAttribute("data-value", data.data[i].can_invite);
         b.classList.add("input-button");
-        b.innerText = data.data[i].can_invite ? "✔" : "✖";
+        // b.innerText = data.data[i].can_invite ? "✔" : "✖";
+        b.innerText = "?";
         b.disabled = true;
 
         b.onclick = async function () {
