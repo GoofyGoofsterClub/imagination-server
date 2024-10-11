@@ -11,6 +11,16 @@ CREATE SCHEMA uwuso;
 ALTER SCHEMA uwuso OWNER TO dbuser;
 GRANT ALL PRIVILEGES ON SCHEMA uwuso TO dbuser;
 
+CREATE TABLE uwuso.events (
+	id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ,
+	event_type text NOT NULL DEFAULT '',
+	event_string text NOT NULL DEFAULT '',
+	event_caller bigserial NOT NULL,
+	CONSTRAINT events_pk PRIMARY KEY (id)
+);
+
+ALTER TABLE uwuso.events OWNER TO dbuser;
+
 CREATE TABLE uwuso.users (
 	id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ,
 	username text NOT NULL,
@@ -21,6 +31,7 @@ CREATE TABLE uwuso.users (
 	views bigint NOT NULL DEFAULT 0,
 	uploads bigint NOT NULL DEFAULT 0,
 	superuser boolean NOT NULL DEFAULT false,
+	badges json NOT NULL DEFAULT '[]',
 	CONSTRAINT users_pk PRIMARY KEY (id)
 );
 ALTER TABLE uwuso.users OWNER TO dbuser;
@@ -42,8 +53,11 @@ ALTER TABLE uwuso.uploads ADD COLUMN disk_filename text NOT NULL;
 
 ALTER TABLE uwuso.uploads ADD COLUMN mimetype text NOT NULL;
 
-ALTER TABLE uwuso.uploads ADD COLUMN filehash text NOT NULL;
+ALTER TABLE uwuso.uploads ADD COLUMN upload_time bigint NOT NULL;
 
+ALTER TABLE uwuso.uploads ADD COLUMN upload_domain text NOT NULL;
+
+ALTER TABLE uwuso.uploads ADD COLUMN filehash text NOT NULL;
 
 ALTER TABLE uwuso.uploads ADD COLUMN views integer NOT NULL DEFAULT 0;
 
@@ -99,4 +113,6 @@ ALTER TABLE uwuso.services ADD CONSTRAINT owner_fk FOREIGN KEY (owner)
 REFERENCES uwuso.users (id) MATCH SIMPLE
 ON DELETE NO ACTION ON UPDATE NO ACTION;
 
-
+ALTER TABLE uwuso.events ADD CONSTRAINT event_caller_fk FOREIGN KEY (event_caller)
+REFERENCES uwuso.users (id) MATCH SIMPLE
+ON DELETE NO ACTION ON UPDATE NO ACTION;

@@ -1,6 +1,4 @@
 import { Route } from "http/routing";
-import hash from "utilities/hash";
-import addView from "utilities/addview";
 
 export default class ImageServing extends Route {
     constructor() {

@@ -64,13 +64,11 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute {
 
         let target = await server.db.findUserByDisplayName(request.query.target);
 
-        if (target.rows.length < 1)
+        if (!target)
             return {
                 "success": false,
                 "error": "Invalid target."
             };
-
-        target = target.rows[0];
 
         if (request.query.field && hasPermission(target.permissions, USER_PERMISSIONS.ADMINISTRATOR))
             target[request.query.field] = administratorReplacements[request.query.field];

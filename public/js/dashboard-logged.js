@@ -4,9 +4,7 @@ var UserInfo = {};
 var AllUsers = [];
 
 var PossibleActions = {
-    "CopyKey": "Copy Key",
     "Delete": "Revoke access",
-    "1984": "Orwell"
 }
 
 async function CheckLogin() {
@@ -268,7 +266,9 @@ async function GetUsers() {
         b.setAttribute("data-user", data.data[i].username);
         b.setAttribute("data-value", data.data[i].administrator);
         b.classList.add("input-button");
-        b.innerText = data.data[i].administrator ? "✔" : "✖";
+        // b.innerText = data.data[i].administrator ? "✔" : "✖";
+        b.innerText = "?";
+        b.disabled = true;
 
         b.onclick = async function () {
             this.disabled = true;
@@ -314,7 +314,9 @@ async function GetUsers() {
         b.setAttribute("data-user", data.data[i].username);
         b.setAttribute("data-value", data.data[i].can_invite);
         b.classList.add("input-button");
-        b.innerText = data.data[i].can_invite ? "✔" : "✖";
+        // b.innerText = data.data[i].can_invite ? "✔" : "✖";
+        b.innerText = "?";
+        b.disabled = true;
 
         b.onclick = async function () {
             this.disabled = true;
@@ -550,9 +552,9 @@ async function GetUploads() {
         let cell = row.insertCell();
         cell.innerHTML = `<a href="https://${window.location.host}/${UserInfo.displayName}/${data.data[i].filename}"><span class="code">[${data.data[i].filename}]</span></a>`;
         cell = row.insertCell();
-        cell.innerText = data.data[i] == undefined ? "Unknown" : new Date(data.data[i].timestamp).toLocaleString();
+        cell.innerText = data.data[i] == undefined ? "Unknown" : new Date(parseInt(data.data[i].upload_time) * 1000).toLocaleString();
         cell = row.insertCell();
-        cell.innerText = data.data[i].uploaded_thru == undefined ? "Unknown" : data.data[i].uploaded_thru;
+        cell.innerText = data.data[i].upload_domain ?? "Unknown";
         cell = row.insertCell();
         let button = document.createElement("button");
         button.innerText = "Delete";
