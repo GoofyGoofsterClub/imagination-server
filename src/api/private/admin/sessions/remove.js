@@ -50,13 +50,11 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute {
 
         let target = await server.db.findUserByDisplayName(request.query.target);
 
-        if (target.rows.length < 1)
+        if (!target)
             return {
                 "success": false,
                 "error": "Invalid target."
             };
-
-        target = target.rows[0];
 
         if (hasPermission(target.permissions, USER_PERMISSIONS.ADMINISTRATOR) || hasPermission(target.permissions, USER_PERMISSIONS.DELETE_ACCOUNTS)) {
             if (user.username == target.username)
