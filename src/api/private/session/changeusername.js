@@ -53,7 +53,6 @@ export default class ChangeUsername extends APIRoute {
         }
 
         let isUsernameTaken = await server.db.findUserByDisplayName(request.query.new_name);
-        console.log(isUsernameTaken);
 
         if (isUsernameTaken)
             return { "success": false, "error": "Display name is already taken." };
