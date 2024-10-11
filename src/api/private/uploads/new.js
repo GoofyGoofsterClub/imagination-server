@@ -107,7 +107,9 @@ export default class UploadsNewAPIRoute extends APIRoute {
         await server.db.query(`INSERT INTO uwuso.uploads (uploader_id, filename, disk_filename,
             mimetype, filehash, views, filesize, service_upload) VALUES (
             $1::bigint, $2::text, $3::text,
-            $4::text, $5::text, $6::integer, $7::bigint, $8::boolean)`, [
+            $4::text, $5::text, $6::integer,
+            $7::bigint, $8::boolean,
+            $8::datetime, $9::text)`, [
             user.id,
             ids.public,
             ids.private,
@@ -115,7 +117,9 @@ export default class UploadsNewAPIRoute extends APIRoute {
             datahash,
             0,
             fileSizeInBytes,
-            isServiceUpload
+            isServiceUpload,
+            Date.now(),
+            request.headers['host']
         ]);
 
         if (server.server._public.Ratelimits.length > 100)
