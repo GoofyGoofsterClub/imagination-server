@@ -15,14 +15,11 @@ CREATE TABLE uwuso.events (
 	id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ,
 	event_type text NOT NULL DEFAULT '',
 	event_string text NOT NULL DEFAULT '',
-	event_caller bigserial NOT NULL DEFAULT 0,
+	event_caller bigserial NOT NULL,
 	CONSTRAINT events_pk PRIMARY KEY (id)
 );
 
 ALTER TABLE uwuso.events OWNER TO dbuser;
-ALTER TABLE uwuso.events ADD CONSTRAINT event_caller_fk FOREIGN KEY (event_caller)
-REFERENCES uwuso.users (id) MATCH SIMPLE
-ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 CREATE TABLE uwuso.users (
 	id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ,
@@ -56,7 +53,7 @@ ALTER TABLE uwuso.uploads ADD COLUMN disk_filename text NOT NULL;
 
 ALTER TABLE uwuso.uploads ADD COLUMN mimetype text NOT NULL;
 
-ALTER TABLE uwuso.uploads ADD COLUMN upload_time datetime NOT NULL;
+ALTER TABLE uwuso.uploads ADD COLUMN upload_time bigint NOT NULL;
 
 ALTER TABLE uwuso.uploads ADD COLUMN upload_domain text NOT NULL;
 
@@ -116,4 +113,6 @@ ALTER TABLE uwuso.services ADD CONSTRAINT owner_fk FOREIGN KEY (owner)
 REFERENCES uwuso.users (id) MATCH SIMPLE
 ON DELETE NO ACTION ON UPDATE NO ACTION;
 
-
+ALTER TABLE uwuso.events ADD CONSTRAINT event_caller_fk FOREIGN KEY (event_caller)
+REFERENCES uwuso.users (id) MATCH SIMPLE
+ON DELETE NO ACTION ON UPDATE NO ACTION;

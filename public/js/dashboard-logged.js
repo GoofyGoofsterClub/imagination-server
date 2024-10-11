@@ -552,9 +552,9 @@ async function GetUploads() {
         let cell = row.insertCell();
         cell.innerHTML = `<a href="https://${window.location.host}/${UserInfo.displayName}/${data.data[i].filename}"><span class="code">[${data.data[i].filename}]</span></a>`;
         cell = row.insertCell();
-        cell.innerText = data.data[i] == undefined ? "Unknown" : new Date(data.data[i].timestamp).toLocaleString();
+        cell.innerText = data.data[i] == undefined ? "Unknown" : new Date(parseInt(data.data[i].upload_time) * 1000).toLocaleString();
         cell = row.insertCell();
-        cell.innerText = data.data[i].uploaded_thru == undefined ? "Unknown" : data.data[i].uploaded_thru;
+        cell.innerText = data.data[i].upload_domain ?? "Unknown";
         cell = row.insertCell();
         let button = document.createElement("button");
         button.innerText = "Delete";

@@ -105,11 +105,11 @@ export default class UploadsNewAPIRoute extends APIRoute {
         let fileSizeInBytes = stats.size;
 
         await server.db.query(`INSERT INTO uwuso.uploads (uploader_id, filename, disk_filename,
-            mimetype, filehash, views, filesize, service_upload) VALUES (
+            mimetype, filehash, views, filesize, service_upload, upload_time, upload_domain) VALUES (
             $1::bigint, $2::text, $3::text,
             $4::text, $5::text, $6::integer,
             $7::bigint, $8::boolean,
-            $8::datetime, $9::text)`, [
+            $9::bigint, $10::text)`, [
             user.id,
             ids.public,
             ids.private,
@@ -118,7 +118,7 @@ export default class UploadsNewAPIRoute extends APIRoute {
             0,
             fileSizeInBytes,
             isServiceUpload,
-            Date.now(),
+            Math.floor(+Date.now() / 1000),
             request.headers['host']
         ]);
 
