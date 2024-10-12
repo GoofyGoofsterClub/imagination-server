@@ -1,5 +1,5 @@
 import { APIRoute } from "http/routing";
-import hash from "utilities/hash";
+import CheckRating from "utilities/rating/conditions";
 
 /*--includedoc
 
@@ -12,37 +12,49 @@ import hash from "utilities/hash";
 Deletes key owner's account completely. Extremely dangerous API call.
 
 */
-export default class DeleteSessionAPIRoute extends APIRoute {
-    constructor() {
+export default class DeleteSessionAPIRoute extends APIRoute
+{
+    constructor()
+    {
         super("GET");
     }
 
-    async call(request, reply, server) {
-        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
+    async call(request, reply, server)
+    {
+        let doesExist = await server.db.checkDocumentExists("users", {
+            "key": request.query.key
+        });
 
         if (!doesExist)
             return {
-                "success": false,
-                "error": "Invalid key."
+                "success": false
             };
+        
+        let user = await server.db.getDocument("users", {
+            "key": request.query.key
+        });
 
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
-
-        if (user.banned)
+        if (user.isBanned)
             return { "success": false, "error": "You are banned." };
 
-        if (request.query.confirmation != user.username) return { "success": false, "error": "Confirmation username is missing or incorrect." };
+        if (request.query.confirmation != user.displayName) return { "success": false, "error": "Confirmation username is missing or incorrect." };
 
-        await server.db.query(`DELETE FROM uwuso.users WHERE id = $1::text`, [user.id]);
+        // if is banned but duration has passed current time, unban
+        if (user.isBanned && user.banDuration < Date.now() && user.banDuration != null)
+        {
+            await server.db.updateDocument("users", {
+                "key": request.query.key
+            }, {
+                "$set": {
+                    "isBanned": false,
+                    "banDuration": null
+                }
+            });
+            user.isBanned = false;
+            user.banDuration = null;
+        }
 
-        // External logging for trolling prevention
-        await server.server._public.ExternalLogging.Log(buildMessage(
-            request.headers['host'],
-            "info",
-            "User changed deleted their profile.",
-            ` \`${user.username}\` has deleted their account forever. Goodbye.`,
-            `https://${request.headers['host']}`
-        ));
+        await server.db.deleteDocument("users", { "key": request.query.key });
 
         return {
             "success": true

@@ -1,6 +1,4 @@
 import { APIRoute } from "http/routing";
-import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
-import hash from "utilities/hash";
 
 /*--includedoc
 
@@ -13,48 +11,47 @@ import hash from "utilities/hash";
 Returns all user's public and private profile data.
 
 */
-export default class AdminGetSessionsAPIRoute extends APIRoute {
-    constructor() {
+export default class AdminGetSessionsAPIRoute extends APIRoute
+{
+    constructor()
+    {
         super("GET");
     }
 
-    async call(request, reply, server) {
-        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
-
+    async call(request, reply, server)
+    {
+        let doesExist = await server.db.checkDocumentExists("users", {
+            "key": request.query.key
+        });
 
         if (!doesExist)
             return {
-                "success": false,
-                "error": "Invalid key."
+                "success": false
             };
+        
+        let user = await server.db.getDocument("users", {
+            "key": request.query.key
+        });
 
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
-
-        if (user.banned) return {
-            "success": false,
-            "error": "You are banned."
-        };
-
-        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR)
-            && !hasPermission(user.permissions, USER_PERMISSIONS.VIEW_OTHER_USERS))
+        if (!user.administrator)
             return {
-                "success": false,
-                "error": "You are not an administrator."
+                "success": false
             };
 
 
-        let sessions = await server.db.query(`SELECT * FROM uwuso.users`);
+        let sessions = await server.db.getDocuments("users", {});
 
-        for (let i = 0; i < sessions.rows.length; i++) {
-            let session = sessions.rows[i];
+        for (let i = 0; i < sessions.length; i++)
+        {
+            let session = sessions[i];
 
-            if (hasPermission(sessions.permissions, USER_PERMISSIONS.ADMINISTRATOR))
+            if (session.administrator)
                 session.key = "<redacted>";
         }
-
+        
         return {
             "success": true,
-            "data": sessions.rows
+            "data": sessions
         };
     }
 }
