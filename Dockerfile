@@ -10,6 +10,8 @@ COPY . .
 
 EXPOSE 3443
 
+RUN npm run build
+
 RUN npx babel src -d lib
 
 CMD [ "node", "./lib/run.js" ]

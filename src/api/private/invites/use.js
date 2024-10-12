@@ -1,5 +1,7 @@
 import { APIRoute } from "http/routing";
 import { v4 as uuidv4 } from "uuid";
+import { USER_PERMISSIONS, permissions } from "utilities/permissions";
+import hash from "utilities/hash";
 
 /*--includedoc
 
@@ -12,40 +14,35 @@ import { v4 as uuidv4 } from "uuid";
 Consumes an invite code and creates a new user with it, returning the access key.
 
 */
-export default class InvitesUseAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class InvitesUseAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
+    async call(request, reply, server) {
         if (!request.query.code)
             return {
                 "success": false,
                 "error": "Missing parameters."
             };
-        
-        let target = await server.db.getDocument("invites", {
-            "hash": request.query.code
-        });
 
-        if (!target)
+        let target = await server.db.query(`SELECT * FROM uwuso.invites WHERE hash = $1::text`, [request.query.code]);
+
+        if (target.rows.length < 1)
             return {
                 "success": false,
                 "error": "Invalid code."
             };
-        
-        if (target.validUntil < Date.now())
+
+        target = target.rows[0];
+
+        if (target.valid_until * 1000 < Date.now())
             return {
                 "success": false,
                 "error": "Code expired."
             };
 
-        let targetUser = await server.db.getDocument("users", {
-            "displayName": target.displayName
-        });
+        let targetUser = await server.db.findUserByDisplayName(target.username);
 
         if (targetUser)
             return {
@@ -53,32 +50,32 @@ export default class InvitesUseAPIRoute extends APIRoute
                 "error": "User already exists."
             };
 
-        await server.db.deleteDocuments("invites", {
-            "hash": request.query.code
-        });
+        await server.db.query(`DELETE FROM uwuso.invites WHERE hash = $1::text`, [request.query.code]);
 
         let accessKey = "vX2~!" + uuidv4();
 
-        await server.db.insertDocument("users", {
-            "displayName": target.displayName,
-            "key": accessKey,
-            "administrator": target.is_administrator ?? false,
-            "can_invite": target.can_invite ?? false,
-            "protected": target.protected ?? false,
-            "private": target.private ?? false,
-            "isBanned": false,
-            "invitedBy": target.invitedBy,
-            "invitedById": target.invitedById,
-            "uploads": 0,
-            "views": 0,
-            "lastUploadTimestamp": Date.now(),
-            "rating": 0
-        });
+        await server.db.query(`INSERT INTO uwuso.users (username, access_key, permissions, private_profile, banned, views, uploads, superuser)
+            VALUES ($1::text, $2::text, $3::bigint,
+                    $4::boolean, $5::boolean, $6::bigint, $7::bigint, $8::boolean)`,
+            [
+                target.username,
+                hash(accessKey),
+                permissions(USER_PERMISSIONS.UPLOAD,
+                    USER_PERMISSIONS.VIEW_OWN_FILES,
+                    USER_PERMISSIONS.CHANGE_DISPLAY_NAME
+                ),
+                false,
+                false,
+                0,
+                0,
+                false
+            ]
+        );
 
         return {
             "success": true,
             "data": {
-                "displayName": target.displayName,
+                "displayName": target.username,
                 "accessKey": accessKey
             }
         };
