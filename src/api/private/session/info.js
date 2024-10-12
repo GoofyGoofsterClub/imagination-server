@@ -1,5 +1,6 @@
 import { APIRoute } from "http/routing";
-import CheckRating from "utilities/rating/conditions";
+import { hasPermission, USER_PERMISSIONS } from "utilities/permissions";
+import hash from "utilities/hash";
 
 /*--includedoc
 
@@ -18,45 +19,27 @@ export default class CheckSessionInfoAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let doesExist = await server.db.checkDocumentExists("users", {
-            "key": request.query.key
-        });
+        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
 
         if (!doesExist)
             return {
-                "success": false
+                "success": false,
+                "error": "Invalid key."
             };
 
-        let user = await server.db.getDocument("users", {
-            "key": request.query.key
-        });
+        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
-        let ratingResponse = await CheckRating(server.db, user.displayName);
-
-        // if is banned but duration has passed current time, unban
-        if (user.isBanned && user.banDuration < Date.now() && user.banDuration != null) {
-            await server.db.updateDocument("users", {
-                "key": request.query.key
-            }, {
-                "$set": {
-                    "isBanned": false,
-                    "banDuration": null
-                }
-            });
-            user.isBanned = false;
-            user.banDuration = null;
-        }
-
+        if (user.banned)
+            return { "success": false, "error": "You are banned." };
 
         return {
             "success": true,
             "data": {
-                "displayName": user.displayName,
-                "can_invite": user.can_invite,
-                "administrator": user.administrator,
-                "isBanned": user.isBanned == undefined ? false : user.isBanned,
-                "usernameChangeBlockedUntil": user.usernameChangeBlockedUntil ?? -1,
-                "superuser": user.superuser ?? false
+                "displayName": user.username,
+                "can_invite": hasPermission(user.permissions, USER_PERMISSIONS.INVITE_USERS) || hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR),
+                "administrator": hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR),
+                "isBanned": user.banned,
+                "superuser": user.superuser
             }
         };
     }

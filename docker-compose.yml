@@ -1,5 +1,39 @@
-version: "3"
 services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    ports:
+      - '5432:5432'
+    expose:
+      - 5432
+    environment:
+      POSTGRES_PASSWORD: boobies
+      POSTGRES_USER: dbuser
+      PGUSER: dbuser
+      POSTGRES_DB: uwuso
+    volumes:
+      - 'pdb:/var/lib/postgresql/data'
+      - './docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d'
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 64M
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdb:/data
+
+  # TO REMOVE
   mongo:
     image: mongo:5.0.2
     restart: unless-stopped
@@ -9,9 +43,12 @@ services:
       - db:/data/db
     env_file:
       - ./.env
+
   web:
     depends_on:
+      - postgres
       - mongo
+      - redis
     image: boobspics-web
     ports:
       - $HTTP_EXPOSE_PORT:$HTTP_PORT
@@ -26,9 +63,17 @@ services:
       - MONGO_HOST=mongo
       - MONGO_PORT=$MONGO_PORT
       - MONGO_DB=$MONGO_DB
+      - PGHOST=postgres
+      - PGPORT=5432
+      - PGUSER=$PGUSER
+      - PGPASSWORD=$PGPASSWORD
+      - PGDATABASE=uwuso
+      - REDISHOST=$REDIS_HOST
       - LOG_WEBHOOK=$LOG_WEBHOOK
       - SHORTENER_URI=$SHORTENER_URI
     build: .
 
 volumes:
   db:
+  pdb:
+  redisdb:
