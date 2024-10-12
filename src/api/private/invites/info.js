@@ -1,4 +1,6 @@
 import { APIRoute } from "http/routing";
+import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
+import hash from "utilities/hash";
 
 /*--includedoc
 
@@ -11,30 +13,23 @@ import { APIRoute } from "http/routing";
 Returns the data about a valid invite code.
 
 */
-export default class InvitesInfoAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class InvitesInfoAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
-        let doesExist = await server.db.checkDocumentExists("users", {
-            "key": request.query.key
-        });
+    async call(request, reply, server) {
+        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
 
         if (!doesExist)
             return {
                 "success": false,
                 "error": "Invalid key."
             };
-        
-        let user = await server.db.getDocument("users", {
-            "key": request.query.key
-        });
 
-        if (!user.administrator)
+        let user = await server.db.findUserByAccessKey(hash(request.query.key));
+
+        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
             return {
                 "success": false,
                 "error": "You are not an administrator."
@@ -45,20 +40,18 @@ export default class InvitesInfoAPIRoute extends APIRoute
                 "success": false,
                 "error": "Missing parameters."
             };
-        
-        let target = await server.db.getDocument("invites", {
-            "hash": request.query.code
-        });
 
-        if (!target)
+        let target = await server.db.query(`SELECT * FROM uwuso.invites WHERE hash = $1::text`, [request.query.code]);
+
+        if (target.rows.length < 1)
             return {
                 "success": false,
                 "error": "Invalid code."
             };
-        
+
         return {
             "success": true,
-            "data": target
+            "data": target.rows
         };
 
 

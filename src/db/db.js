@@ -1,89 +1,41 @@
-import { MongoClient } from "mongodb";
+import pg from "pg";
+import { PresetOutput } from "utilities/output";
+const { Pool } = pg;
 
-export default class DatabaseController
-{
-    constructor(host, port, database, username, password)
-    {
-        this.host = host;
-        this.port = port;
-        this.username = username;
-        this.password = password;
-        this.databaseName = database;
+export default class NewDatabaseController {
+    constructor() {
+        this.Output = new PresetOutput("db");
+        this.pool = new Pool();
 
-        this.client = null;
-        this.database = null;
+        this.Output.Log("Database initialized.");
     }
 
-    async connect()
-    {
-        if (this.username == null || this.password == null)
-        {
-            this.client = new MongoClient(`mongodb://${this.host}:${this.port}`);
-            await this.client.connect();
-            this.database = this.client.db(this.databaseName);
-            return this;
-        }
-        this.client = new MongoClient(`mongodb://${this.username}:${this.password}@${this.host}:${this.port}`);
-        await this.client.connect();
-        this.database = this.client.db(this.database);
+    async query(text, params) {
+        const start = Date.now();
+        const res = await this.pool.query(text, params);
+        const duration = Date.now() - start;
 
-        return this;
+        this.Output.Log(`Executed a query :: ${(duration / 1000).toFixed(2)}s :: ${res.rowCount} rows`);
+        return res;
     }
 
-    async getCollection(collection)
-    {
-        return this.database.collection(collection);
+    async getAmountOfUsers() {
+        let users = await this.query("SELECT COUNT(id) AS count FROM uwuso.users");
+        return users.rows[0].count;
     }
 
-    async getDocument(collection, query)
-    {
-        let result = await this.database.collection(collection).find(query).toArray();
-        if (result.length == 0)
-            return null;
-        return result[0];
+    async doesUserExistByAccessKey(accesskey) {
+        let users = await this.query("SELECT COUNT(id) AS count FROM uwuso.users WHERE access_key = $1", [accesskey]);
+        return users.rows[0].count > 0;
     }
 
-    async getDocuments(collection, query)
-    {
-        return await this.database.collection(collection).find(query).toArray();
+    async findUserByDisplayName(displayname) {
+        let users = await this.query("SELECT * FROM uwuso.users WHERE username = $1", [displayname]);
+        return users.rows[0];
     }
 
-    async getDocumentsSkip(collection, query, skip, limit)
-    {
-        if (!limit)
-            limit = 1;
-        if (!skip)
-            skip = 0;
-
-        let result = await this.database.collection(collection).find(query).limit(limit).skip(skip).toArray();
-        return result;
-    }
-
-    async checkDocumentExists(collection, query)
-    {
-        let result = await this.database.collection(collection).find(query).toArray();
-        return result.length > 0;
-    }
-
-    async insertDocument(collection, document)
-    {
-        await this.database.collection(collection).insertOne(document);
-    }
-
-    async deleteDocument(collection, query)
-    {
-        await this.database.collection(collection).deleteOne(query);
-    }
-
-    async deleteDocuments(collection, query)
-    {
-        await this.database.collection(collection).deleteMany(query);
-    }
-
-    async updateDocument(collection, query, update, upsert = false)
-    {
-        let _collection = await this.getCollection(collection, query);
-        let result = await _collection.updateOne(query, update, { upsert: upsert });
-        return result;
+    async findUserByAccessKey(accesskey) {
+        let users = await this.query("SELECT * FROM uwuso.users WHERE access_key = $1", [accesskey]);
+        return users.rows[0];
     }
 }

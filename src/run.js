@@ -1,42 +1,38 @@
 import Output from "utilities/output";
 import HTTPServer from "http/server";
 import HTTPRouting from "http/routing";
-import DatabaseController from "db/db";
-import CalculateRatingWorker from "utilities/rating/calculationworker";
-import HeartbeatManager from "utilities/heartbeat";
-// These imports are for when there is no users.
-import { v4 as uuidv4 } from "uuid";
-import hash from "utilities/hash";
+import DatabaseController from "db/old";
+import NewDatabaseController from "db/db";
 
 Output.Log("Preparing the server...");
 
 (async () => {
     Output.Log("Connecting to the database...");
+
     const db = await new DatabaseController(
         process.env.MONGO_HOST,
         process.env.MONGO_PORT,
         'boobspics'
     ).connect();
 
+    const ndb = await new NewDatabaseController();
+
     Output.Log("Connected to the database!");
 
-    let amountOfUsers = await (await db.getCollection("users")).countDocuments();
-
-    setTimeout(() => CalculateRatingWorker(db, Output), 10000);
-
     Output.Log("Registering routes...");
-    const server = new HTTPServer(db);
-
-    let isInitialSetup = !(await db.checkDocumentExists("globals", { "field": "_initialSetup" }));
-    
-    if (amountOfUsers < 1)
-    {
-        Output.Warn("sys", `No users found in the database. Please complete the initial user setup.`);
-    }
+    const server = new HTTPServer(db, ndb);
 
     HTTPRouting.RegisterRoutes(server);
 
-    server.server._public['initialSetup'] = isInitialSetup;
+    let amountOfUsers = await ndb.getAmountOfUsers();
+    await Output.Log(`${amountOfUsers} users exists in database.`);
+
+    if (amountOfUsers < 1) {
+        Output.Warn("No users found in database, expecting an initial setup");
+        Output.Warn("Alternatively, migrate MongoDB database to PostgreSQL if you used it before.");
+    }
+
+    server.server._public['initialSetup'] = amountOfUsers < 1;
 
     server.start(process.env.HTTP_PORT).then(() => {
         Output.Log("Server started!");
