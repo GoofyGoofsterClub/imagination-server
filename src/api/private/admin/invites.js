@@ -1,4 +1,6 @@
 import { APIRoute } from "http/routing";
+import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
+import hash from "utilities/hash";
 
 /*--includedoc
 
@@ -11,40 +13,38 @@ import { APIRoute } from "http/routing";
 Returns all unused invites.
 
 */
-export default class AdminGetSessionsAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class AdminGetSessionsAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
-        let doesExist = await server.db.checkDocumentExists("users", {
-            "key": request.query.key
-        });
+    async call(request, reply, server) {
+        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
 
         if (!doesExist)
             return {
                 "success": false,
                 "error": "Invalid key."
             };
-        
-        let user = await server.db.getDocument("users", {
-            "key": request.query.key
-        });
 
-        if (!user.administrator)
+        let user = await server.db.findUserByAccessKey(hash(request.query.key));
+
+        if (user.banned) return {
+            "success": false,
+            "error": "You are banned."
+        };
+
+        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
             return {
                 "success": false,
                 "error": "You are not an administrator."
             };
 
-        let invites = await server.db.getDocuments("invites", {});
+        let invites = await server.db.query(`SELECT * FROM uwuso.invites`);
 
         return {
             "success": true,
-            "data": invites
+            "data": invites.rows
         };
     }
 }
