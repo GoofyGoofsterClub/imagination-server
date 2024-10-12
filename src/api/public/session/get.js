@@ -1,5 +1,4 @@
 import { APIRoute } from "http/routing";
-import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 
 /*--includedoc
 
@@ -12,31 +11,40 @@ import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 Gets publically available information about a user.
 
 */
-export default class PublicSessionGetAPIRoute extends APIRoute {
-    constructor() {
+export default class PublicSessionGetAPIRoute extends APIRoute
+{
+    constructor()
+    {
         super("GET");
     }
 
-    async call(request, reply, server) {
+    async call(request, reply, server)
+    {
         if (!request.query.target)
             return {
                 "success": false,
                 "error": "No target specified"
             };
+        
+        let doesExist = await server.db.checkDocumentExists("users", {
+            "displayName": request.query.target
+        });
 
-        let user = await server.db.findUserByDisplayName(request.query.target);
-
-        if (!user)
+        if (!doesExist)
             return {
                 "success": false,
                 "error": "User does not exist"
             };
+        
+        let user = await server.db.getDocument("users", {
+            "displayName": request.query.target
+        });
 
-        if (user.private_profile)
+        if (user.private)
             return {
                 "success": true,
                 "data": {
-                    "displayName": user.username,
+                    "displayName": user.displayName,
                     "rating": 0,
                     "uploads": 0,
                     "invitedBy": null,
@@ -44,22 +52,22 @@ export default class PublicSessionGetAPIRoute extends APIRoute {
                     "views": 0,
                     "badges": user.badges ?? [],
                     "paint": user.paint ?? null,
-                    "isBanned": user.banned ?? false
+                    "isBanned": user.isBanned ?? false
                 }
             };
 
         return {
             "success": true,
             "data": {
-                "displayName": user.username,
-                "rating": 1, // -- TO-DO: Remove
+                "displayName": user.displayName,
+                "rating": user.rating ?? 0,
                 "uploads": user.uploads ?? 0,
-                "invitedBy": null,
-                "administrator": hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR),
+                "invitedBy": user.invitedBy ?? (user.invited_by ?? null),
+                "administrator": user.administrator,
                 "views": user.views ?? 0,
                 "badges": user.badges ?? [],
                 "paint": user.paint ?? null,
-                "isBanned": user.banned ?? false
+                "isBanned": user.isBanned ?? false
             }
         };
     }

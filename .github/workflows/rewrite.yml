@@ -28,14 +28,6 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/imagination-server-rewrite:latest
-      -
-        name: Build and push modified postgres
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: ./Dockerfile-postgres
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/imagination-database-rewrite:latest
       - 
         name: Webhook
         uses: distributhor/workflow-webhook@v2
