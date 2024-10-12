@@ -1,6 +1,5 @@
 import { APIRoute } from "http/routing";
 import { v4 as uuidv4 } from "uuid";
-import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 import hash from "utilities/hash";
 
 /*--includedoc
@@ -14,28 +13,41 @@ import hash from "utilities/hash";
 Creates a new invite code for a user with selected username by an eligible user.
 
 */
-export default class InvitesNewAPIRoute extends APIRoute {
-    constructor() {
+export default class InvitesNewAPIRoute extends APIRoute
+{
+    constructor()
+    {
         super("GET");
     }
 
-    async call(request, reply, server) {
-        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
+    async call(request, reply, server)
+    {
+        let doesExist = await server.db.checkDocumentExists("users", {
+            "key": request.query.key
+        });
 
         if (!doesExist)
             return {
                 "success": false,
                 "error": "Invalid key."
             };
+        
+        let user = await server.db.getDocument("users", {
+            "key": request.query.key
+        });
 
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
-
-        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR) && !hasPermission(user.permissions, USER_PERMISSIONS.INVITE_USERS))
+        if (!user.administrator && !user.can_invite)
             return {
                 "success": false,
                 "error": "You are not an administrator or you cannot invite users."
             };
 
+        if(user.rating && user.rating < -3)
+            return {
+                "success": false,
+                "error": "Your rating is too low to invite users."
+            };
+        
         if (!request.query.target)
             return {
                 "success": false,
@@ -48,24 +60,24 @@ export default class InvitesNewAPIRoute extends APIRoute {
                 "error": "Invalid username."
             };
 
-        let target = await server.db.findUserByDisplayName(request.query.target);
+        let target = await server.db.getDocument("users", {
+            "displayName": request.query.target
+        });
+        
         if (target)
             return {
                 "success": false,
                 "error": "Specified name is taken."
             };
-
+        
         let inviteCode = hash(uuidv4());
 
-        await server.db.query(`INSERT INTO uwuso.invites (username, hash, inviter, valid_until)
-            VALUES ($1::text, $2::text, $3::bigint, $4::bigint)`,
-            [
-                request.query.target,
-                inviteCode,
-                user.id,
-                parseInt(Math.floor(+Date.now() / 1000) + 604800)
-            ]
-        );
+        await server.db.insertDocument("invites", {
+            "hash": inviteCode,
+            "displayName": request.query.target,
+            "invitedBy": user.displayName,
+            "invitedById": user._id
+        });
 
         return {
             "success": true,

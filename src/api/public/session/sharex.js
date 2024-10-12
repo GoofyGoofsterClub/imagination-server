@@ -1,5 +1,4 @@
 import { APIRoute } from "http/routing";
-import hash from "utilities/hash";
 
 /*--includedoc
 
@@ -12,25 +11,31 @@ import hash from "utilities/hash";
 Generate a ShareX config file for the user.
 
 */
-export default class CheckSessionInfoAPIRoute extends APIRoute {
-    constructor() {
+export default class CheckSessionInfoAPIRoute extends APIRoute
+{
+    constructor()
+    {
         super("GET");
     }
 
-    async call(request, reply, server) {
-        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
+    async call(request, reply, server)
+    {
+        let doesExist = await server.db.checkDocumentExists("users", {
+            "key": request.query.key
+        });
 
         if (!doesExist)
             return {
-                "success": false,
-                "error": "Invalid key."
+                "success": false
             };
-
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
+        
+        let user = await server.db.getDocument("users", {
+            "key": request.query.key
+        });
 
 
         reply.header('Content-Disposition',
-            `attachment; filename=${user.username}.sxcu`);
+        `attachment; filename=${user.displayName}.sxcu`);
         return {
             "Version": "13.7.0",
             "Name": request.headers['host'],
