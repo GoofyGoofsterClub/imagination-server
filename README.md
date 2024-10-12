@@ -6,7 +6,7 @@ A file server with built-in user and file management, built on NodeJS.
 
 1. [Docker or Docker Desktop](https://docs.docker.com/engine/install/), if you are on Windows
 2. [NodeJS](https://nodejs.org/en) (Tested on 19+)
-3. [MongoDB](https://www.mongodb.com/) (Tested on 5.0.2)
+3. [PostgreSQL](https://www.postgresql.org/) (Tested on 16.4)
 
 ## Contributing
 
@@ -25,12 +25,12 @@ For code standards use the config provided for `Prettier`.
 ```bash
 $ git clone https://github.com/LMNYX/imagination-server.git
 $ cd imagination-server
-$ docker compose up
+$ docker compose up -d
 ```
 
 ### Without Docker
 
-Prerequisites include [MongoDB](https://www.mongodb.com/) and NodeJS being installed on the machine.
+Prerequisites include [PostgreSQL](https://www.postgresql.org/) and NodeJS being installed on the machine.
 
 ```bash
 $ git clone https://github.com/LMNYX/imagination-server.git
@@ -43,15 +43,11 @@ $ node run start # or yarn start
 
 ## After installation
 
-After installation you will need to log in with administrator account, create a new account for yourself and **delete the initial one**.
+After you started the server, you will need to open the service in your browser and set username for root user and title for web pages.
 
-To do so, open terminal after **initial start up** and look for the line that looks like this:
+When you complete the setup and press the button to do so, you will be displayed the key for access to your account. It will not be displayed again after that.
 
-`No users found in the database. Please go to /invite/randomletters to create an account.`
-
-Copy the link and open it in the browser, on the domain you're hosting the server, agree to the invitation and copy the key, then go to the main page and click on Dashboard, or open `/#dashboard`, put the key in and create a new account.
-
-It is recommended to use the invite, and setup from there, because the invite is **not unique**.
+When you're ready refresh the page and you will be able to access the service's functionality.
 
 ## Troubleshooting
 
@@ -66,11 +62,11 @@ $ source .env set
 $ set +o allexport
 ```
 
-If this didn't help, check if your MongoDB credentials are correct in the `.env` file.
+If this didn't help, check if your PostgreSQL credentials are correct in the `.env` file.
 
 ### Server crashing after around 10 seconds (with docker)
 
-Environment variables are incorrectly configured, check `.env`, most likely, expose port is already used.
+Environment variables are incorrectly configured, check `.env`, or, most likely, expose port is already used.
 
 ### API endpoints in `/docs` are not correct.
 

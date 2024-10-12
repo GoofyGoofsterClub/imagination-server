@@ -1,4 +1,5 @@
 import { APIRoute } from "http/routing";
+import hash from "utilities/hash";
 
 /*--includedoc
 
@@ -11,34 +12,27 @@ import { APIRoute } from "http/routing";
 Removes the already existing invite code.
 
 */
-export default class InvitesRemoveAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class InvitesRemoveAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
+    async call(request, reply, server) {
         if (!request.query.code)
             return {
                 "success": false,
                 "error": "Missing parameters."
             };
-        
-        let target = await server.db.getDocuments("invites", {
-            "hash": request.query.code
-        });
 
-        if (!target)
+        let target = await server.db.query(`SELECT * FROM uwuso.invites WHERE hash = $1::text`, [request.query.code]);
+
+        if (target.rows.length < 0)
             return {
                 "success": false,
-                "error": "Invalid target."
+                "error": "Invalid code."
             };
-        
-        await server.db.deleteDocuments("invites", {
-            "hash": request.query.code
-        });
+
+        await server.db.query(`DELETE FROM uwuso.invites WHERE hash = $1::text`, [request.query.code])
 
         return {
             "success": true

@@ -12,37 +12,30 @@ import hash from "utilities/hash";
 Returns all user's uploads
 
 */
-export default class SessionUploadsAPIRoute extends APIRoute
-{
-    constructor()
-    {
+export default class SessionUploadsAPIRoute extends APIRoute {
+    constructor() {
         super("GET");
     }
 
-    async call(request, reply, server)
-    {
-        let doesExist = await server.db.checkDocumentExists("users", {
-            "key": request.query.key
-        });
+    async call(request, reply, server) {
+        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
 
         if (!doesExist)
             return {
-                "success": false
+                "success": false,
+                "error": "Invalid key."
             };
-        
-        let user = await server.db.getDocument("users", {
-            "key": request.query.key
-        });
 
-        let uploaderHash = hash(user.displayName);
+        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
-        let uploads = await server.db.getDocuments("uploads", {
-            "uploader": uploaderHash
-        });
+        if (user.banned)
+            return { "success": false, "error": "You are banned." };
+
+        let uploads = await server.db.query(`SELECT * FROM uwuso.uploads WHERE uploader_id = $1::bigint`, [user.id]);
 
         return {
             "success": true,
-            "data": uploads
+            "data": uploads.rows
         };
     }
 }
