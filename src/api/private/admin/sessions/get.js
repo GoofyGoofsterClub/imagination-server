@@ -1,6 +1,5 @@
 import { APIRoute } from "http/routing";
-import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
-import hash from "utilities/hash";
+import CheckRating from "utilities/rating/conditions";
 
 const restrictedFields = [
     // for future use
@@ -21,34 +20,43 @@ const administratorReplacements = {
 Returns specific field from a user's profile.
 
 */
-export default class AdminGetSessionsFieldAPIRoute extends APIRoute {
-    constructor() {
+export default class AdminGetSessionsFieldAPIRoute extends APIRoute
+{
+    constructor()
+    {
         super("GET");
     }
 
-    async call(request, reply, server) {
-        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
-
+    async call(request, reply, server)
+    {
+        let doesExist = await server.db.checkDocumentExists("users", {
+            "key": request.query.key
+        });
 
         if (!doesExist)
             return {
                 "success": false,
                 "error": "Invalid key."
             };
+        
+        let user = await server.db.getDocument("users", {
+            "key": request.query.key
+        });
 
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
+        let ratingResponse = await CheckRating(server.db, user.displayName);
+        if (!ratingResponse)
+            return {
+                "success": false,
+                "error": "You are banned."
+            };
 
-        if (user.banned) return {
-            "success": false,
-            "error": "You are banned."
-        };
 
-        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
+        if (!user.administrator)
             return {
                 "success": false,
                 "error": "You are not an administrator."
             };
-
+        
         if (!request.query.target)
             return {
                 "success": false,
@@ -62,7 +70,9 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute {
                 "error": "You cannot get this field."
             };
 
-        let target = await server.db.findUserByDisplayName(request.query.target);
+        let target = await server.db.getDocument("users", {
+            "displayName": request.query.target
+        });
 
         if (!target)
             return {
@@ -70,7 +80,8 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute {
                 "error": "Invalid target."
             };
 
-        if (request.query.field && hasPermission(target.permissions, USER_PERMISSIONS.ADMINISTRATOR))
+        
+        if (request.query.field && target.administrator)
             target[request.query.field] = administratorReplacements[request.query.field];
 
         return {

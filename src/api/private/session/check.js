@@ -1,5 +1,4 @@
 import { APIRoute } from "http/routing";
-import hash from "utilities/hash";
 
 /*--includedoc
 
@@ -12,15 +11,27 @@ import hash from "utilities/hash";
 Check if a session key is valid.
 
 */
-export default class CheckSessionAPIRoute extends APIRoute {
-    constructor() {
+export default class CheckSessionAPIRoute extends APIRoute
+{
+    constructor()
+    {
         super("GET");
     }
 
-    async call(request, reply, server) {
-        // TO-DO: Add maintenance check? Idk why it was here but ig needed??
+    async call(request, reply, server)
+    {
+        let isMaintenance = await server.db.getDocument("globals", {
+            "field": "maintenance"
+        });
 
-        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
+        if (isMaintenance && isMaintenance.value && isMaintenance.value.enabled)
+        {
+            return { "success": false, "error": isMaintenance.value.message, "maintenance": true };
+        }
+
+        let doesExist = await server.db.checkDocumentExists("users", {
+            "key": request.query.key
+        });
 
         return {
             "success": doesExist,

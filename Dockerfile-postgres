@@ -1,3 +1,0 @@
-FROM postgres:latest
-COPY ./docker-entrypoint-initdb.d/uwu.sql /docker-entrypoint-initdb.d/uwu.sql 
-RUN chown postgres:postgres /docker-entrypoint-initdb.d/uwu.sql
