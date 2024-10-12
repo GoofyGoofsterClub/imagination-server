@@ -1,6 +1,4 @@
 import { APIRoute } from "http/routing";
-import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
-import hash from "utilities/hash";
 
 /*--includedoc
 
@@ -13,51 +11,55 @@ import hash from "utilities/hash";
 Deletes a user.
 
 */
-export default class AdminRemoveSessionAPIRoute extends APIRoute {
-    constructor() {
+export default class AdminRemoveSessionAPIRoute extends APIRoute
+{
+    constructor()
+    {
         super("GET");
     }
 
-    async call(request, reply, server) {
-        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
-
+    async call(request, reply, server)
+    {
+        let doesExist = await server.db.checkDocumentExists("users", {
+            "key": request.query.key
+        });
 
         if (!doesExist)
             return {
                 "success": false,
                 "error": "Invalid key."
             };
+        
+        let user = await server.db.getDocument("users", {
+            "key": request.query.key
+        });
 
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
-
-        if (user.banned) return {
-            "success": false,
-            "error": "You are banned."
-        };
-
-        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
+        if (!user.administrator)
             return {
                 "success": false,
                 "error": "You are not an administrator."
             };
-
-
+        
         if (!request.query.target)
             return {
                 "success": false,
                 "error": "Missing parameters."
             };
 
-        let target = await server.db.findUserByDisplayName(request.query.target);
+        let target = await server.db.getDocument("users", {
+            "displayName": request.query.target
+        });
 
         if (!target)
             return {
                 "success": false,
                 "error": "Invalid target."
             };
-
-        if (hasPermission(target.permissions, USER_PERMISSIONS.ADMINISTRATOR) || hasPermission(target.permissions, USER_PERMISSIONS.DELETE_ACCOUNTS)) {
-            if (user.username == target.username)
+        
+        
+        if (target.administrator)
+        {
+            if (user.displayName == target.displayName)
                 return {
                     "success": false,
                     "error": "You cannot remove yourself."
@@ -65,11 +67,13 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute {
 
             return {
                 "success": false,
-                "error": "You cannot remove an administrator or a person with similar permissions."
+                "error": "You cannot remove an administrator."
             };
         }
 
-        await server.db.query(`DELETE FROM uwuso.users WHERE id = $1::bigint`, [target.id]);
+        let zxv = await server.db.deleteDocument("users", {
+            "key": target.key
+        });
 
         return {
             "success": true
