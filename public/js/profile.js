@@ -1,9 +1,11 @@
-window.onload = async () => {
+window.onload = async () =>
+{
 
     let profileInfo = await fetch('/api/public/session/get?target=' + USERNAME);
     profileInfo = await profileInfo.json();
 
-    if (!profileInfo.success) {
+    if (!profileInfo.success)
+    {
         document.querySelector("#_profile_not_found").style.display = "block";
         document.querySelector("#_profile_error_text").innerText = profileInfo.error;
         return;
@@ -37,23 +39,27 @@ window.onload = async () => {
     document.querySelector("#profile-block-uploads > .profile-info-block-value").innerText = profileInfo.uploads.toLocaleString();
     document.querySelector("#profile-block-views > .profile-info-block-value").innerText = profileInfo.views.toLocaleString();
 
-    if (profileInfo.invitedBy) {
+    if (profileInfo.invitedBy)
+    {
         document.querySelector("#profile-invited-by").innerText = profileInfo.invitedBy;
         document.querySelector("#profile-invited-by").href = "/profile/" + profileInfo.invitedBy;
     }
-    else {
+    else
+    {
         document.querySelector(".profile-username-holder > .small-text").style.display = "none";
     }
 
     let ranks2 = [...Ranks].reverse();
     var rank = null;
-    for (var i = 0; i < ranks2.length; i++) {
+    for (var i = 0; i < ranks2.length; i++)
+    {
         if (profileInfo.rating >= ranks2[i].rating)
             rank = ranks2[i];
     }
 
     document.querySelector("#profile-picture").src = "/public/img/rating/" + rank.image;
-    document.querySelector("#profile-picture").onload = () => {
+    document.querySelector("#profile-picture").onload = () =>
+    {
         document.querySelector("#profile-picture").style.display = "block";
     };
 
@@ -65,8 +71,10 @@ window.onload = async () => {
             "image": "1.png"
         });
 
-    if (badges.length > 0) {
-        for (var i = 0; i < badges.length; i++) {
+    if (badges.length > 0)
+    {
+        for (var i = 0; i < badges.length; i++)
+        {
             let badge = badges[i];
             let badgeElement = document.createElement("div");
             if (badge.image.startsWith("http"))
@@ -79,7 +87,8 @@ window.onload = async () => {
         }
     }
 
-    if (profileInfo.isBanned) {
+    if (profileInfo.isBanned)
+    {
         document.querySelector(".profile-banned").style.display = "block";
         document.querySelector(".profile").classList.add("banned");
     }

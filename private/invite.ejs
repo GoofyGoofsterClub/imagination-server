@@ -18,7 +18,7 @@
     </div>
     <div class="content">
         <h1>You've been selected!</h1>
-        <p>Irasshya, <b><%= it.invite.username %></b>! One of our trusted people, <%= it.invite.inviter_username %>, selected you to be a part of a human experiment. As in to use this service.</p>
+        <p>Irasshya, <b><%= it.invite.displayName %></b>! One of our trusted people, <%= it.invite.invitedBy %>, selected you to be a part of a human experiment. As in to use this service.</p>
         <p><b>Before you accept: </b>This service is built upon trust. We believe that you wont abuse it and will behave.</p>
         <br>
         <br>
@@ -27,7 +27,7 @@
                 <p>
                     <input readonly disabled value="●●●●●●●●●●●●●●●●●●●" id="__invite_key_field" style="transition: 0.3s;"> <button class="input-button" id="__invite_accept_button">I accept</button> <button class="input-button" id="__invite__decline_button">I decline</button>
                     <p class="small-text error-text" id="__invite_result_message"></p>
-                    <p class="small-text" style="display: none;" id="__invite_result_after_acceptance">Welcome, <%= it.invite.username %>! Please copy the <span class="error-text">code above before closing this page</span>, this is your key to access everything here. Please look at <a href="/#setup">[Setup Guide]</a> on the main page for instructions on hwo to set this up.</p>
+                    <p class="small-text" style="display: none;" id="__invite_result_after_acceptance">Welcome, <%= it.invite.displayName %>! Please copy the <span class="error-text">code above before closing this page</span>, this is your key to access everything here. Please look at <a href="/#setup">[Setup Guide]</a> on the main page for instructions on hwo to set this up.</p>
                 </p>
             </div>
         </p>

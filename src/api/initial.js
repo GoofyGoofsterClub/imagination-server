@@ -1,7 +1,5 @@
 import { APIRoute } from "http/routing";
 import { v4 as uuidv4 } from "uuid";
-import { ALL_PERMISSIONS } from "utilities/permissions";
-import hash from "utilities/hash";
 
 /*--includedoc
 
@@ -20,7 +18,7 @@ export default class InitialSetupAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let isInitialSetup = (await server.db.getAmountOfUsers()) < 1;
+        let isInitialSetup = !(await server.db.checkDocumentExists("globals", { "field": "_initialSetup" }));
 
         if (!isInitialSetup) {
             reply.status(403);
@@ -31,22 +29,23 @@ export default class InitialSetupAPIRoute extends APIRoute {
 
         let accessKey = "vX2~!" + uuidv4();
 
-        await server.db.query(`INSERT INTO uwuso.users (username, access_key, permissions, private_profile, banned, views, uploads, superuser)
-            VALUES ($1::text, $2::text, $3::bigint,
-                    $4::boolean, $5::boolean, $6::bigint, $7::bigint, $8::boolean)`,
-            [
-                request.body.rootUsername,
-                hash(accessKey),
-                ALL_PERMISSIONS,
-                true,
-                false,
-                0,
-                0,
-                true
-            ]
-        );
+        await server.db.insertDocument("users", {
+            displayName: request.body.rootUsername,
+            key: accessKey,
+            administrator: true,
+            can_invite: true,
+            protected: true,
+            private: true,
+            isBanned: false,
+            invitedBy: null,
+            superuser: true,
+            uploads: 0,
+            views: 0
+        });
 
         server.server._public.initialSetup = false;
+        await server.db.insertDocument("globals", { "field": "_initialSetup", "value": false });
+        await server.db.insertDocument("globals", { "field": "webTitle", "value": request.body.webTitle });
         reply.send({ "key": accessKey });
     }
 }

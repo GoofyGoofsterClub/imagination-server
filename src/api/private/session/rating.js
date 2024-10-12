@@ -12,18 +12,48 @@ import calculateRating from "utilities/rating/calculate";
 Recalculates and returns the rating of a user.
 
 */
-export default class CheckRatingSessionAPIRoute extends APIRoute {
-    constructor() {
+export default class CheckRatingSessionAPIRoute extends APIRoute
+{
+    constructor()
+    {
         super("GET");
     }
 
-    async call(request, reply, server) {
+    async call(request, reply, server)
+    {
+        let doesExist = await server.db.checkDocumentExists("users", {
+            "key": request.query.key
+        });
 
-        // DEPRECATED: -- WILL BE REMOVED SOON
+        if (!doesExist)
+            return {
+                "success": false,
+                "error": "Invalid key."
+            };
+        
+        let user = await server.db.getDocument("users", {
+            "key": request.query.key
+        });
+        
+        if (!user.lastUploadTimestamp)
+            user.lastUploadTimestamp = Date.now();
+
+        
+        user.rating = calculateRating(user.uploads, user.views, Math.floor((Date.now() - user.lastUploadTimestamp) / 86400000)) ?? 0;
+        if (user.rating == Infinity) // nah bro no trolling.
+            user.rating = 0;
+
+        await server.db.updateDocument("users", {
+            "key": request.query.key
+        }, { "$set": {
+            "views": user.views,
+            "lastUploadTimestamp": user.lastUploadTimestamp,
+            "rating": user.rating
+        } });
 
         return {
             "success": true,
-            "rating": 1
+            "rating": user.rating
         };
     }
 }
