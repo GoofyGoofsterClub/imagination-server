@@ -60,7 +60,7 @@ export default class AdminCreateServiceAccount extends APIRoute {
                 $4::bigint, $5::bigint, $6::boolean);`,
             [
                 hash(accessKey),
-                internal_name,
+                internalKey,
                 request.query.internal_name,
                 user.id,
                 permissions(USER_PERMISSIONS.UPLOAD, USER_PERMISSIONS.VIEW_OWN_FILES)
