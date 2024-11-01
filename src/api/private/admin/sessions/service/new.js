@@ -63,7 +63,8 @@ export default class AdminCreateServiceAccount extends APIRoute {
                 internalKey,
                 request.query.internal_name,
                 user.id,
-                permissions(USER_PERMISSIONS.UPLOAD, USER_PERMISSIONS.VIEW_OWN_FILES)
+                permissions(USER_PERMISSIONS.UPLOAD, USER_PERMISSIONS.VIEW_OWN_FILES),
+                false
             ]);
 
         return {
