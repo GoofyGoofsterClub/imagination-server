@@ -7,6 +7,24 @@ var PossibleActions = {
     "Delete": "Revoke access",
 }
 
+function selectText(nodeId) {
+    const node = document.getElementById(nodeId);
+
+    if (document.body.createTextRange) {
+        const range = document.body.createTextRange();
+        range.moveToElementText(node);
+        range.select();
+    } else if (window.getSelection) {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    } else {
+        console.warn("Could not select text in node: Unsupported browser.");
+    }
+}
+
 async function CheckLogin() {
     let key = localStorage.getItem("key");
     if (key == null) {
@@ -88,9 +106,10 @@ async function CheckLogin() {
             document.getElementById("__dashboard_logged_web_upload_error").classList.add("error-text");
             return;
         }
-        document.getElementById("__dashboard_logged_web_upload_error").innerHTML = `Uploaded successfully: <a href="${data.data.link}">${data.data.link}</a>`;
+        document.getElementById("__dashboard_logged_web_upload_error").innerHTML = `Uploaded successfully: <a id="link-selector0" href="${data.data.link}">${data.data.link}</a>`;
         document.getElementById("__dashboard_logged_web_upload_error").style.display = "block";
         document.getElementById("__dashboard_logged_web_upload_error").classList.remove("error-text");
+        selectText('link-selector0');
     }
 
     document.getElementById("__dashboard_logged_delete_all").onclick = async function () {
