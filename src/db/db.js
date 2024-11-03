@@ -38,4 +38,21 @@ export default class NewDatabaseController {
         let users = await this.query("SELECT * FROM uwuso.users WHERE access_key = $1", [accesskey]);
         return users.rows[0];
     }
+
+    async addEventListing(eventString, eventCaller)
+    {
+        eventType = (+Date.now()/1000).toFixed(0).toString();
+        if(!eventString) eventString = "Unknown";
+        if(!eventCaller) eventCaller = 1;
+
+        await server.db.query(`INSERT INTO uwuso.events (event_type, event_string, event_caller)
+            VALUES ($1::text, $2::text, $3::bigint)`,
+        [
+            eventType,
+            eventString,
+            eventCaller
+        ]);
+
+        return true;
+    }
 }
