@@ -62,8 +62,7 @@ export default class HTTPServer {
                 new Field("Request IP", request.ip, false)
             ));
 
-            // Set the status code to 400 so that external audit tools could automatically detect bot activity faster
-            reply.status(400);
+            reply.status(500);
 
             reply.view("error.ejs", {
                 "domain": request.headers['host'],
