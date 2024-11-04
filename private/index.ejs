@@ -56,10 +56,10 @@
         href="#welcome"
         style="opacity: 0"
         data-content="welcome"
-        ><span translatable-id="navbar-welcome">Welcome</span></a
+        ><span translatable-id="navbar-welcome" data-umami-event="Welcome button press">Welcome</span></a
       >
       <a class="nav-el" href="#faq" style="opacity: 0" data-content="faq"
-        ><span translatable-id="navbar-faq">FAQ</span></a
+        ><span translatable-id="navbar-faq" data-umami-event="FAQ button press">FAQ</span></a
       >
       <!-- <a class="nav-el" href="#setup" style="opacity: 0" data-content="setup"
         ><span translatable-id="navbar-setup">Setup</span></a
@@ -69,7 +69,7 @@
         href="#dashboard"
         style="opacity: 0"
         data-content="dashboard"
-        ><span translatable-id="navbar-dashboard">Dashboard</span></a
+        ><span translatable-id="navbar-dashboard" data-umami-event="Dashboard button press">Dashboard</span></a
       >
       <a class="nav-el bland language-selector" style="opacity: 0"
         ><span
@@ -87,14 +87,14 @@
   </noscript>
   <div class="content" style="transform: translateY(-100px); opacity: 0"></div>
   <div class="legal">
-    <a href="https://reze.moe/" class="me">reze.moe</a>
-    <a href="#" onclick="ChangePage('contribution'); return false;" class="me"
+    <a href="https://reze.moe/" class="me" data-umami-event="reze.moe button press">reze.moe</a>
+    <a href="#" onclick="ChangePage('contribution'); return false;" class="me" data-umami-event="Contributors button press"
       >contributors</a
     >
-    <a href="https://mishashto.com/terms" class="me"
+    <a href="https://mishashto.com/terms" class="me" data-umami-event="TOS button press"
       >tos</a
     >
-    <a href="https://mishashto.com/donate" class="me"
+    <a href="https://mishashto.com/donate" class="me" data-umami-event="Donate button press"
       >support</a
     >
     ♥
