@@ -8,16 +8,21 @@ Output.Log("Preparing the server...");
 
 (async () => {
     Output.Log("Connecting to the database...");
-
-    const db = await new DatabaseController(
-        process.env.MONGO_HOST,
-        process.env.MONGO_PORT,
-        'boobspics'
-    ).connect();
-
-    const ndb = await new NewDatabaseController();
-
-    Output.Log("Connected to the database!");
+    try {
+    
+        const db = await new DatabaseController(
+            process.env.MONGO_HOST,
+            process.env.MONGO_PORT,
+            'boobspics'
+        ).connect();
+    
+        const ndb = await new NewDatabaseController();
+    
+        Output.Log("Connected to the database!");
+    } catch (e){
+        Output.Warn(`Error while starting database: ${e}`);
+        process.exit(-1);
+    }
 
     Output.Log("Registering routes...");
     const server = new HTTPServer(db, ndb);
