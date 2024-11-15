@@ -8,15 +8,27 @@ Output.Log("Preparing the server...");
 
 (async () => {
     Output.Log("Connecting to the database...");
-        const db = await new DatabaseController(
+    
+    let db;
+    let ndb;
+
+    try
+    {
+        db = await new DatabaseController(
             process.env.MONGO_HOST,
             process.env.MONGO_PORT,
             'boobspics'
         ).connect();
     
-        const ndb = await new NewDatabaseController();
+        ndb = await new NewDatabaseController();
     
         Output.Log("Connected to the database!");
+    }
+    catch (e)
+    {
+        Output.Error("sys", `An error occurred while connecting to database: ${e}`);
+        process.exit(-1);
+    }
 
     Output.Log("Registering routes...");
     const server = new HTTPServer(db, ndb);
@@ -37,5 +49,5 @@ Output.Log("Preparing the server...");
         Output.Log("Server started!");
     });
 })().catch((error) => {
-    Output.Error("sys", "An error occured while starting the server:", error);
+    Output.Error("sys", "An error occurred while starting the server:", error);
 });
