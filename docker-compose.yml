@@ -61,7 +61,7 @@ services:
       redis-cache:
         condition: service_started
         restart: true
-    image: boobspics-web
+#    image: nekopavel/imagination-server:latest   #Uncomment this if you want to use prebuilt image
     ports:
       - $HTTP_EXPOSE_PORT:$HTTP_PORT
     volumes:
@@ -84,7 +84,7 @@ services:
       - REDISHOST=$REDIS_HOST
       - LOG_WEBHOOK=$LOG_WEBHOOK
       - SHORTENER_URI=$SHORTENER_URI
-    build: .
+    build: .                                      #Comment this line if using prebuilt image
 
 volumes:
   db:
