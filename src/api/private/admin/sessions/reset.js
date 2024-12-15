@@ -49,15 +49,18 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
                 "error": "Missing parameters."
             };
 
+        let target = await server.db.findUserByDisplayName(request.query.target);
+
         if (!target)
             return {
                 "success": false,
                 "error": "Invalid target."
             };
 
+
         let accessKey = "vX2~!" + uuidv4();
 
-        let target = await server.db.query(`UPDATE uwuso.users SET access_key = $2 WHERE username = $1`, [
+        let _target = await server.db.query(`UPDATE uwuso.users SET access_key = $2 WHERE username = $1`, [
             request.query.target,
             hash(accessKey)
         ]);
