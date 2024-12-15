@@ -65,7 +65,6 @@ services:
     ports:
       - $HTTP_EXPOSE_PORT:$HTTP_PORT
     volumes:
-      - ./:/usr/src/boobspics
       - uploads:/usr/src/boobspics/privateuploads
     container_name: boobspics-web
     restart: unless-stopped
