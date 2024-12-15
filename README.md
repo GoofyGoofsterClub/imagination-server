@@ -25,6 +25,7 @@ For code standards use the config provided for `Prettier`.
 ```bash
 $ git clone https://github.com/LMNYX/imagination-server.git
 $ cd imagination-server
+$ cp .example.env .env
 $ docker compose up -d
 ```
 
