@@ -58,7 +58,7 @@ services:
       mongo:
         condition: service_started
         restart: true
-      redis-cache:
+      redis:
         condition: service_started
         restart: true
 #    image: nekopavel/imagination-server:latest   #Uncomment this if you want to use prebuilt image
