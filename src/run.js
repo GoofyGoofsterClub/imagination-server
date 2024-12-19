@@ -8,26 +8,27 @@ Output.Log("Preparing the server...");
 
 (async () => {
     Output.Log("Connecting to the database...");
-    
+
     let db;
     let ndb;
+    let databaseConnectionSuccess = false;
 
-    try
-    {
-        db = await new DatabaseController(
-            process.env.MONGO_HOST,
-            process.env.MONGO_PORT,
-            'boobspics'
-        ).connect();
-    
-        ndb = await new NewDatabaseController();
-    
-        Output.Log("Connected to the database!");
-    }
-    catch (e)
-    {
-        Output.Error("sys", `An error occurred while connecting to database: ${e}`);
-        process.exit(-1);
+    while (!databaseConnectionSuccess) {
+        try {
+            db = await new DatabaseController(
+                process.env.MONGO_HOST,
+                process.env.MONGO_PORT,
+                'boobspics'
+            ).connect();
+
+            ndb = await new NewDatabaseController();
+
+            Output.Log("Connected to the database!");
+            databaseConnectionSuccess = true;
+        }
+        catch (e) {
+            Output.Error("sys", `An error occurred while connecting to database: ${e}`);
+        }
     }
 
     Output.Log("Registering routes...");
