@@ -5,8 +5,7 @@ import DatabaseController from "db/old";
 import NewDatabaseController from "db/db";
 
 Output.Log("Preparing the server...");
-
-(async () => {
+const run = async () => {
     Output.Log("Connecting to the database...");
 
     let db;
@@ -49,6 +48,19 @@ Output.Log("Preparing the server...");
     server.start(process.env.HTTP_PORT).then(() => {
         Output.Log("Server started!");
     });
-})().catch((error) => {
+}
+
+async function runWrapper() {
+    try {
+        await run();
+    }
+    catch (e) {
+        Output.Error("sys", "An error occurred while starting the server:", e);
+        Output.Log("Retrying...");
+        await runWrapper();
+    }
+}
+
+runWrapper().catch((error) => {
     Output.Error("sys", "An error occurred while starting the server:", error);
 });
