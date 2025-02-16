@@ -23,6 +23,12 @@ services:
         reservations:
           cpus: '0.25'
           memory: 64M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
 
   redis:
     image: redis:latest
@@ -46,14 +52,20 @@ services:
 
   web:
     depends_on:
-      - postgres
-      - mongo
-      - redis
-    image: boobspics-web
+      postgres:
+        condition: service_healthy
+        restart: true
+      mongo:
+        condition: service_started
+        restart: true
+      redis:
+        condition: service_started
+        restart: true
+#    image: nekopavel/imagination-server:latest   #Uncomment this if you want to use prebuilt image
     ports:
       - $HTTP_EXPOSE_PORT:$HTTP_PORT
     volumes:
-      - ./:/usr/src/boobspics
+      - uploads:/usr/src/boobspics/privateuploads
     container_name: boobspics-web
     restart: unless-stopped
     env_file:
@@ -71,9 +83,10 @@ services:
       - REDISHOST=$REDIS_HOST
       - LOG_WEBHOOK=$LOG_WEBHOOK
       - SHORTENER_URI=$SHORTENER_URI
-    build: .
+    build: .                                      #Comment this line if using prebuilt image
 
 volumes:
   db:
   pdb:
   redisdb:
+  uploads:

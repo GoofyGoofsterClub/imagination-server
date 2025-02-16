@@ -1,5 +1,5 @@
 {
-    "generationTimestamp": "2024-07-21T15:17:00.177Z",
+    "generationTimestamp": "2024-12-15T12:18:47.221Z",
     "routes": [
         {
             "path": "api/initial",
@@ -121,6 +121,28 @@
                 ],
                 "returns": "Nothing",
                 "returnexample": "{ \"success\": true }"
+            }
+        },
+        {
+            "path": "api/private/admin/sessions/reset",
+            "method": "GET",
+            "description": "Resets user's access key",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": true,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    },
+                    {
+                        "type": "string",
+                        "name": "target"
+                    }
+                ],
+                "returns": "A key",
+                "returnexample": "{ \"success\": true, \"value\": \"\" }"
             }
         },
         {

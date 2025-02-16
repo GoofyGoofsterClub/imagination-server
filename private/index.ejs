@@ -14,6 +14,7 @@
     content="The only way I know how to upload files now"
   />
   <link rel="stylesheet" href="/public/css/new.css" />
+  <script defer src="https://a.uwu.so/script.js" data-website-id="04d5eaa1-173a-4e93-ac90-c1a523f759e9"></script>
   <script src="/public/js/anime.min.js"></script>
   <script src="/public/js/tooltips.js"></script>
   <script src="/public/js/rankdata.js"></script>
@@ -55,9 +56,10 @@
         href="#welcome"
         style="opacity: 0"
         data-content="welcome"
+        data-umami-event="Welcome button press"
         ><span translatable-id="navbar-welcome">Welcome</span></a
       >
-      <a class="nav-el" href="#faq" style="opacity: 0" data-content="faq"
+      <a class="nav-el" href="#faq" style="opacity: 0" data-content="faq" data-umami-event="FAQ button press"
         ><span translatable-id="navbar-faq">FAQ</span></a
       >
       <!-- <a class="nav-el" href="#setup" style="opacity: 0" data-content="setup"
@@ -68,6 +70,7 @@
         href="#dashboard"
         style="opacity: 0"
         data-content="dashboard"
+        data-umami-event="Dashboard button press"
         ><span translatable-id="navbar-dashboard">Dashboard</span></a
       >
       <a class="nav-el bland language-selector" style="opacity: 0"
@@ -86,9 +89,15 @@
   </noscript>
   <div class="content" style="transform: translateY(-100px); opacity: 0"></div>
   <div class="legal">
-    <a href="https://reze.moe/" class="me">reze.moe</a>
-    <a href="#" onclick="ChangePage('contribution'); return false;"
+    <a href="https://reze.moe/" class="me" data-umami-event="reze.moe button press">reze.moe</a>
+    <a href="#" onclick="ChangePage('contribution'); return false;" class="me" data-umami-event="Contributors button press"
       >contributors</a
+    >
+    <a href="https://mishashto.com/terms" class="me" data-umami-event="TOS button press"
+      >tos</a
+    >
+    <a href="https://mishashto.com/donate" class="me" data-umami-event="Donate button press"
+      >support</a
     >
     ♥
   </div>

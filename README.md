@@ -10,6 +10,10 @@ A file server with built-in user and file management, built on NodeJS.
 
 ## Contributing
 
+> [!NOTE]  
+> This codebase is feature-locked and will only be modified when a feature-breaking bug is discovered.
+> Please check out the new version of media server when it's out!
+
 Imagination server welcomes all contributors, but keep in mind that the project is mostly finished and no new features are being considered as of now. If you wish to add a new section, feature, or change design, please open an issue first, before creating a pull request, to insure that you don't waste your time for nothing.
 
 <!-- If you wish to help translate project, please use [POEditor](https://poeditor.com/join/project/GWroOdMlYw). If the project is full and you wish to contribute for a language that is not yet on the website, please email `me@reze.moe`.
@@ -25,6 +29,7 @@ For code standards use the config provided for `Prettier`.
 ```bash
 $ git clone https://github.com/LMNYX/imagination-server.git
 $ cd imagination-server
+$ cp .example.env .env
 $ docker compose up -d
 ```
 

@@ -26,12 +26,13 @@ export default class UploadsNewAPIRoute extends APIRoute {
         let user;
 
         let isServiceUpload = false;
+        let serviceAccountAttempt;
         let doesUserExist = await server.db.doesUserExistByAccessKey(hash(request.headers["authorization"]));
 
         if (!doesUserExist) {
-            let serviceAccountAttempt = await server.db.query(`SELECT * FROM uwuso.services WHERE access_key = $1::text`, [hash(request.headers["authorization"])]);
+            serviceAccountAttempt = await server.db.query(`SELECT * FROM uwuso.services WHERE access_key = $1::text`, [hash(request.headers["authorization"])]);
 
-            if (serviceAccountAttempt.rows.length < 1)
+            if (!serviceAccountAttempt || serviceAccountAttempt.rows.length < 1)
                 return {
                     "success": false,
                     "error": "Invalid key."
