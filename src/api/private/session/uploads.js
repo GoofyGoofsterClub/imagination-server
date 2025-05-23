@@ -31,7 +31,7 @@ export default class SessionUploadsAPIRoute extends APIRoute {
         if (user.banned)
             return { "success": false, "error": "You are banned." };
 
-        let uploads = await server.db.query(`SELECT * FROM uwuso.uploads WHERE uploader_id = $1::bigint`, [user.id]);
+        let uploads = await server.db.query(`SELECT * FROM uwuso.uploads WHERE uploader_id = $1::bigint ORDER BY upload_time ASC`, [user.id]);
 
         return {
             "success": true,
