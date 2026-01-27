@@ -32,17 +32,16 @@ export default class CheckSessionInfoAPIRoute extends APIRoute {
         reply.header('Content-Disposition',
             `attachment; filename=${user.username}.sxcu`);
         return {
-            "Version": "13.7.0",
-            "Name": request.headers['host'],
-            "DestinationType": "ImageUploader, TextUploader, FileUploader",
+            "Version": "18.0.1",
+            "DestinationType": "ImageUploader, FileUploader",
             "RequestMethod": "POST",
-            "RequestURL": `https://${request.headers['host']}/api/private/uploads/new`,
+            "RequestURL": "https://uwu.so/api/private/uploads/new",
             "Headers": {
                 "Authorization": request.query.key
             },
             "Body": "MultipartFormData",
             "FileFormName": "image",
-            "URL": "$json:data.link$"
+            "URL": "{json:data.link}"
         };
     }
 }
