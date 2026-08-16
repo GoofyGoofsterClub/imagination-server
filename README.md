@@ -1,30 +1,7 @@
 # Imagination Server
 
 > [!WARNING]  
-> This project is deprecated. All original imagination server instances will go offline on July 1st, 2027 due to the technical debt and lack of interest to continue the project.
-> Please see [Phantasia](https://github.com/GoofyGoofsterClub/phantasia), an imagination server work-in-progress successor.
->
-> Yes, I am deprecating a project without a stable successor project in mind, because Phantasia itself **is also out of scope of my interest** for now, that means there will be no continuation of this project as of now (June 18th, 2026).
->
-> For now, please find a better implementation somewhere else. You can star and watch the [Phantasia](https://github.com/GoofyGoofsterClub/phantasia)'s repository to know when I get motivation to get back on track.
->
-<details>
-<summary>⚠️ &lt;CLICK&gt; For previous and active original instance (uwu.so) users &lt;CLICK&gt; ⚠️</summary>
-
-As I am not yet sure if Phantasia will ever be complete, I cannot be sure if I will migrate uwu.so to it. I'd recommend downloading important files and uploading them somewhere else.
-
-When and if I realize that I will 100% not be migrating to Phantasia I will open an archive download for all users (even banned ones) to get their stuff downloaded fast and easy. However, if I do migrate to Phantasia all your files will be migrated and you will be able to keep using the uwu.so instance as usual, minus the API changes.
-
-### Changes
-
-Because Phantasia is a complete rewrite and a major upgrade there **will be** major API structure changes. That means your uploader will break and that is guaranteed. You might not like it, you might say "well you could add a redirect for old route users", but the entire point of Phantasia was to get rid of technical debt we've collected over the time and that will completely contradict the point.
-
-Database structure is also changed that means there might be some inaccuracy at the beginning, however I'll try to mitigate that. That also means new users (which is rare) will have different API keys.
-
-Also, since the beginning I've managed all the keys, when it was just a JSON file, since then we've came a long way and there is still no way to reset a key without my help, that will change in Phantasia, because we're adding zero-assist key resets using additional (completely optional) account links.
-
-<br><hr>
-</details>
+> This project is deprecated. An updated statement available on [a dedicated page](https://do.varesa.moe/GOODBYE.txt).
 
 A file server with built-in user and file management, built on NodeJS.
 
