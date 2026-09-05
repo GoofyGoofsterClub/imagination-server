@@ -73,7 +73,11 @@ export default class HTTPServer {
     }
 
     async registerPlugins() {
-        await this.server.register(fastifyMultipart);
+        await this.server.register(fastifyMultipart, {
+            limits: {
+                fileSize: Infinity
+            }
+        });
         await this.server.register(fastifyCookie);
         await this.server.register(fastifyStatic, {
             root: `${__dirname}/../../public`,
