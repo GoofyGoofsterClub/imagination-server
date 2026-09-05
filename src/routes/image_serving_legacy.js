@@ -10,7 +10,7 @@ export default class ImageServing extends Route {
 
         if (fileInfo.rows.length < 1) {
             reply.status(404);
-            return reply.view("error.ejs", {
+            return reply.viewAsync("error.ejs", {
                 "error_title": "Not Found",
                 "error_message": "<p>This page doesn't exist.</p><img src='/public/img/uhhh.jpg'>"
             });

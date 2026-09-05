@@ -38,11 +38,11 @@ export class Route {
 
     async callWrapper(request, reply, server, handler) {
         if (server.server._public.initialSetup) {
-            return reply.view('initial-setup.ejs');
+            return reply.viewAsync('initial-setup.ejs');
         }
         if (server.server._public.Maintenance && server.server._public.Maintenance.value.mode >= 2) {
             reply.status(503);
-            return reply.view('maintenance.ejs', { reason: server.server._public.Maintenance.value.message });
+            return reply.viewAsync('maintenance.ejs', { reason: server.server._public.Maintenance.value.message });
         }
         return await handler(request, reply, server);
     }

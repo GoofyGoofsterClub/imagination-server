@@ -9,7 +9,7 @@ export default class IndexRoute extends Route
 
     async call(request, reply)
     {
-        reply.view("index.ejs", {
+        return reply.viewAsync("index.ejs", {
             "domain": request.headers['host']
         });
     }

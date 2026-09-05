@@ -14,7 +14,7 @@ export default class InviteRoute extends Route {
                                                 WHERE uwuso.invites.hash = $1::text;`, [request.params.key]);
 
         if (inviteInfo.rows.length < 1)
-            return reply.view("error.ejs", {
+            return reply.viewAsync("error.ejs", {
                 "error_title": "Invalid invite",
                 "error_message": "The invite you have provided is invalid."
             });
@@ -22,12 +22,12 @@ export default class InviteRoute extends Route {
         let doesUserExist = await server.db.findUserByDisplayName(inviteInfo.rows[0].username);
 
         if (doesUserExist)
-            return reply.view("error.ejs", {
+            return reply.viewAsync("error.ejs", {
                 "error_title": "Invalid invite",
                 "error_message": "The invite you have provided is invalid."
             });
 
-        return reply.view("invite.ejs", {
+        return reply.viewAsync("invite.ejs", {
             "invite": inviteInfo.rows[0]
         });
     }

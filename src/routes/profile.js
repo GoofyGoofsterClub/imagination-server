@@ -9,7 +9,7 @@ export default class ProfileRoute extends Route
 
     async call(request, reply)
     {
-        reply.view("profile.ejs", {
+        return reply.viewAsync("profile.ejs", {
             "username": request.params.username
         });
     }

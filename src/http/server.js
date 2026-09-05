@@ -1,9 +1,9 @@
 import fastify from "fastify";
-import fastifyMultipart from "fastify-multipart";
-import fastifyCookie from "fastify-cookie";
-import fastifyStatic from "fastify-static";
+import fastifyMultipart from "@fastify/multipart";
+import fastifyCookie from "@fastify/cookie";
+import fastifyStatic from "@fastify/static";
 import eta from "eta";
-import pointOfView from "point-of-view";
+import pointOfView from "@fastify/view";
 import { PresetOutput } from "utilities/output";
 import { ExternalLogging, Field, buildMessage } from "utilities/logexternal";
 import Authenticate from "utilities/authentication";
@@ -30,8 +30,8 @@ export default class HTTPServer {
     }
 
     async register404() {
-        this.server.setNotFoundHandler((request, reply) => {
-            reply.view("404.ejs", {
+        this.server.setNotFoundHandler(async (request, reply) => {
+            return reply.viewAsync("404.ejs", {
                 "domain": request.headers['host']
             });
         });
@@ -64,7 +64,7 @@ export default class HTTPServer {
 
             reply.status(500);
 
-            reply.view("error.ejs", {
+            return reply.viewAsync("error.ejs", {
                 "domain": request.headers['host'],
                 "error_title": "An error occured while processing your request",
                 "error_message": error
@@ -79,11 +79,17 @@ export default class HTTPServer {
             root: `${__dirname}/../../public`,
             prefix: "/public/"
         });
+        const etaEngine = {
+            configure: (opts) => eta.configure(opts),
+            render: (file, data, config) => eta.renderFile(file, data, config),
+            renderAsync: (file, data, config) => eta.renderFileAsync(file, data, config)
+        };
+
         await this.server.register(pointOfView, {
             engine: {
-                eta: eta
+                eta: etaEngine
             },
-            templates: `${__dirname}/../../private`
+            root: `${__dirname}/../../private`
         });
 
         this.server._public = {
