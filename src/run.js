@@ -1,4 +1,4 @@
-import Output from "utilities/output";
+import Output, { shutdownLogger } from "utilities/output";
 import HTTPServer from "http/server";
 import HTTPRouting from "http/routing";
 import DatabaseController from "db/old";
@@ -64,3 +64,12 @@ async function runWrapper() {
 runWrapper().catch((error) => {
     Output.Error("sys", "An error occurred while starting the server:", error);
 });
+
+async function gracefulShutdown(signal) {
+    Output.Log("sys", `Received ${signal}, shutting down...`);
+    await shutdownLogger();
+    process.exit(0);
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
