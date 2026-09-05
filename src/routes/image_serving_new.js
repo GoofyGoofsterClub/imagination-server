@@ -34,8 +34,6 @@ export default class NewImageServing extends Route {
 
         reply.type(file.mimetype);
 
-        reply.sendFile(file.disk_filename, {
-            "root": `${__dirname}/../../privateuploads`
-        });
+        return reply.sendFile(file.disk_filename, `${__dirname}/../../privateuploads`, { contentType: false });
     }
 }
