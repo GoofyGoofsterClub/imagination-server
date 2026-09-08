@@ -2,7 +2,7 @@ import 'colors';
 import { logs, SeverityNumber } from '@opentelemetry/api-logs';
 import { LoggerProvider, BatchLogRecordProcessor } from '@opentelemetry/sdk-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
-import { Resource } from '@opentelemetry/resources';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
 const OTLP_ENDPOINT = process.env.OTLP_LOG_ENDPOINT;
@@ -14,7 +14,7 @@ let otlpEnabled = false;
 
 if (OTLP_ENDPOINT) {
     try {
-        const resource = new Resource({
+        const resource = resourceFromAttributes({
             [SemanticResourceAttributes.SERVICE_NAME]: OTLP_SERVICE_NAME,
             [SemanticResourceAttributes.SERVICE_VERSION]: process.env.npm_package_version || '1.0.0'
         });
@@ -23,8 +23,10 @@ if (OTLP_ENDPOINT) {
             url: OTLP_ENDPOINT
         });
 
-        loggerProvider = new LoggerProvider({ resource });
-        loggerProvider.addLogRecordProcessor(new BatchLogRecordProcessor(exporter));
+        loggerProvider = new LoggerProvider({
+            resource,
+            processors: [new BatchLogRecordProcessor(exporter)]
+        });
         logs.setGlobalLoggerProvider(loggerProvider);
 
         logger = logs.getLogger(OTLP_SERVICE_NAME);
