@@ -101,7 +101,8 @@ export default class HTTPServer {
             "Output": this.Output,
             "ExternalLogging": this.externalLogging,
             "Ratelimits": [],
-            "Maintenance": false
+            "Maintenance": false,
+            "StatisticsCache": null
         };
 
         let isMaintenance = false;

@@ -265,8 +265,9 @@ function SetContent(content) {
 }
 
 async function GetUploadCount(event) {
-    const _v = await fetch('/api/public/uploads/count');
-    const _v_json = await _v.json();
-    document.getElementById("__upload_counter").innerText = _v_json.count;
+    const response = await fetch('/api/public/uploads/count');
+    const data = await response.json();
+    document.getElementById("__upload_counter").innerText = Number(data.uploads ?? data.count).toLocaleString();
+    document.getElementById("__views_counter").innerText = Number(data.views ?? 0).toLocaleString();
     event.remove();
 }
