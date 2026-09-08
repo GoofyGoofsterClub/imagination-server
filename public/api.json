@@ -1,5 +1,5 @@
 {
-    "generationTimestamp": "2024-12-15T12:18:47.221Z",
+    "generationTimestamp": "2026-09-08T12:26:38.158Z",
     "routes": [
         {
             "path": "api/initial",
@@ -86,19 +86,6 @@
                 ],
                 "returns": "New value",
                 "returnexample": "{ \"success\": true, \"value\": \"\" }"
-            }
-        },
-        {
-            "path": "api/private/admin/sessions/recalculate",
-            "method": "GET",
-            "description": "Recalculates all sessions' rating.",
-            "params": {
-                "private": false,
-                "needsauth": true,
-                "adminonly": true,
-                "params": {},
-                "returns": "Nothing",
-                "returnexample": "{ \"success\": true }"
             }
         },
         {
@@ -350,24 +337,6 @@
             }
         },
         {
-            "path": "api/private/session/rating",
-            "method": "GET",
-            "description": "Recalculates and returns the rating of a user.",
-            "params": {
-                "private": false,
-                "needsauth": true,
-                "adminonly": false,
-                "params": [
-                    {
-                        "type": "string",
-                        "name": "key"
-                    }
-                ],
-                "returns": "Recalculates and returns the rating of a user.",
-                "returnexample": "{ \"success\": true, \"rating\": 0.58488221 }"
-            }
-        },
-        {
             "path": "api/private/session/uploads",
             "method": "GET",
             "description": "Returns all user's uploads",
@@ -458,7 +427,7 @@
                     }
                 ],
                 "returns": "Publically available information about a user.",
-                "returnexample": "{ \"success\": true, \"data\": { \"displayName\": \"test\", \"rating\": 0, \"uploads\": 0, \"invitedBy\": null, \"administrator\": false, \"views\": 0, \"badges\": [], \"paint\": null, \"isBanned\": false }"
+                "returnexample": "{ \"success\": true, \"data\": { \"displayName\": \"test\", \"uploads\": 0, \"invitedBy\": null, \"administrator\": false, \"views\": 0, \"badges\": [], \"paint\": null, \"isBanned\": false } }"
             }
         },
         {
