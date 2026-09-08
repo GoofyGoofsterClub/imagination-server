@@ -8,7 +8,7 @@
     "start": "babel src -d lib && node ./lib/run.js"
   },
   "author": "",
-  "license": "ISC",
+  "license": "GPL-2.0-only",
   "dependencies": {
     "@fastify/cookie": "^11.1.2",
     "@fastify/formbody": "^9.0.0",
