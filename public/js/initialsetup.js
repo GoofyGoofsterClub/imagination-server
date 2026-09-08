@@ -4,7 +4,6 @@ window.onload = async () => {
     const ERROR_ELEMENT = document.querySelector("#initialsetup-error-text");
     const INITIALSETUP_FIELDS = {
         "ROOT_USERNAME": document.querySelector("#initialsetup-username"),
-        "WEB_TITLE": document.querySelector("#initialsetup-title"),
     }
     const SUBMIT_BUTTON = document.querySelector("button.input-button");
 
@@ -33,8 +32,7 @@ window.onload = async () => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                "rootUsername": INITIALSETUP_FIELDS.ROOT_USERNAME.value,
-                "webTitle": INITIALSETUP_FIELDS.WEB_TITLE.value
+                "rootUsername": INITIALSETUP_FIELDS.ROOT_USERNAME.value
             })
         });
 

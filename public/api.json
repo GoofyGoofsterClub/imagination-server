@@ -1,10 +1,10 @@
 {
-    "generationTimestamp": "2026-09-08T13:14:31.438Z",
+    "generationTimestamp": "2026-09-08T13:21:22.075Z",
     "routes": [
         {
             "path": "api/initial",
             "method": "POST",
-            "description": "Sets up the initial configuration of the server, creating a new user and giving access to it.",
+            "description": "Creates the initial root user and gives it full access.",
             "params": {
                 "private": false,
                 "needsauth": false,

@@ -11,7 +11,7 @@ import hash from "utilities/hash";
 @params []
 @returns Key of an initial user
 @returnexample { "key": "XXXX-XXXX-XXXX-XXXX" }
-Sets up the initial configuration of the server, creating a new user and giving access to it.
+Creates the initial root user and gives it full access.
 
 */
 export default class InitialSetupAPIRoute extends APIRoute {
