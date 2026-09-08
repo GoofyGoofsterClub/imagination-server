@@ -1,5 +1,5 @@
 {
-    "generationTimestamp": "2026-09-08T12:44:16.754Z",
+    "generationTimestamp": "2026-09-08T13:14:31.438Z",
     "routes": [
         {
             "path": "api/initial",
@@ -471,14 +471,14 @@
         {
             "path": "api/public/uploads/count",
             "method": "GET",
-            "description": "Counts the number of uploads in the database.",
+            "description": "Returns cached aggregate totals for uploads and image views.",
             "params": {
                 "private": false,
                 "needsauth": false,
                 "adminonly": false,
                 "params": {},
-                "returns": "The number of uploads in the database.",
-                "returnexample": "{ \"count\": 123 }"
+                "returns": "Total uploads and views.",
+                "returnexample": "{ \"count\": 123, \"uploads\": 123, \"views\": 456 }"
             }
         }
     ]
