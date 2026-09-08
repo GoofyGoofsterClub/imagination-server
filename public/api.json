@@ -1,5 +1,5 @@
 {
-    "generationTimestamp": "2026-09-08T12:26:38.158Z",
+    "generationTimestamp": "2026-09-08T12:44:16.754Z",
     "routes": [
         {
             "path": "api/initial",
@@ -348,6 +348,26 @@
                     {
                         "type": "string",
                         "name": "key"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page"
+                    },
+                    {
+                        "type": "string",
+                        "name": "search"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "from"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "to"
+                    },
+                    {
+                        "type": "string",
+                        "name": "sort"
                     }
                 ],
                 "returns": "Returns all user's uploads",
