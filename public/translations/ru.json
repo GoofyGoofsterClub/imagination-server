@@ -5,8 +5,9 @@
     "main-header": "Cute File Uploader",
     "main-header-sub": "Лучший способ загрузки файлов, который я знаю",
     "welcome-header": "Добро пожаловать!",
-    "welcome-uploads-before": "На этом сервисе уже",
-    "welcome-uploads-after": "загрузок!",
+    "welcome-uploads-before": "Наше сообщество уже загрузило",
+    "welcome-uploads-after": "файлов и получило",
+    "welcome-views-after": "просмотров."
     "navbar-welcome": "Добро пожаловать!",
     "navbar-faq": "FAQ",
     "navbar-setup": "Установка",

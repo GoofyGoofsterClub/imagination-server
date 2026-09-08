@@ -5,8 +5,9 @@
     "main-header": "Cute File Uploader",
     "main-header-sub": "The only way I know how to upload files now",
     "welcome-header": "Welcome!",
-    "welcome-uploads-before": "We've got",
-    "welcome-uploads-after": "uploads so far!",
+    "welcome-uploads-before": "So far, our community has shared",
+    "welcome-uploads-after": "files and received",
+    "welcome-views-after": "views."
     "navbar-welcome": "Welcome",
     "navbar-faq": "FAQ",
     "navbar-setup": "Setup",

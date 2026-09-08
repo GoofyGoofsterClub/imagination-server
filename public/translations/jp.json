@@ -5,8 +5,9 @@
     "main-header": "Cute File Uploader",
     "main-header-sub": "最高のファイルアップローダ",
     "welcome-header": "いらっしゃいませ!",
-    "welcome-uploads-before": " ",
-    "welcome-uploads-after": "件のアップロードがある!",
+    "welcome-uploads-before": "これまでにコミュニティで",
+    "welcome-uploads-after": "件のファイルが共有され、",
+    "welcome-views-after": "回閲覧されました。"
     "navbar-welcome": "いらっしゃいませ！",
     "navbar-faq": "よくある質問",
     "navbar-setup": "インストール",
