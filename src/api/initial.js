@@ -27,7 +27,8 @@ export default class InitialSetupAPIRoute extends APIRoute {
             return { "error": "Server is already setup." };
         }
 
-        request.body = JSON.parse(request.body);
+        if (typeof request.body === "string")
+            request.body = JSON.parse(request.body);
 
         let accessKey = "vX2~!" + uuidv4();
 

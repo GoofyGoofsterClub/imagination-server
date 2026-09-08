@@ -29,6 +29,9 @@ window.onload = async () => {
 
         let initialSetupAPIRequest = await fetch('/api/initial', {
             method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({
                 "rootUsername": INITIALSETUP_FIELDS.ROOT_USERNAME.value,
                 "webTitle": INITIALSETUP_FIELDS.WEB_TITLE.value

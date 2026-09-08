@@ -174,6 +174,12 @@
   <input id="__dashboard_logged_uploads_search" type="search" placeholder="Search uploads by filename" />
   <label>From <input id="__dashboard_logged_uploads_from" type="datetime-local" /></label>
   <label>To <input id="__dashboard_logged_uploads_to" type="datetime-local" /></label>
+  <label>Sort
+    <select class="input-button" id="__dashboard_logged_uploads_sort">
+      <option value="DESC" selected>Newest first</option>
+      <option value="ASC">Oldest first</option>
+    </select>
+  </label>
   <button class="input-button" id="__dashboard_logged_uploads_search_button">Search</button>
 </p>
 <table id="__dashboard_logged_uploads_table">

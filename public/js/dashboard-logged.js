@@ -647,7 +647,12 @@ function updatePagination(type, data) {
 
 async function GetUploads() {
     const page = window.dashboardUploadsPage || 1;
-    const params = new URLSearchParams({ key: localStorage.getItem("key"), page, search: document.getElementById("__dashboard_logged_uploads_search").value.trim() });
+    const params = new URLSearchParams({
+        key: localStorage.getItem("key"),
+        page,
+        search: document.getElementById("__dashboard_logged_uploads_search").value.trim(),
+        sort: document.getElementById("__dashboard_logged_uploads_sort").value
+    });
     const from = document.getElementById("__dashboard_logged_uploads_from").value;
     const to = document.getElementById("__dashboard_logged_uploads_to").value;
     if (from) params.set("from", Math.floor(new Date(from).getTime() / 1000));
@@ -678,6 +683,7 @@ function setupDashboardFilters() {
     document.getElementById("__dashboard_logged_users_search_button").onclick = () => { window.dashboardUsersPage = 1; GetUsers(); };
     document.getElementById("__dashboard_logged_users_search").onkeydown = (event) => { if (event.key === "Enter") document.getElementById("__dashboard_logged_users_search_button").click(); };
     document.getElementById("__dashboard_logged_uploads_search_button").onclick = () => { window.dashboardUploadsPage = 1; GetUploads(); };
+    document.getElementById("__dashboard_logged_uploads_sort").onchange = () => { window.dashboardUploadsPage = 1; GetUploads(); };
 }
 
 async function DeleteFile(index, filename, deletehash) {

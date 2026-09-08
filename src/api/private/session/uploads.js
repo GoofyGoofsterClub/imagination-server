@@ -6,7 +6,7 @@ import hash from "utilities/hash";
 @private false
 @needsauth true
 @adminonly false
-@params [(string) key]
+@params [(string) key, (integer) page, (string) search, (integer) from, (integer) to, (string) sort]
 @returns Returns all user's uploads
 @returnexample { "success": true, "data": [...] }
 Returns all user's uploads
@@ -33,6 +33,9 @@ export default class SessionUploadsAPIRoute extends APIRoute {
 
         const page = Math.max(1, parseInt(request.query.page, 10) || 1);
         const pageSize = 50;
+        const sort = (request.query.sort || "DESC").toUpperCase();
+        if (sort !== "ASC" && sort !== "DESC")
+            return { "success": false, "error": "Invalid upload time sort order." };
         const offset = (page - 1) * pageSize;
         const search = (request.query.search || "").trim();
         const searchPattern = `%${search}%`;
@@ -58,7 +61,7 @@ export default class SessionUploadsAPIRoute extends APIRoute {
             FROM uwuso.uploads
             WHERE uploader_id = $1::bigint
               AND filename ILIKE $2::text${dateClause}
-            ORDER BY upload_time DESC
+            ORDER BY upload_time ${sort}
             LIMIT $${limitIndex}::integer OFFSET $${offsetIndex}::integer`,
             [...filters, pageSize, offset]);
 
