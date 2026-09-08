@@ -31,11 +31,45 @@ export default class SessionUploadsAPIRoute extends APIRoute {
         if (user.banned)
             return { "success": false, "error": "You are banned." };
 
-        let uploads = await server.db.query(`SELECT * FROM uwuso.uploads WHERE uploader_id = $1::bigint ORDER BY upload_time ASC`, [user.id]);
+        const page = Math.max(1, parseInt(request.query.page, 10) || 1);
+        const pageSize = 50;
+        const offset = (page - 1) * pageSize;
+        const search = (request.query.search || "").trim();
+        const searchPattern = `%${search}%`;
+        const from = request.query.from ? parseInt(request.query.from, 10) : null;
+        const to = request.query.to ? parseInt(request.query.to, 10) : null;
+        const filters = [user.id, searchPattern];
+        let dateClause = "";
+        if (Number.isFinite(from)) {
+            filters.push(from);
+            dateClause += ` AND upload_time >= $${filters.length}::bigint`;
+        }
+        if (Number.isFinite(to)) {
+            filters.push(to);
+            dateClause += ` AND upload_time <= $${filters.length}::bigint`;
+        }
+        if (Number.isFinite(from) && Number.isFinite(to) && from > to)
+            return { "success": false, "error": "The start date must be before the end date." };
+        const limitIndex = filters.length + 1;
+        const offsetIndex = filters.length + 2;
+        const uploads = await server.db.query(`
+            SELECT id, filename, upload_time, upload_domain,
+                   COUNT(*) OVER() AS total_count
+            FROM uwuso.uploads
+            WHERE uploader_id = $1::bigint
+              AND filename ILIKE $2::text${dateClause}
+            ORDER BY upload_time DESC
+            LIMIT $${limitIndex}::integer OFFSET $${offsetIndex}::integer`,
+            [...filters, pageSize, offset]);
 
+        const total = uploads.rows.length > 0 ? Number(uploads.rows[0].total_count) : 0;
         return {
             "success": true,
-            "data": uploads.rows
+            "data": uploads.rows,
+            "page": page,
+            "pageSize": pageSize,
+            "total": total,
+            "totalPages": Math.ceil(total / pageSize)
         };
     }
 }

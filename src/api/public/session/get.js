@@ -8,7 +8,7 @@ import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 @adminonly false
 @params [(string) target]
 @returns Publically available information about a user.
-@returnexample { "success": true, "data": { "displayName": "test", "rating": 0, "uploads": 0, "invitedBy": null, "administrator": false, "views": 0, "badges": [], "paint": null, "isBanned": false }
+@returnexample { "success": true, "data": { "displayName": "test", "uploads": 0, "invitedBy": null, "administrator": false, "views": 0, "badges": [], "paint": null, "isBanned": false } }
 Gets publically available information about a user.
 
 */
@@ -37,7 +37,7 @@ export default class PublicSessionGetAPIRoute extends APIRoute {
                 "success": true,
                 "data": {
                     "displayName": user.username,
-                    "rating": 0,
+
                     "uploads": 0,
                     "invitedBy": null,
                     "administrator": false,
@@ -52,7 +52,7 @@ export default class PublicSessionGetAPIRoute extends APIRoute {
             "success": true,
             "data": {
                 "displayName": user.username,
-                "rating": 1, // -- TO-DO: Remove
+
                 "uploads": user.uploads ?? 0,
                 "invitedBy": null,
                 "administrator": hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR),

@@ -193,19 +193,6 @@ async function CheckLogin() {
         ChangePage("dangerzone");
     }
 
-    document.getElementById("__dashboard_logged_recalc_all").onclick = async function () {
-        document.getElementById("__dashboard_logged_recalc_all").disabled = true;
-        let _resp = await fetch("/api/private/admin/sessions/recalculate?key=" + key);
-        _resp = await _resp.json();
-
-        if (!_resp.success) {
-            alert("Welp. It failed!");
-            document.getElementById("__dashboard_logged_recalc_all").disabled = false;
-            return;
-        }
-        alert("All done!");
-        document.getElementById("__dashboard_logged_recalc_all").disabled = false;
-    }
 
     document.getElementById("__dashboard_logged_delete_account_button_DO_NOT_CLICK").onclick = async function () {
         document.getElementById("__dashboard_logged_delete_account_button_DO_NOT_CLICK").disabled = true;
@@ -222,6 +209,7 @@ async function CheckLogin() {
         location.reload();
     }
 
+    setupDashboardFilters();
     GetUploads();
 
     if (userInfo.administrator) {
@@ -237,7 +225,7 @@ async function GetUserInfo() {
     return data.data;
 }
 
-async function GetUsers() {
+async function GetUsersLegacy() {
     let key = localStorage.getItem("key");
     let response = await fetch("/api/private/admin/sessions?key=" + key);
 
@@ -257,14 +245,8 @@ async function GetUsers() {
         let cell = row.insertCell();
         let image = document.createElement("img");
 
-        let ranks2 = [...Ranks].reverse();
-        data.data[i].rating = 1;
-        for (var j = 0; j < ranks2.length; j++) {
-            if (data.data[i].rating >= ranks2[j].rating)
-                rank = ranks2[j];
-        }
         image.setAttribute("data-tooltip", `Click to open profile`);
-        image.src = "/public/img/rating/" + rank.image;
+        image.src = "/public/img/badges/1.png";
         image.onclick = () => { location.href = `/profile/${data.data[i].username}`; }
         image.style = "max-width: 48px; max-height: 48px; vertical-align: middle; margin-right: 12px; border-radius: 999px;";
         if (data.data[i].banned)
@@ -542,7 +524,66 @@ async function DownloadSharex() {
     }, 3000);
 }
 
-async function GetUploads() {
+async function GetUsers() {
+    const page = window.dashboardUsersPage || 1;
+    const search = document.getElementById("__dashboard_logged_users_search").value.trim();
+    const key = localStorage.getItem("key");
+    const response = await fetch(`/api/private/admin/sessions?key=${encodeURIComponent(key)}&page=${page}&search=${encodeURIComponent(search)}`);
+    const data = await response.json();
+    if (!data.success) return;
+
+    window.dashboardUsersPage = data.page;
+    const table = document.getElementById("__dashboard_logged_users_table");
+    while (table.rows.length > 1) table.deleteRow(1);
+    data.data.forEach((user, index) => {
+        const row = table.insertRow();
+        row.id = `__dashboard_logged_users_table_row_${index}`;
+        const name = row.insertCell();
+        const profileLink = document.createElement("a");
+        profileLink.href = `/profile/${encodeURIComponent(user.username)}`;
+        profileLink.textContent = user.username;
+        name.appendChild(profileLink);
+        const admin = row.insertCell();
+        const adminButton = document.createElement("button");
+        adminButton.className = "input-button";
+        adminButton.innerText = user.administrator ? "✔" : "✖";
+        adminButton.onclick = () => modifyUserPermission(user, "administrator", adminButton);
+        admin.appendChild(adminButton);
+        const invite = row.insertCell();
+        const inviteButton = document.createElement("button");
+        inviteButton.className = "input-button";
+        inviteButton.innerText = user.can_invite ? "✔" : "✖";
+        inviteButton.onclick = () => modifyUserPermission(user, "can_invite", inviteButton);
+        invite.appendChild(inviteButton);
+        const banned = row.insertCell();
+        const bannedButton = document.createElement("button");
+        bannedButton.className = "input-button";
+        bannedButton.innerText = user.banned ? "✔" : "✖";
+        bannedButton.onclick = () => modifyUserPermission(user, "banned", bannedButton);
+        banned.appendChild(bannedButton);
+        const actions = row.insertCell();
+        actions.innerText = user.superuser ? "Protected" : "";
+    });
+    updatePagination("users", data);
+}
+
+async function modifyUserPermission(user, field, button) {
+    button.disabled = true;
+    const response = await fetch("/api/private/admin/sessions/modify", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: localStorage.getItem("key"), target: user.username, field, value: !(field === "administrator" ? user.administrator : field === "can_invite" ? user.can_invite : user.banned) })
+    });
+    const data = await response.json();
+    if (data.success) {
+        if (field === "administrator") user.administrator = !user.administrator;
+        if (field === "can_invite") user.can_invite = !user.can_invite;
+        if (field === "banned") user.banned = !user.banned;
+        button.innerText = (field === "administrator" ? user.administrator : field === "can_invite" ? user.can_invite : user.banned) ? "✔" : "✖";
+    } else alert(data.error || "Unable to update user.");
+    button.disabled = false;
+}
+
+async function GetUploadsLegacy() {
     let key = localStorage.getItem("key");
     let response = await fetch("/api/private/session/uploads?key=" + key);
     let data = await response.json();
@@ -591,6 +632,52 @@ async function GetUploads() {
         _p.classList.add("error-text");
         cell.appendChild(_p);
     }
+}
+
+function updatePagination(type, data) {
+    const label = document.getElementById(`__dashboard_logged_${type}_pagination`);
+    const previous = document.getElementById(`__dashboard_logged_${type}_previous`);
+    const next = document.getElementById(`__dashboard_logged_${type}_next`);
+    label.innerText = data.total === 0 ? "No results" : `Page ${data.page} of ${data.totalPages} (${data.total} total)`;
+    previous.disabled = data.page <= 1;
+    next.disabled = data.page >= data.totalPages;
+    previous.onclick = () => { window[`dashboard${type[0].toUpperCase()}${type.slice(1)}Page`] = data.page - 1; type === "users" ? GetUsers() : GetUploads(); };
+    next.onclick = () => { window[`dashboard${type[0].toUpperCase()}${type.slice(1)}Page`] = data.page + 1; type === "users" ? GetUsers() : GetUploads(); };
+}
+
+async function GetUploads() {
+    const page = window.dashboardUploadsPage || 1;
+    const params = new URLSearchParams({ key: localStorage.getItem("key"), page, search: document.getElementById("__dashboard_logged_uploads_search").value.trim() });
+    const from = document.getElementById("__dashboard_logged_uploads_from").value;
+    const to = document.getElementById("__dashboard_logged_uploads_to").value;
+    if (from) params.set("from", Math.floor(new Date(from).getTime() / 1000));
+    if (to) params.set("to", Math.floor(new Date(to).getTime() / 1000));
+    const response = await fetch(`/api/private/session/uploads?${params}`);
+    const data = await response.json();
+    const table = document.getElementById("__dashboard_logged_uploads_table");
+    while (table.rows.length > 1) table.deleteRow(1);
+    if (!data.success) return;
+    window.dashboardUploadsPage = data.page;
+    document.getElementById("__dashboard_logged_uploads_count").innerText = data.total;
+    data.data.forEach((upload, index) => {
+        const row = table.insertRow();
+        row.id = `__dashboard_logged_uploads_table_row_${index}`;
+        row.insertCell().innerHTML = `<a href="https://${window.location.host}/${UserInfo.displayName}/${encodeURIComponent(upload.filename)}"><span class="code">[${upload.filename}]</span></a>`;
+        row.insertCell().innerText = new Date(Number(upload.upload_time) * 1000).toLocaleString();
+        row.insertCell().innerText = upload.upload_domain || "Unknown";
+        const action = row.insertCell();
+        const button = document.createElement("button");
+        button.innerText = "Delete"; button.className = "input-button button-red";
+        button.onclick = () => DeleteFile(index, upload.filename);
+        action.appendChild(button);
+    });
+    updatePagination("uploads", data);
+}
+
+function setupDashboardFilters() {
+    document.getElementById("__dashboard_logged_users_search_button").onclick = () => { window.dashboardUsersPage = 1; GetUsers(); };
+    document.getElementById("__dashboard_logged_users_search").onkeydown = (event) => { if (event.key === "Enter") document.getElementById("__dashboard_logged_users_search_button").click(); };
+    document.getElementById("__dashboard_logged_uploads_search_button").onclick = () => { window.dashboardUploadsPage = 1; GetUploads(); };
 }
 
 async function DeleteFile(index, filename, deletehash) {

@@ -7,8 +7,14 @@ import hash from "utilities/hash";
 const restrictedFields = [
     "key",
     "protected",
-    "displayName"
+    "displayName",
+    "permissions"
 ];
+
+const permissionFields = {
+    administrator: USER_PERMISSIONS.ADMINISTRATOR,
+    can_invite: USER_PERMISSIONS.INVITE_USERS
+};
 
 /*--includedoc
 
@@ -51,7 +57,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
                 "error": "You are not an administrator."
             };
 
-        if (!requestData.target || !requestData.field || 'value' in requestData == false)
+        if (!requestData.target || !requestData.field || !('value' in requestData))
             return {
                 "success": false,
                 "error": "Missing parameters."
@@ -77,13 +83,27 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
                 "error": "You cannot modify this user."
             };
 
-        if (hasPermission(target.permissions, USER_PERMISSIONS.ADMINISTRATOR) && requestData.field == "isBanned")
+        if (hasPermission(target.permissions, USER_PERMISSIONS.ADMINISTRATOR) && requestData.field === "banned")
             return {
                 "success": false,
                 "error": "You cannot ban an administrator."
             };
 
-        await server.db.query(`UPDATE uwuso.users SET ` + escapeIdentifier(requestData.field) + ` = $1 WHERE username = $2`, [requestData.value, target.username]);
+        if (requestData.field in permissionFields && typeof requestData.value !== "boolean")
+            return {
+                "success": false,
+                "error": "Permission value must be boolean."
+            };
+
+        if (requestData.field in permissionFields) {
+            const permission = permissionFields[requestData.field];
+            const permissions = requestData.value
+                ? (target.permissions | permission)
+                : (target.permissions & ~permission);
+            await server.db.query(`UPDATE uwuso.users SET permissions = $1::bigint WHERE username = $2`, [permissions, target.username]);
+        } else {
+            await server.db.query(`UPDATE uwuso.users SET ` + escapeIdentifier(requestData.field) + ` = $1 WHERE username = $2`, [requestData.value, target.username]);
+        }
 
         // External logging
         server.externalLogging.Log(buildMessage(

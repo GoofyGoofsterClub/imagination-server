@@ -22,8 +22,7 @@
     "dashboard-upload-title": "Upload",
     "dashboard-upload-paragraph": "If you are the homie that doesn't have ShareX or doesn't want to use it.",
     "dashboard-upload-button": "Upload",
-    "dashboard-ratio": "Your upload ratio is",
-    "dashboard-ratio-paragraph": "Ratio does not affect anything, it's just for cosmetic, for now at least.",
+
     "dashboard-invite-title": "Invite users",
     "dashboard-invite-paragraph": "You can invite new users to the service! Please choose carefully who you invite!",
     "dashboard-invite-button": "Create invite",
@@ -36,7 +35,7 @@
     "dashboard-users-caninvite": "Can Invite",
     "dashboard-users-isbanned": "Is Banned",
     "dashboard-users-actions": "Actions",
-    "dashboard-recalculate": "Recalculate ALL ratings",
+
     "dashboard-users-unavailable": "You do not have access to user management :(",
     "dashboard-uploads-title": "Uploads",
     "dashboard-uploads-counter-before": "You have",

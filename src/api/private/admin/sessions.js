@@ -43,18 +43,41 @@ export default class AdminGetSessionsAPIRoute extends APIRoute {
             };
 
 
-        let sessions = await server.db.query(`SELECT * FROM uwuso.users`);
+        const page = Math.max(1, parseInt(request.query.page, 10) || 1);
+        const pageSize = 50;
+        const search = (request.query.search || "").trim();
+        const offset = (page - 1) * pageSize;
+        const searchPattern = `%${search}%`;
 
-        for (let i = 0; i < sessions.rows.length; i++) {
-            let session = sessions.rows[i];
+        const result = await server.db.query(`
+            SELECT id, username, permissions, banned, superuser,
+                   COUNT(*) OVER() AS total_count
+            FROM uwuso.users
+            WHERE username ILIKE $1::text
+            ORDER BY username ASC
+            LIMIT $2::integer OFFSET $3::integer`,
+            [searchPattern, pageSize, offset]);
 
-            if (hasPermission(sessions.permissions, USER_PERMISSIONS.ADMINISTRATOR))
-                session.key = "<redacted>";
-        }
+        const total = result.rows.length > 0 ? Number(result.rows[0].total_count) : Number((await server.db.query(
+            `SELECT COUNT(id) AS count FROM uwuso.users WHERE username ILIKE $1::text`, [searchPattern]
+        )).rows[0].count);
+
+        const users = result.rows.map((session) => ({
+            id: session.id,
+            username: session.username,
+            banned: session.banned,
+            superuser: session.superuser,
+            administrator: hasPermission(session.permissions, USER_PERMISSIONS.ADMINISTRATOR),
+            can_invite: hasPermission(session.permissions, USER_PERMISSIONS.INVITE_USERS)
+        }));
 
         return {
             "success": true,
-            "data": sessions.rows
+            "data": users,
+            "page": page,
+            "pageSize": pageSize,
+            "total": total,
+            "totalPages": Math.ceil(total / pageSize)
         };
     }
 }

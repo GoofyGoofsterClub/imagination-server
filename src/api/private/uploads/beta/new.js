@@ -3,7 +3,7 @@ import { GeneratePrivateID, GeneratePublicID } from "utilities/id";
 import hash, { hashBuffer } from "utilities/hash";
 import addUpload from "utilities/addupload";
 import { Field, buildMessage } from "utilities/logexternal";
-import CheckRating from "utilities/rating/conditions";
+
 import { promises as fs } from 'fs';
 
 /*--includedoc

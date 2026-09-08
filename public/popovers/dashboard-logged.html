@@ -115,16 +115,11 @@
 <hr />
 <br />
 <div id="__dashboard_logged_users_block" style="display: none">
-  <h2>
-    <button
-      style="float: right"
-      class="input-button"
-      id="__dashboard_logged_recalc_all"
-      translatable-id="dashboard-recalculate"
-    >
-      Recalculate ALL</button
-    ><span translatable-id="dashboard-users-title">Users</span>
-  </h2>
+  <h2><span translatable-id="dashboard-users-title">Users</span></h2>
+  <p>
+    <input id="__dashboard_logged_users_search" type="search" placeholder="Search users by name" />
+    <button class="input-button" id="__dashboard_logged_users_search_button">Search</button>
+  </p>
   <p translatable-id="dashboard-users-paragraph">
     You are an administrator, so you can manipulate other users' accounts!
   </p>
@@ -145,6 +140,9 @@
       </tr>
     </tbody>
   </table>
+  <p class="small-text" id="__dashboard_logged_users_pagination"></p>
+  <button class="input-button" id="__dashboard_logged_users_previous">Previous</button>
+  <button class="input-button" id="__dashboard_logged_users_next">Next</button>
 </div>
 <p
   id="__dashboard_logged_users_block_unavailable"
@@ -172,6 +170,12 @@
   <b id="__dashboard_logged_uploads_count">...</b>
   <span translatable-id="dashboard-uploads-counter-after">uploads!</span>
 </p>
+<p>
+  <input id="__dashboard_logged_uploads_search" type="search" placeholder="Search uploads by filename" />
+  <label>From <input id="__dashboard_logged_uploads_from" type="datetime-local" /></label>
+  <label>To <input id="__dashboard_logged_uploads_to" type="datetime-local" /></label>
+  <button class="input-button" id="__dashboard_logged_uploads_search_button">Search</button>
+</p>
 <table id="__dashboard_logged_uploads_table">
   <thead>
     <tr>
@@ -193,6 +197,9 @@
     </tr>
   </tbody>
 </table>
+<p class="small-text" id="__dashboard_logged_uploads_pagination"></p>
+<button class="input-button" id="__dashboard_logged_uploads_previous">Previous</button>
+<button class="input-button" id="__dashboard_logged_uploads_next">Next</button>
 <div id="__dashboard_logged_dangerzone" style="display: none;">
   <br />
   <hr />
