@@ -18,8 +18,14 @@ export default class NewImageServing extends Route {
 
         let file = fileInfo.rows[0];
 
-        server.db.query(`UPDATE uwuso.users SET views = views + 1 WHERE id = $1::bigint`, [file.uploader_id]).catch(() => {});
-        server.db.query(`UPDATE uwuso.uploads SET views = views + 1 WHERE id = $1::bigint`, [file.id]).catch(() => {});
+        await Promise.all([
+            server.db.query(`UPDATE uwuso.users SET views = views + 1 WHERE id = $1::bigint`, [file.uploader_id]),
+            server.db.query(`UPDATE uwuso.uploads SET views = views + 1 WHERE id = $1::bigint`, [file.id])
+        ]);
+
+        let cache = server.server._public.StatisticsCache;
+        if (cache && cache.value)
+            cache.value.views = Number(cache.value.views) + 1;
 
         let fileMimetype = file.mimetype;
         if (
@@ -30,7 +36,6 @@ export default class NewImageServing extends Route {
         )
             reply.header("Content-Disposition", `attachment; filename="${file.filename}.${file.file_ext ? file.file_ext : ""}"`);
 
-        reply.header("Cache-Control", "public, max-age=31536000, immutable");
         reply.type(file.mimetype);
 
         return reply.sendFile(file.disk_filename, `${__dirname}/../../privateuploads`, { contentType: false });

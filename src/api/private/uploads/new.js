@@ -109,6 +109,12 @@ export default class UploadsNewAPIRoute extends APIRoute {
             request.headers['host']
         ]);
 
+        let cache = server.server._public.StatisticsCache;
+        if (cache && cache.value) {
+            cache.value.uploads = Number(cache.value.uploads) + 1;
+            cache.value.count = cache.value.uploads;
+        }
+
         if (server.server._public.Ratelimits.length > 100)
             server.server._public.Ratelimits.shift();
         server.server._public.Ratelimits.push({

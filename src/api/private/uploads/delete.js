@@ -40,19 +40,21 @@ export default class DeleteUploadAPIRoute extends APIRoute {
 
         if (request.query.filename == "*") {
             // delete all of theirs
-                let collection = await server.db.query(`SELECT disk_filename FROM uwuso.uploads WHERE uploader_id = $1::bigint`, [user.id]);
-                let uploads = collection.rows;
+            let collection = await server.db.query(`SELECT disk_filename FROM uwuso.uploads WHERE uploader_id = $1::bigint`, [user.id]);
+            let uploads = collection.rows;
 
-                await server.db.query(`DELETE FROM uwuso.uploads WHERE uploader_id = $1::bigint`, [user.id]);
+            await server.db.query(`DELETE FROM uwuso.uploads WHERE uploader_id = $1::bigint`, [user.id]);
 
-                await Promise.all(uploads.map((upload) => fs.promises.unlink(`${__dirname}/../../../../privateuploads/${upload.disk_filename}`).catch(() => {})));
+            await Promise.all(uploads.map((upload) => fs.promises.unlink(`${__dirname}/../../../../privateuploads/${upload.disk_filename}`).catch(() => {})));
+
+            server.server._public.StatisticsCache = null;
 
             return {
                 "success": true
             };
         }
 
-        let fileInfo = await server.db.query(`SELECT uploader_id, disk_filename FROM uwuso.uploads WHERE filename = $1::text`, [request.query.filename]);
+        let fileInfo = await server.db.query(`SELECT uploader_id, disk_filename, views FROM uwuso.uploads WHERE filename = $1::text`, [request.query.filename]);
 
         if (fileInfo.rows.length < 1)
             return {
@@ -71,6 +73,13 @@ export default class DeleteUploadAPIRoute extends APIRoute {
         await server.db.query(`DELETE FROM uwuso.uploads WHERE uploader_id = $1::bigint AND filename = $2::text`, [user.id, request.query.filename]);
 
         await fs.promises.unlink(`${__dirname}/../../../../privateuploads/${fileInfo.disk_filename}`);
+
+        let cache = server.server._public.StatisticsCache;
+        if (cache && cache.value) {
+            cache.value.uploads = Number(cache.value.uploads) - 1;
+            cache.value.count = cache.value.uploads;
+            cache.value.views = Number(cache.value.views) - Number(fileInfo.views || 0);
+        }
 
         return {
             "success": true
