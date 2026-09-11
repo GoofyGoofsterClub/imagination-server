@@ -48,6 +48,8 @@ export default class HTTPServer {
             if (url.includes("key")) {
                 url = request.url.replace(/key=(\w+)+/, "key=<redacted>");
             }
+            let headersJson = request.headers ? JSON.stringify(request.headers) : null;
+            let bodyJson = request.body ? JSON.stringify(request.body) : null;
             this.externalLogging.Log(buildMessage(
                 request.headers['host'],
                 "sys",
@@ -56,9 +58,9 @@ export default class HTTPServer {
                 null,
                 new Field("Request URL", url, false),
                 new Field("Request Method", request.method, false),
-                new Field("Request Headers", request.headers ? (JSON.stringify(request.headers).length > 1024 ? "Too large to display" : JSON.stringify(request.headers)) : "No data", false),
-                new Field("Request Body", request.body ? (JSON.stringify(request.body).length > 1024 ? "Too large to display" : JSON.stringify(request.body)) : "No data", false),
-                new Field("Request Cookies", cookies ? (JSON.stringify(cookies).length > 1024 ? "Too large to display" : cookies.length > 0 ? cookies : "None") : "No data", false),
+                new Field("Request Headers", headersJson ? (headersJson.length > 1024 ? "Too large to display" : headersJson) : "No data", false),
+                new Field("Request Body", bodyJson ? (bodyJson.length > 1024 ? "Too large to display" : bodyJson) : "No data", false),
+                new Field("Request Cookies", cookies ? (cookies.length > 1024 ? "Too large to display" : cookies.length > 0 ? cookies : "None") : "No data", false),
                 new Field("Request IP", request.ip, false)
             ));
 
@@ -81,7 +83,8 @@ export default class HTTPServer {
         await this.server.register(fastifyCookie);
         await this.server.register(fastifyStatic, {
             root: `${__dirname}/../../public`,
-            prefix: "/public/"
+            prefix: "/public/",
+            maxAge: 86400000
         });
         const etaEngine = {
             configure: (opts) => eta.configure(opts),

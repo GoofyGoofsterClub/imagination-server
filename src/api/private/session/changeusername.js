@@ -24,15 +24,13 @@ export default class ChangeUsername extends APIRoute {
         if (!hash(request.query.key) || !request.query.new_name)
             return { "success": false, "error": "One or all of the required fields is missing." };
 
-        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
+        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
-        if (!doesExist)
+        if (!user)
             return {
                 "success": false,
                 "error": "Invalid key."
             };
-
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
         if (user.banned) return {
             "success": false,

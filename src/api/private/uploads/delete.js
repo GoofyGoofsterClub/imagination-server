@@ -19,15 +19,13 @@ export default class DeleteUploadAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let doesUserExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
+        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
-        if (!doesUserExist)
+        if (!user)
             return {
                 "success": false,
                 "error": "Invalid key."
             };
-
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
         if (user.banned) return {
             "success": false,
@@ -42,21 +40,19 @@ export default class DeleteUploadAPIRoute extends APIRoute {
 
         if (request.query.filename == "*") {
             // delete all of theirs
-            let collection = await server.db.query(`SELECT * FROM uwuso.uploads WHERE uploader_id = $1::bigint`, [user.id]);
-            let uploads = collection.rows;
+                let collection = await server.db.query(`SELECT disk_filename FROM uwuso.uploads WHERE uploader_id = $1::bigint`, [user.id]);
+                let uploads = collection.rows;
 
-            await server.db.query(`DELETE FROM uwuso.uploads WHERE uploader_id = $1::bigint`, [user.id]);
+                await server.db.query(`DELETE FROM uwuso.uploads WHERE uploader_id = $1::bigint`, [user.id]);
 
-            for (let upload of uploads) {
-                fs.unlinkSync(`${__dirname}/../../../../privateuploads/${upload.disk_filename}`);
-            }
+                await Promise.all(uploads.map((upload) => fs.promises.unlink(`${__dirname}/../../../../privateuploads/${upload.disk_filename}`).catch(() => {})));
 
             return {
                 "success": true
             };
         }
 
-        let fileInfo = await server.db.query(`SELECT * FROM uwuso.uploads WHERE filename = $1::text`, [request.query.filename]);
+        let fileInfo = await server.db.query(`SELECT uploader_id, disk_filename FROM uwuso.uploads WHERE filename = $1::text`, [request.query.filename]);
 
         if (fileInfo.rows.length < 1)
             return {
@@ -74,7 +70,7 @@ export default class DeleteUploadAPIRoute extends APIRoute {
 
         await server.db.query(`DELETE FROM uwuso.uploads WHERE uploader_id = $1::bigint AND filename = $2::text`, [user.id, request.query.filename]);
 
-        fs.unlinkSync(`${__dirname}/../../../../privateuploads/${fileInfo.disk_filename}`);
+        await fs.promises.unlink(`${__dirname}/../../../../privateuploads/${fileInfo.disk_filename}`);
 
         return {
             "success": true

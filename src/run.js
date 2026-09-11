@@ -21,6 +21,7 @@ const run = async () => {
             ).connect();
 
             ndb = await new NewDatabaseController();
+            await ndb.ensureIndexes();
 
             Output.Log("Connected to the database!");
             databaseConnectionSuccess = true;

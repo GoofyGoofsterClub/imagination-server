@@ -116,3 +116,11 @@ ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE uwuso.events ADD CONSTRAINT event_caller_fk FOREIGN KEY (event_caller)
 REFERENCES uwuso.users (id) MATCH SIMPLE
 ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+CREATE INDEX IF NOT EXISTS idx_uploads_filename ON uwuso.uploads (filename);
+CREATE INDEX IF NOT EXISTS idx_uploads_filehash ON uwuso.uploads (filehash);
+CREATE INDEX IF NOT EXISTS idx_uploads_uploader_time ON uwuso.uploads (uploader_id, upload_time DESC);
+CREATE INDEX IF NOT EXISTS idx_users_access_key ON uwuso.users (access_key);
+CREATE INDEX IF NOT EXISTS idx_users_username ON uwuso.users (username);
+CREATE INDEX IF NOT EXISTS idx_invites_hash ON uwuso.invites (hash);
+CREATE INDEX IF NOT EXISTS idx_services_access_key ON uwuso.services (access_key);

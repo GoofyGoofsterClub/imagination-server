@@ -19,16 +19,13 @@ export default class AdminGetSessionsAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
+        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
-
-        if (!doesExist)
+        if (!user)
             return {
                 "success": false,
                 "error": "Invalid key."
             };
-
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
         if (user.banned) return {
             "success": false,
@@ -47,19 +44,26 @@ export default class AdminGetSessionsAPIRoute extends APIRoute {
         const pageSize = 50;
         const search = (request.query.search || "").trim();
         const offset = (page - 1) * pageSize;
-        const searchPattern = `%${search}%`;
+        const filters = [];
+        let whereClause = "";
+        if (search) {
+            filters.push(`%${search}%`);
+            whereClause = `WHERE username ILIKE $1::text`;
+        }
+        const limitIndex = filters.length + 1;
+        const offsetIndex = filters.length + 2;
 
         const result = await server.db.query(`
             SELECT id, username, permissions, banned, superuser,
                    COUNT(*) OVER() AS total_count
             FROM uwuso.users
-            WHERE username ILIKE $1::text
+            ${whereClause}
             ORDER BY username ASC
-            LIMIT $2::integer OFFSET $3::integer`,
-            [searchPattern, pageSize, offset]);
+            LIMIT $${limitIndex}::integer OFFSET $${offsetIndex}::integer`,
+            [...filters, pageSize, offset]);
 
         const total = result.rows.length > 0 ? Number(result.rows[0].total_count) : Number((await server.db.query(
-            `SELECT COUNT(id) AS count FROM uwuso.users WHERE username ILIKE $1::text`, [searchPattern]
+            `SELECT COUNT(id) AS count FROM uwuso.users ${whereClause}`, search ? [filters[0]] : []
         )).rows[0].count);
 
         const users = result.rows.map((session) => ({

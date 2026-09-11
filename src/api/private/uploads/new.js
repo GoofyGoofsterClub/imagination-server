@@ -23,14 +23,14 @@ export default class UploadsNewAPIRoute extends APIRoute {
         // Needed for extension to work
         reply.header("Access-Control-Allow-Origin", "*");
 
-        let user;
+        let accessHash = hash(request.headers["authorization"]);
+        let user = await server.db.findUserByAccessKey(accessHash);
 
         let isServiceUpload = false;
         let serviceAccountAttempt;
-        let doesUserExist = await server.db.doesUserExistByAccessKey(hash(request.headers["authorization"]));
 
-        if (!doesUserExist) {
-            serviceAccountAttempt = await server.db.query(`SELECT * FROM uwuso.services WHERE access_key = $1::text`, [hash(request.headers["authorization"])]);
+        if (!user) {
+            serviceAccountAttempt = await server.db.query(`SELECT * FROM uwuso.services WHERE access_key = $1::text`, [accessHash]);
 
             if (!serviceAccountAttempt || serviceAccountAttempt.rows.length < 1)
                 return {
@@ -39,25 +39,13 @@ export default class UploadsNewAPIRoute extends APIRoute {
                 };
 
             isServiceUpload = true;
-        }
-
-        if (!isServiceUpload) {
-            user = await server.db.findUserByAccessKey(hash(request.headers["authorization"]));
-
-            if (user.banned) return {
-                "success": false,
-                "error": "You are banned."
-            };
-        }
-        else {
             user = serviceAccountAttempt.rows[0];
         }
-        if (!isServiceUpload && user.banned) {
-            reply.status(403);
-            return reply.send({
-                "error": "You are banned."
-            });
-        }
+
+        if (!isServiceUpload && user.banned) return {
+            "success": false,
+            "error": "You are banned."
+        };
 
         if (isServiceUpload && user.disabled) {
             return {
@@ -78,7 +66,7 @@ export default class UploadsNewAPIRoute extends APIRoute {
 
         }
 
-        const existance = await server.db.query(`SELECT * FROM uwuso.uploads WHERE filehash = $1::text`, [datahash]);
+        const existance = await server.db.query(`SELECT filename FROM uwuso.uploads WHERE filehash = $1::text LIMIT 1`, [datahash]);
 
         if (existance.rows.length > 0) {
             reply.send({
@@ -101,9 +89,7 @@ export default class UploadsNewAPIRoute extends APIRoute {
         // write dataBuffer to private
         await fs.writeFile(`${__dirname}/../../../../privateuploads/${ids.private}`, dataBuffer);
 
-        let stats = await fs.stat(`${__dirname}/../../../../privateuploads/${ids.private}`);
-
-        let fileSizeInBytes = stats.size;
+        let fileSizeInBytes = dataBuffer.length;
 
         await server.db.query(`INSERT INTO uwuso.uploads (uploader_id, filename, disk_filename,
             mimetype, filehash, views, filesize, service_upload, upload_time, upload_domain) VALUES (

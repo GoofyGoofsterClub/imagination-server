@@ -19,16 +19,13 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
+        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
-
-        if (!doesExist)
+        if (!user)
             return {
                 "success": false,
                 "error": "Invalid key."
             };
-
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
         if (user.banned) return {
             "success": false,

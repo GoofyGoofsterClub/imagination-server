@@ -18,15 +18,13 @@ export default class SessionUploadsAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
+        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
-        if (!doesExist)
+        if (!user)
             return {
                 "success": false,
                 "error": "Invalid key."
             };
-
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
         if (user.banned)
             return { "success": false, "error": "You are banned." };
@@ -38,18 +36,21 @@ export default class SessionUploadsAPIRoute extends APIRoute {
             return { "success": false, "error": "Invalid upload time sort order." };
         const offset = (page - 1) * pageSize;
         const search = (request.query.search || "").trim();
-        const searchPattern = `%${search}%`;
         const from = request.query.from ? parseInt(request.query.from, 10) : null;
         const to = request.query.to ? parseInt(request.query.to, 10) : null;
-        const filters = [user.id, searchPattern];
-        let dateClause = "";
+        const filters = [user.id];
+        let extraClause = "";
+        if (search) {
+            filters.push(`%${search}%`);
+            extraClause += ` AND filename ILIKE $${filters.length}::text`;
+        }
         if (Number.isFinite(from)) {
             filters.push(from);
-            dateClause += ` AND upload_time >= $${filters.length}::bigint`;
+            extraClause += ` AND upload_time >= $${filters.length}::bigint`;
         }
         if (Number.isFinite(to)) {
             filters.push(to);
-            dateClause += ` AND upload_time <= $${filters.length}::bigint`;
+            extraClause += ` AND upload_time <= $${filters.length}::bigint`;
         }
         if (Number.isFinite(from) && Number.isFinite(to) && from > to)
             return { "success": false, "error": "The start date must be before the end date." };
@@ -59,8 +60,7 @@ export default class SessionUploadsAPIRoute extends APIRoute {
             SELECT id, filename, upload_time, upload_domain,
                    COUNT(*) OVER() AS total_count
             FROM uwuso.uploads
-            WHERE uploader_id = $1::bigint
-              AND filename ILIKE $2::text${dateClause}
+            WHERE uploader_id = $1::bigint${extraClause}
             ORDER BY upload_time ${sort}
             LIMIT $${limitIndex}::integer OFFSET $${offsetIndex}::integer`,
             [...filters, pageSize, offset]);

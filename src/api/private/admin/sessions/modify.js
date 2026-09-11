@@ -35,16 +35,13 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
     async call(request, reply, server) {
         const requestData = request.body;
 
-        let doesExist = await server.db.doesUserExistByAccessKey(hash(requestData.key));
+        let user = await server.db.findUserByAccessKey(hash(requestData.key));
 
-
-        if (!doesExist)
+        if (!user)
             return {
                 "success": false,
                 "error": "Invalid key."
             };
-
-        let user = await server.db.findUserByAccessKey(hash(requestData.key));
 
         if (user.banned) return {
             "success": false,
