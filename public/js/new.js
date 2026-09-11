@@ -87,9 +87,26 @@ window.onload = async () => {
     if (target == null) target = document.querySelector(`.nav-el[data-content="welcome"]`);
     target.classList.add("current");
 
-    var newData = await fetch('/public/popovers/' + target.getAttribute('data-content') + '.html');
+    var initialPage = target.getAttribute('data-content');
+    if (initialPage == "dashboard") {
+        let key = localStorage.getItem("key");
+        if (key != null) {
+            let response = await fetch("/api/private/session/check?key=" + encodeURIComponent(key));
+            let data = await response.json();
+            if (data.success)
+                initialPage = "dashboard-logged";
+            else if (data.maintenance) {
+                window.maintenanceReason = data.error;
+                initialPage = "maintenance";
+            }
+            else
+                localStorage.removeItem("key");
+        }
+    }
+
+    var newData = await fetch('/public/popovers/' + initialPage + '.html');
     var newDataText = await newData.text();
-    document.querySelector('body>.content').innerHTML = newDataText;
+    await ApplyPageContent(newDataText);
 
     Translatable.translateGroup(Translatable.find("body"), CurrentLanguage);
 
@@ -216,23 +233,7 @@ async function ChangePage(page) {
     }
     else {
         newData = await newData.text();
-
-        let parser = new DOMParser();
-        let doc = parser.parseFromString(newData, 'text/html');
-
-        let scripts = doc.getElementsByTagName('preload-script');
-        for (var i = 0; i < scripts.length; i++) {
-            let script = scripts[i];
-            let src = script.getAttribute('src');
-            if (document.querySelector(`script[src="${src}"]`) != null)
-                document.querySelector(`script[src="${src}"]`).remove();
-            let scriptElement = document.createElement('script');
-            scriptElement.src = src;
-            document.head.appendChild(scriptElement);
-
-            script.remove();
-        }
-        document.querySelector('body>.content').innerHTML = newData;
+        await ApplyPageContent(newData);
     }
 
     var els = document.querySelectorAll('body>.content>*');
@@ -258,6 +259,27 @@ async function ChangePage(page) {
         delay: anime.stagger(120)
     });
     Translatable.translateGroup(Translatable.find("body"), CurrentLanguage);
+}
+
+function ApplyPageContent(html) {
+    document.querySelector('body>.content').innerHTML = html;
+    let parser = new DOMParser();
+    let doc = parser.parseFromString(html, 'text/html');
+    let scripts = doc.getElementsByTagName('preload-script');
+    let pending = [];
+    for (var i = 0; i < scripts.length; i++) {
+        let src = scripts[i].getAttribute('src');
+        if (document.querySelector(`script[src="${src}"]`) != null)
+            document.querySelector(`script[src="${src}"]`).remove();
+        let scriptElement = document.createElement('script');
+        pending.push(new Promise((resolve) => {
+            scriptElement.onload = resolve;
+            scriptElement.onerror = resolve;
+        }));
+        scriptElement.src = src;
+        document.head.appendChild(scriptElement);
+    }
+    return Promise.all(pending);
 }
 
 function SetContent(content) {
