@@ -45,10 +45,12 @@ async function CheckLogin() {
     }
 
     document.getElementById("__dashboard_logged_displayname").innerText = userInfo.displayName;
+    LoadServiceAnnouncement(userInfo.administrator);
 
     if (userInfo.administrator) {
         document.getElementById("__dashboard_logged_users_block").style.display = "block";
         document.getElementById("__dashboard_logged_users_block_unavailable").style.display = "none";
+        document.getElementById("__dashboard_announcement_admin").style.display = "block";
         document.getElementById("__dashboard_logged_invite_block").style.display = "block";
         document.getElementById("__dashboard_logged_invite_block_unavailable").style.display = "none";
     }
@@ -215,6 +217,112 @@ async function CheckLogin() {
     if (userInfo.administrator) {
         GetUsers();
     }
+}
+
+function sanitizeAnnouncementHtml(message) {
+    const template = document.createElement("template");
+    template.innerHTML = message;
+    const allowedTags = new Set(["B", "STRONG", "I", "EM", "U", "BR", "P", "A"]);
+
+    for (const element of template.content.querySelectorAll("*")) {
+        if (!allowedTags.has(element.tagName)) {
+            element.replaceWith(document.createTextNode(element.textContent));
+            continue;
+        }
+
+        const href = element.tagName === "A" ? element.getAttribute("href") : null;
+        for (const attribute of [...element.attributes])
+            element.removeAttribute(attribute.name);
+
+        if (element.tagName === "A") {
+            if (!href || !/^https?:\/\//i.test(href))
+                element.replaceWith(document.createTextNode(element.textContent));
+            else {
+                element.setAttribute("href", href);
+                element.setAttribute("target", "_blank");
+                element.setAttribute("rel", "noopener noreferrer");
+            }
+        }
+    }
+    return template.innerHTML;
+}
+
+async function LoadServiceAnnouncement(isAdmin) {
+    const announcement = document.getElementById("__dashboard_announcement");
+    const adminPanel = document.getElementById("__dashboard_announcement_admin");
+    if (isAdmin) adminPanel.style.display = "block";
+
+    let data = { success: false, data: null };
+    try {
+        const response = await fetch("/api/public/announcement");
+        if (response.ok) data = await response.json();
+    } catch (error) {
+        console.warn("Could not load service announcement.", error);
+    }
+
+    if (data.success && data.data) {
+        announcement.className = `service-announcement service-announcement-${data.data.severity}`;
+        announcement.replaceChildren();
+        const message = document.createElement("span");
+        message.className = "service-announcement-message";
+        message.innerHTML = sanitizeAnnouncementHtml(data.data.message);
+        announcement.appendChild(message);
+        if (data.data.button_text && data.data.button_url) {
+            const button = document.createElement("a");
+            button.className = "input-button";
+            button.href = data.data.button_url;
+            button.target = "_blank";
+            button.rel = "noopener noreferrer";
+            button.textContent = data.data.button_text;
+            announcement.appendChild(button);
+        }
+        announcement.style.display = "block";
+    } else {
+        announcement.style.display = "none";
+    }
+
+    if (!isAdmin) return;
+    if (data.success && data.data) {
+        document.getElementById("__dashboard_announcement_text").value = data.data.message;
+        document.getElementById("__dashboard_announcement_severity").value = data.data.severity;
+        document.getElementById("__dashboard_announcement_button_text").value = data.data.button_text || "";
+        document.getElementById("__dashboard_announcement_button_url").value = data.data.button_url || "";
+    }
+
+    document.getElementById("__dashboard_announcement_save").onclick = async () => {
+        const result = document.getElementById("__dashboard_announcement_result");
+        const saveResponse = await fetch("/api/private/admin/announcement", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                key: localStorage.getItem("key"),
+                message: document.getElementById("__dashboard_announcement_text").value,
+                severity: document.getElementById("__dashboard_announcement_severity").value,
+                buttonText: document.getElementById("__dashboard_announcement_button_text").value,
+                buttonUrl: document.getElementById("__dashboard_announcement_button_url").value
+            })
+        });
+        const saveData = await saveResponse.json();
+        result.innerText = saveData.success ? "Announcement published." : saveData.error;
+        result.classList.toggle("error-text", !saveData.success);
+        if (saveData.success) LoadServiceAnnouncement(false);
+    };
+
+    document.getElementById("__dashboard_announcement_clear").onclick = async () => {
+        const clearResponse = await fetch("/api/private/admin/announcement/clear", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key: localStorage.getItem("key") })
+        });
+        const clearData = await clearResponse.json();
+        document.getElementById("__dashboard_announcement_result").innerText = clearData.success ? "Announcement cleared." : clearData.error;
+        if (clearData.success) {
+            announcement.style.display = "none";
+            document.getElementById("__dashboard_announcement_text").value = "";
+            document.getElementById("__dashboard_announcement_button_text").value = "";
+            document.getElementById("__dashboard_announcement_button_url").value = "";
+        }
+    };
 }
 
 async function GetUserInfo() {

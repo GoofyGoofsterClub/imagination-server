@@ -21,6 +21,7 @@
   <span translatable-id="dashboard-welcome"></span>,
   <b id="__dashboard_logged_displayname">[loading]</b>!
 </p>
+<div id="__dashboard_announcement" class="service-announcement" style="display: none;"></div>
 <br />
 <hr />
 <br />
@@ -123,6 +124,7 @@
   <p translatable-id="dashboard-users-paragraph">
     You are an administrator, so you can manipulate other users' accounts!
   </p>
+
   <table id="__dashboard_logged_users_table">
     <thead>
       <tr>
@@ -150,6 +152,24 @@
 >
   You don't have access to user management! ;(
 </p>
+<div id="__dashboard_announcement_admin" style="display: none;">
+  <h2>Service announcement</h2>
+  <p><textarea id="__dashboard_announcement_text" rows="3" maxlength="1000" placeholder="Announcement text"></textarea></p>
+  <p>
+    <label>Severity
+      <select class="input-button" id="__dashboard_announcement_severity">
+        <option value="info">Info</option>
+        <option value="warning">Warning</option>
+        <option value="critical">Critical</option>
+      </select>
+    </label>
+    <input id="__dashboard_announcement_button_text" maxlength="100" placeholder="Button text (optional)" />
+    <input id="__dashboard_announcement_button_url" type="url" maxlength="2000" placeholder="Button link (optional)" />
+    <button class="input-button" id="__dashboard_announcement_save">Publish</button>
+    <button class="input-button button-red" id="__dashboard_announcement_clear">Clear</button>
+  </p>
+  <p class="small-text error-text" id="__dashboard_announcement_result"></p>
+</div>
 <br />
 <hr />
 <br />

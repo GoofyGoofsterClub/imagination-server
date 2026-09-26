@@ -101,6 +101,16 @@ CREATE TABLE uwuso.statistics (
 );
 ALTER TABLE uwuso.statistics OWNER TO dbuser;
 
+CREATE TABLE uwuso.service_announcements (
+    id integer PRIMARY KEY,
+    message text NOT NULL,
+    severity text NOT NULL,
+    button_text text,
+    button_url text,
+    updated_at timestamptz NOT NULL DEFAULT NOW()
+);
+ALTER TABLE uwuso.service_announcements OWNER TO dbuser;
+
 ALTER TABLE uwuso.uploads ADD CONSTRAINT uploader_id_fk FOREIGN KEY (uploader_id)
 REFERENCES uwuso.users (id) MATCH SIMPLE
 ON DELETE NO ACTION ON UPDATE NO ACTION;

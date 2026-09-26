@@ -189,7 +189,7 @@ window.onload = async () => {
 };
 
 async function ChangePage(page) {
-    var newData = await fetch('/public/popovers/' + page + '.html');
+    let newData = await fetch('/public/popovers/' + page + '.html');
 
     anime({
         targets: 'body>.content',

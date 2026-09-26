@@ -1,4 +1,6 @@
 import { Route } from "http/routing";
+import { getAnnouncement } from "utilities/announcement";
+import { isBrowserPageRequest } from "utilities/browser";
 
 export default class NewImageServing extends Route {
     constructor() {
@@ -27,17 +29,29 @@ export default class NewImageServing extends Route {
         if (cache && cache.value)
             cache.value.views = Number(cache.value.views) + 1;
 
-        let fileMimetype = file.mimetype;
-        if (
-            !fileMimetype.startsWith("image/") &&
-            !fileMimetype.startsWith("video/") &&
-            !fileMimetype.startsWith("audio/") &&
-            fileMimetype !== "application/pdf"
-        )
-            reply.header("Content-Disposition", `attachment; filename="${file.filename}.${file.file_ext ? file.file_ext : ""}"`);
+        const browserImageTypes = [
+            "image/avif", "image/bmp", "image/gif", "image/jpeg", "image/png",
+            "image/svg+xml", "image/webp", "image/x-icon"
+        ];
+        const kind = browserImageTypes.includes(file.mimetype) ? "image"
+            : file.mimetype.startsWith("video/") ? "video"
+                : file.mimetype.startsWith("audio/") ? "audio"
+                    : file.mimetype === "application/pdf" ? "pdf" : "other";
+        if (!isBrowserPageRequest(request) || kind === "other") {
+            if (kind === "other")
+                reply.header("Content-Disposition", `attachment; filename="${file.filename}"`);
+            reply.type(file.mimetype);
+            return reply.sendFile(file.disk_filename, `${__dirname}/../../privateuploads`, { contentType: false });
+        }
 
-        reply.type(file.mimetype);
-
-        return reply.sendFile(file.disk_filename, `${__dirname}/../../privateuploads`, { contentType: false });
+        const rawUrl = `/raw/${encodeURIComponent(file.filename)}`;
+        const announcement = await getAnnouncement(server.db);
+        return reply.viewAsync("viewer.ejs", {
+            filename: file.filename,
+            kind,
+            rawUrl,
+            downloadUrl: `${rawUrl}?download=1`,
+            announcement
+        });
     }
 }

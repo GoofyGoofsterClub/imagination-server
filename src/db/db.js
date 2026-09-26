@@ -19,6 +19,15 @@ export default class NewDatabaseController {
             await this.pool.query("CREATE INDEX IF NOT EXISTS idx_users_username ON uwuso.users (username)");
             await this.pool.query("CREATE INDEX IF NOT EXISTS idx_invites_hash ON uwuso.invites (hash)");
             await this.pool.query("CREATE INDEX IF NOT EXISTS idx_services_access_key ON uwuso.services (access_key)");
+            await this.pool.query(`
+                CREATE TABLE IF NOT EXISTS uwuso.service_announcements (
+                    id integer PRIMARY KEY,
+                    message text NOT NULL,
+                    severity text NOT NULL,
+                    button_text text,
+                    button_url text,
+                    updated_at timestamptz NOT NULL DEFAULT NOW()
+                )`);
         } catch (e) {
             this.Output.Warn(`Could not ensure indexes: ${e}`);
         }

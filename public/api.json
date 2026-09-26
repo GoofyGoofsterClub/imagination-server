@@ -1,5 +1,5 @@
 {
-    "generationTimestamp": "2026-09-08T13:21:22.075Z",
+    "generationTimestamp": "2026-09-26T16:23:50.773Z",
     "routes": [
         {
             "path": "api/initial",
@@ -12,6 +12,58 @@
                 "params": {},
                 "returns": "Key of an initial user",
                 "returnexample": "{ \"key\": \"XXXX-XXXX-XXXX-XXXX\" }"
+            }
+        },
+        {
+            "path": "api/private/admin/announcement/clear",
+            "method": "POST",
+            "description": "Clears the active service announcement.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": true,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    }
+                ],
+                "returns": "Nothing.",
+                "returnexample": "{ \"success\": true }"
+            }
+        },
+        {
+            "path": "api/private/admin/announcement",
+            "method": "POST",
+            "description": "Creates or replaces the active service announcement.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": true,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    },
+                    {
+                        "type": "string",
+                        "name": "message"
+                    },
+                    {
+                        "type": "string",
+                        "name": "severity"
+                    },
+                    {
+                        "type": "string",
+                        "name": "buttonText"
+                    },
+                    {
+                        "type": "string",
+                        "name": "buttonUrl"
+                    }
+                ],
+                "returns": "The saved announcement.",
+                "returnexample": "{ \"success\": true, \"data\": { \"message\": \"Maintenance soon\", \"severity\": \"warning\" } }"
             }
         },
         {
@@ -430,6 +482,19 @@
                 ],
                 "returns": "New upload's link",
                 "returnexample": "{ \"success\": true, \"data\": { \"link\": \"https://.../username/usIUSisdbQ\" } }"
+            }
+        },
+        {
+            "path": "api/public/announcement",
+            "method": "GET",
+            "description": "Returns the active service announcement, if one exists.",
+            "params": {
+                "private": false,
+                "needsauth": false,
+                "adminonly": false,
+                "params": {},
+                "returns": "The active service announcement.",
+                "returnexample": "{ \"success\": true, \"data\": null }"
             }
         },
         {

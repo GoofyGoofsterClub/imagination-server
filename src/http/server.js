@@ -75,6 +75,15 @@ export default class HTTPServer {
     }
 
     async registerPlugins() {
+        this.server._public = {
+            "Authenticate": Authenticate,
+            "Output": this.Output,
+            "ExternalLogging": this.externalLogging,
+            "Ratelimits": [],
+            "Maintenance": false,
+            "StatisticsCache": null
+        };
+
         await this.server.register(fastifyMultipart, {
             limits: {
                 fileSize: Infinity
@@ -98,15 +107,6 @@ export default class HTTPServer {
             },
             root: `${__dirname}/../../private`
         });
-
-        this.server._public = {
-            "Authenticate": Authenticate,
-            "Output": this.Output,
-            "ExternalLogging": this.externalLogging,
-            "Ratelimits": [],
-            "Maintenance": false,
-            "StatisticsCache": null
-        };
 
         let isMaintenance = false;
 

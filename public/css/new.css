@@ -195,19 +195,29 @@ a:hover
     text-decoration: underline;
 }
 
-input
+input,
+textarea
 {
+    box-sizing: border-box;
     background: rgba(255,255,255,0);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 999px;
     padding: 8px 16px;
     color: white;
     outline: none;
-    
     transition: 0.2s;
 }
 
-input:focus
+textarea
+{
+    width: 100%;
+    min-height: 80px;
+    resize: vertical;
+    border-radius: 8px;
+}
+
+input:focus,
+textarea:focus
 {
     border: 1px solid rgba(255,255,255,0.2);
     background: rgba(255,255,255,0.1);
@@ -256,6 +266,30 @@ input:disabled
 .error-text
 {
     color: rgb(240, 86, 86);
+}
+
+.service-announcement
+{
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.2);
+}
+
+.service-announcement-info { background: rgba(80, 150, 255, .18); }
+.service-announcement-warning { background: rgba(255, 180, 50, .2); }
+.service-announcement-critical { background: rgba(240, 70, 70, .22); }
+.service-announcement-message { display: block; min-width: 0; overflow-wrap: anywhere; }
+.service-announcement .input-button { float: none; position: static; justify-self: end; white-space: nowrap; }
+@media (max-width: 600px) {
+    .service-announcement { grid-template-columns: minmax(0, 1fr); }
 }
 
 .bold
