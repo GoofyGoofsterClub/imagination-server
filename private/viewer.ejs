@@ -4,6 +4,22 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title><%= it.filename %></title>
+  <meta property="og:title" content="<%= it.filename %>" />
+  <meta property="og:url" content="<%= it.embedUrl %>" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <% if (it.kind === "image") { %>
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="<%= it.embedUrl %>" />
+    <meta name="twitter:image" content="<%= it.embedUrl %>" />
+  <% } else if (it.kind === "video") { %>
+    <meta property="og:type" content="video.other" />
+    <meta property="og:video" content="<%= it.embedUrl %>" />
+    <meta property="og:video:type" content="<%= it.mimetype %>" />
+  <% } else if (it.kind === "audio") { %>
+    <meta property="og:type" content="music.song" />
+    <meta property="og:audio" content="<%= it.embedUrl %>" />
+    <meta property="og:audio:type" content="<%= it.mimetype %>" />
+  <% } %>
   <link rel="icon" type="image/webp" href="/public/img/favicon.webp" />
   <link rel="stylesheet" href="/public/css/new.css" />
   <style>

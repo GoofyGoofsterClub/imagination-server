@@ -45,12 +45,16 @@ export default class NewImageServing extends Route {
         }
 
         const rawUrl = `/raw/${encodeURIComponent(file.filename)}`;
+        const protocol = request.headers["x-forwarded-proto"] || "http";
+        const embedUrl = `${protocol}://${request.headers.host}${rawUrl}`;
         const announcement = await getAnnouncement(server.db);
         return reply.viewAsync("viewer.ejs", {
             filename: file.filename,
+            mimetype: file.mimetype,
             kind,
             rawUrl,
             downloadUrl: `${rawUrl}?download=1`,
+            embedUrl,
             announcement
         });
     }
