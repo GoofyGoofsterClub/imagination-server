@@ -39,7 +39,8 @@
     .image-lightbox-image.is-dragging { cursor: grabbing; }
     .image-lightbox-controls { position: fixed; top: 16px; right: 16px; z-index: 1; display: flex; gap: 8px; }
     .image-lightbox-hint { position: fixed; bottom: 16px; left: 16px; opacity: .7; }
-    .file-viewer-content > img { cursor: zoom-in; } display: block; max-width: min(100%, 1400px); max-height: 75vh; object-fit: contain;  }
+    .file-viewer-media { display: block; flex: 0 1 auto; min-width: 0; min-height: 0; width: auto; height: auto; max-width: calc(100vw - 48px); max-height: calc(100vh - 180px); object-fit: contain; border-radius: 8px; }
+    .file-viewer-content > img { cursor: zoom-in; }
     video.file-viewer-media, audio.file-viewer-media { width: min(100%, 1000px); }
     .file-viewer-frame { width: min(100%, 1200px); height: 75vh; border: 0; background: white; }
     .file-viewer-download { margin-top: 16px; }
