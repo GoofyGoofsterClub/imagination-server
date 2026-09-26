@@ -33,7 +33,13 @@
     .service-announcement .input-button { float: none; flex: 0 0 auto; }
     .file-viewer-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; padding: 24px; }
     .file-viewer-content > .input-button { margin-top: 16px; }
-    .file-viewer-media { display: block; max-width: min(100%, 1400px); max-height: 75vh; object-fit: contain;  }
+    .image-lightbox { position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.88); overflow: hidden; }
+    .image-lightbox.is-open { display: flex; }
+    .image-lightbox-image { max-width: 90vw; max-height: 90vh; user-select: none; -webkit-user-drag: none; touch-action: none; cursor: grab; transform-origin: center center; }
+    .image-lightbox-image.is-dragging { cursor: grabbing; }
+    .image-lightbox-controls { position: fixed; top: 16px; right: 16px; z-index: 1; display: flex; gap: 8px; }
+    .image-lightbox-hint { position: fixed; bottom: 16px; left: 16px; opacity: .7; }
+    .file-viewer-content > img { cursor: zoom-in; } display: block; max-width: min(100%, 1400px); max-height: 75vh; object-fit: contain;  }
     video.file-viewer-media, audio.file-viewer-media { width: min(100%, 1000px); }
     .file-viewer-frame { width: min(100%, 1200px); height: 75vh; border: 0; background: white; }
     .file-viewer-download { margin-top: 16px; }
@@ -74,8 +80,91 @@
   <footer class="file-viewer-footer small-text">
     <%= it.filename %>
   </footer>
+  <% if (it.kind === "image") { %>
+    <div class="image-lightbox" id="image-lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+      <div class="image-lightbox-controls">
+        <button class="input-button" id="image-zoom-out" type="button">−</button>
+        <button class="input-button" id="image-zoom-reset" type="button">Reset</button>
+        <button class="input-button" id="image-zoom-in" type="button">+</button>
+        <button class="input-button" id="image-lightbox-close" type="button">Close</button>
+      </div>
+      <img class="image-lightbox-image" id="image-lightbox-image" draggable="false" src="<%= it.rawUrl %>" alt="<%= it.filename %>" />
+      <span class="image-lightbox-hint small-text">Scroll to zoom · drag to move · double-click to zoom</span>
+    </div>
+  <% } %>
 <script>
   (() => {
+    const preview = document.querySelector('.file-viewer-content > img');
+    const lightbox = document.querySelector('#image-lightbox');
+    const lightboxImage = document.querySelector('#image-lightbox-image');
+    if (preview && lightbox && lightboxImage) {
+      let scale = 1;
+      let offsetX = 0;
+      let offsetY = 0;
+      let dragging = false;
+      let startX = 0;
+      let startY = 0;
+
+      const renderImage = () => {
+        lightboxImage.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+      };
+      const setScale = (value) => {
+        scale = Math.min(8, Math.max(1, value));
+        if (scale === 1) { offsetX = 0; offsetY = 0; }
+        renderImage();
+      };
+      const openLightbox = () => {
+        lightbox.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+        setScale(1);
+      };
+      const closeLightbox = () => {
+        lightbox.classList.remove('is-open');
+        document.body.style.overflow = '';
+      };
+
+      preview.addEventListener('click', openLightbox);
+      document.querySelector('#image-lightbox-close').addEventListener('click', closeLightbox);
+      document.querySelector('#image-zoom-in').addEventListener('click', () => setScale(scale + .5));
+      document.querySelector('#image-zoom-out').addEventListener('click', () => setScale(scale - .5));
+      document.querySelector('#image-zoom-reset').addEventListener('click', () => setScale(1));
+      lightbox.addEventListener('click', (event) => { if (event.target === lightbox) closeLightbox(); });
+      document.addEventListener('keydown', (event) => {
+        if (!lightbox.classList.contains('is-open')) return;
+        if (event.key === 'Escape') closeLightbox();
+        if (event.key === '+') setScale(scale + .5);
+        if (event.key === '-') setScale(scale - .5);
+      });
+      lightboxImage.addEventListener('wheel', (event) => {
+        event.preventDefault();
+        setScale(scale + (event.deltaY < 0 ? .25 : -.25));
+      }, { passive: false });
+      lightboxImage.addEventListener('dblclick', () => setScale(scale === 1 ? 2 : 1));
+      lightboxImage.addEventListener('dragstart', (event) => event.preventDefault());
+      lightboxImage.addEventListener('pointerdown', (event) => {
+        event.preventDefault();
+        dragging = true;
+        startX = event.clientX - offsetX;
+        startY = event.clientY - offsetY;
+        lightboxImage.classList.add('is-dragging');
+        lightboxImage.setPointerCapture(event.pointerId);
+      });
+      lightboxImage.addEventListener('pointermove', (event) => {
+        if (!dragging || scale === 1) return;
+        event.preventDefault();
+        offsetX = event.clientX - startX;
+        offsetY = event.clientY - startY;
+        renderImage();
+      });
+      const stopDragging = () => {
+        dragging = false;
+        lightboxImage.classList.remove('is-dragging');
+      };
+      lightboxImage.addEventListener('pointerup', stopDragging);
+      lightboxImage.addEventListener('pointercancel', stopDragging);
+      lightboxImage.addEventListener('lostpointercapture', stopDragging);
+    }
+
     const header = document.querySelector('.file-viewer-header');
     const content = document.querySelector('#file-viewer-content');
     const button = document.querySelector('#file-viewer-download');
