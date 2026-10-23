@@ -68,6 +68,14 @@ services:
       - uploads:/usr/src/boobspics/privateuploads
     container_name: boobspics-web
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 128M
     env_file:
       - ./.env
     environment:
