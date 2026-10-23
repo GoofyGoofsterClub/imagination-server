@@ -7,6 +7,7 @@ import pointOfView from "@fastify/view";
 import { PresetOutput } from "utilities/output";
 import { ExternalLogging, Field, buildMessage } from "utilities/logexternal";
 import Authenticate from "utilities/authentication";
+import RateLimiter from "utilities/ratelimit";
 
 const SENSITIVE_HEADERS = ["authorization", "cookie", "x-api-key"];
 
@@ -84,7 +85,12 @@ export default class HTTPServer {
             "Authenticate": Authenticate,
             "Output": this.Output,
             "ExternalLogging": this.externalLogging,
-            "Ratelimits": [],
+            "UploadRateLimiter": new RateLimiter(
+                this.redis,
+                "ratelimit:uploads",
+                Number(process.env.UPLOAD_RATE_LIMIT) || 10,
+                Number(process.env.UPLOAD_RATE_WINDOW) || 10
+            ),
             "ViewCounter": this.viewCounter,
             "Maintenance": false,
             "StatisticsCache": null
@@ -92,7 +98,8 @@ export default class HTTPServer {
 
         await this.server.register(fastifyMultipart, {
             limits: {
-                fileSize: Infinity
+                fileSize: Number(process.env.MAX_UPLOAD_SIZE) || 10 * 1024 * 1024 * 1024,
+                files: 1
             }
         });
         await this.server.register(fastifyCookie);

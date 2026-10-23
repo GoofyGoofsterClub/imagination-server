@@ -1,7 +1,11 @@
 import { APIRoute } from "http/routing";
 import { GeneratePrivateID, GeneratePublicID } from "utilities/id";
-import hash, { hashBuffer } from "utilities/hash";
-import { promises as fs } from 'fs';
+import hash from "utilities/hash";
+import { publicBaseUrl, publicProtocol } from "utilities/links";
+import crypto from 'crypto';
+import { promises as fs, createWriteStream } from 'fs';
+import { Transform } from 'stream';
+import { pipeline } from 'stream/promises';
 
 /*--includedoc
 
@@ -22,6 +26,12 @@ export default class UploadsNewAPIRoute extends APIRoute {
     async call(request, reply, server) {
         // Needed for extension to work
         reply.header("Access-Control-Allow-Origin", "*");
+
+        if (!request.headers["authorization"])
+            return {
+                "success": false,
+                "error": "Invalid key."
+            };
 
         let accessHash = hash(request.headers["authorization"]);
         let user = await server.db.findUserByAccessKey(accessHash);
@@ -54,28 +64,46 @@ export default class UploadsNewAPIRoute extends APIRoute {
             }
         }
 
-        const data = await request.file();
-        const dataBuffer = await data.toBuffer();
-        const datahash = await hashBuffer(dataBuffer.slice(0, 1024 * 1024));
+        if (isServiceUpload || !user.superuser) {
+            const limit = await server.server._public.UploadRateLimiter.hit(isServiceUpload ? `service:${user.id}` : `user:${user.id}`);
+            if (!limit.allowed) {
+                reply.status(429);
+                reply.header("Retry-After", limit.retryAfter);
+                return reply.send({
+                    "success": false,
+                    "error": "You are uploading too fast."
+                });
+            }
+        }
+
+        const quota = Number(process.env.USER_STORAGE_QUOTA) || 0;
+        let usedStorage = 0;
+        if (quota > 0) {
+            const usage = await server.db.query(`SELECT COALESCE(SUM(filesize), 0)::bigint AS used FROM uwuso.uploads WHERE uploader_id = $1::bigint`, [user.id]);
+            usedStorage = Number(usage.rows[0].used);
+            if (usedStorage >= quota) {
+                reply.status(413);
+                return reply.send({
+                    "success": false,
+                    "error": "Storage quota exceeded."
+                });
+            }
+        }
+
+        let data;
+        try {
+            data = await request.file();
+        }
+        catch (e) {
+            data = null;
+        }
 
         if (!data) {
             reply.status(400);
             return reply.send({
+                "success": false,
                 "error": "No file was provided"
             });
-
-        }
-
-        const existance = await server.db.query(`SELECT filename FROM uwuso.uploads WHERE filehash = $1::text LIMIT 1`, [datahash]);
-
-        if (existance.rows.length > 0) {
-            reply.send({
-                "success": true,
-                "data": {
-                    "link": `https://${request.headers['host']}/${user.username ?? user.internal_key}/${existance.rows[0].filename}`
-                }
-            });
-            return;
         }
 
         let publicKeySlice = user.username ? hash(user.username.slice(0, 2)).slice(0, 2) + user.username.slice(0, 1) : hash(user.internal_key.slice(0, 2)).slice(0, 2) + user.internal_key.slice(0, 1);
@@ -86,81 +114,121 @@ export default class UploadsNewAPIRoute extends APIRoute {
             "delete": GeneratePrivateID()
         };
 
-        // write dataBuffer to private
-        await fs.writeFile(`${__dirname}/../../../../privateuploads/${ids.private}`, dataBuffer);
+        const diskPath = `${__dirname}/../../../../privateuploads/${ids.private}`;
 
-        let fileSizeInBytes = dataBuffer.length;
-
-        await server.db.query(`INSERT INTO uwuso.uploads (uploader_id, filename, disk_filename,
-            mimetype, filehash, views, filesize, service_upload, upload_time, upload_domain) VALUES (
-            $1::bigint, $2::text, $3::text,
-            $4::text, $5::text, $6::integer,
-            $7::bigint, $8::boolean,
-            $9::bigint, $10::text)`, [
-            user.id,
-            ids.public,
-            ids.private,
-            data.mimetype,
-            datahash,
-            0,
-            fileSizeInBytes,
-            isServiceUpload,
-            Math.floor(+Date.now() / 1000),
-            request.headers['host']
-        ]);
-
-        let cache = server.server._public.StatisticsCache;
-        if (cache && cache.value) {
-            cache.value.uploads = Number(cache.value.uploads) + 1;
-            cache.value.count = cache.value.uploads;
+        const fileHash = crypto.createHash('sha256');
+        let fileSizeInBytes = 0;
+        try {
+            await pipeline(
+                data.file,
+                new Transform({
+                    transform(chunk, encoding, callback) {
+                        fileHash.update(chunk);
+                        fileSizeInBytes += chunk.length;
+                        callback(null, chunk);
+                    }
+                }),
+                createWriteStream(diskPath)
+            );
         }
-
-        if (server.server._public.Ratelimits.length > 100)
-            server.server._public.Ratelimits.shift();
-        server.server._public.Ratelimits.push({
-            "userName": user.username ?? user.internal_key,
-            "timestamp": Date.now()
-        });
-
-        if (!isServiceUpload) // TO-DO(mishashto): Add another ratelimit for services.
-        {
-            let uploadsInLast10Seconds = server.server._public.Ratelimits.filter(x => x.userName == user.username && x.timestamp > Date.now() - 10000);
-            if (uploadsInLast10Seconds.length > 10 && !_auth.protected) {
-                reply.status(429);
+        catch (e) {
+            await fs.unlink(diskPath).catch(() => {});
+            if (e.code === "FST_REQ_FILE_TOO_LARGE") {
+                reply.status(413);
                 return reply.send({
-                    "error": "You are uploading too fast."
+                    "success": false,
+                    "error": "File is too large."
                 });
             }
+            throw e;
+        }
 
-            await server.db.query(`UPDATE uwuso.users SET uploads = uploads + 1 WHERE id = $1::bigint`, [user.id]);
+        if (data.file.truncated) {
+            await fs.unlink(diskPath).catch(() => {});
+            reply.status(413);
+            return reply.send({
+                "success": false,
+                "error": "File is too large."
+            });
+        }
 
-            // await addUpload(server.odb, user.username);
-            // if (_auth.isMonitored) {
-            //     await server.server._public.ExternalLogging.Log(buildMessage(
-            //         request.headers['host'],
-            //         "info",
-            //         "A file has been uploaded.",
-            //         `A file has been uploaded by \`${user.username}\`:\n\`${data.filename}\``,
-            //         `https://${request.headers['host']}/${user.username}/${ids.public}`,
-            //         new Field("File ID", ids.public, false),
-            //         new Field("File Name", data.filename, true),
-            //         new Field("File Size", fileSizeInBytes, true),
-            //         new Field("File Extension", data.filename.split(".")[1], true),
-            //         new Field("File Mimetype", data.mimetype, true),
-            //         new Field("File Uploaded Through", request.headers['host'], true),
-            //         new Field("File Uploaded By", user.username, true)
-            //     ));
-            // }
+        if (quota > 0 && usedStorage + fileSizeInBytes > quota) {
+            await fs.unlink(diskPath).catch(() => {});
+            reply.status(413);
+            return reply.send({
+                "success": false,
+                "error": "Storage quota exceeded."
+            });
+        }
+
+        const datahash = fileHash.digest('hex');
+        let filename = ids.public;
+        let isNewUpload;
+
+        try {
+            const existing = await server.db.query(`SELECT filename FROM uwuso.uploads WHERE uploader_id = $1::bigint AND filehash = $2::text LIMIT 1`, [user.id, datahash]);
+
+            if (existing.rows.length > 0) {
+                filename = existing.rows[0].filename;
+                isNewUpload = false;
+            }
+            else {
+                const inserted = await server.db.query(`INSERT INTO uwuso.uploads (uploader_id, filename, disk_filename,
+                    mimetype, filehash, views, filesize, service_upload, upload_time, upload_domain) VALUES (
+                    $1::bigint, $2::text, $3::text,
+                    $4::text, $5::text, $6::integer,
+                    $7::bigint, $8::boolean,
+                    $9::bigint, $10::text)
+                    ON CONFLICT DO NOTHING
+                    RETURNING filename`, [
+                    user.id,
+                    ids.public,
+                    ids.private,
+                    data.mimetype,
+                    datahash,
+                    0,
+                    fileSizeInBytes,
+                    isServiceUpload,
+                    Math.floor(+Date.now() / 1000),
+                    request.headers['host']
+                ]);
+
+                isNewUpload = inserted.rows.length > 0;
+                if (!isNewUpload) {
+                    const winner = await server.db.query(`SELECT filename FROM uwuso.uploads WHERE uploader_id = $1::bigint AND filehash = $2::text LIMIT 1`, [user.id, datahash]);
+                    filename = winner.rows[0].filename;
+                }
+            }
+        }
+        catch (e) {
+            await fs.unlink(diskPath).catch(() => {});
+            throw e;
+        }
+
+        if (!isNewUpload)
+            await fs.unlink(diskPath).catch(() => {});
+
+        if (isNewUpload) {
+            let cache = server.server._public.StatisticsCache;
+            if (cache && cache.value) {
+                cache.value.uploads = Number(cache.value.uploads) + 1;
+                cache.value.count = cache.value.uploads;
+            }
+
+            if (!isServiceUpload)
+                await server.db.query(`UPDATE uwuso.users SET uploads = uploads + 1 WHERE id = $1::bigint`, [user.id]);
         }
 
         let shortenedUrl = null;
 
+        const baseUrl = publicBaseUrl(request);
+
         if (request.query.custom_url)
-            shortenedUrl = `https://${request.query.custom_url}/${ids.public}`;
+            shortenedUrl = `${publicProtocol(request)}://${request.query.custom_url}/${filename}`;
 
         else if (process.env.SHORTENER_URI && request.query['shorten'] && !isServiceUpload)
         {
-            let shortenerRequest = await fetch(`https://${process.env.SHORTENER_URI}/api/link/shorten?key=${request.headers['authorization']}&link=https://${request.headers['host']}/${ids.public}`);
+            let shortenerRequest = await fetch(`https://${process.env.SHORTENER_URI}/api/link/shorten?key=${request.headers['authorization']}&link=${encodeURIComponent(`${baseUrl}/${filename}`)}`);
 
             if (shortenerRequest.status == 200) {
                 let shortenerRequestJSON = await shortenerRequest.json();
@@ -171,7 +239,7 @@ export default class UploadsNewAPIRoute extends APIRoute {
         reply.send({
             "success": true,
             "data": {
-                "link": shortenedUrl ?? (request.query['useLegacyStyling'] ? `https://${request.headers['host']}/${user.username ?? user.internal_key}/${ids.public}` : `https://${request.headers['host']}/${ids.public}`)
+                "link": shortenedUrl ?? (request.query['useLegacyStyling'] ? `${baseUrl}/${user.username ?? user.internal_key}/${filename}` : `${baseUrl}/${filename}`)
             }
         });
 

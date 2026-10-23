@@ -134,3 +134,4 @@ CREATE INDEX IF NOT EXISTS idx_users_access_key ON uwuso.users (access_key);
 CREATE INDEX IF NOT EXISTS idx_users_username ON uwuso.users (username);
 CREATE INDEX IF NOT EXISTS idx_invites_hash ON uwuso.invites (hash);
 CREATE INDEX IF NOT EXISTS idx_services_access_key ON uwuso.services (access_key);
+CREATE UNIQUE INDEX IF NOT EXISTS uploads_uploader_filehash_uindex ON uwuso.uploads (uploader_id, filehash);

@@ -31,6 +31,12 @@ export default class NewDatabaseController {
         } catch (e) {
             this.Output.Warn(`Could not ensure indexes: ${e}`);
         }
+
+        try {
+            await this.pool.query("CREATE UNIQUE INDEX IF NOT EXISTS uploads_uploader_filehash_uindex ON uwuso.uploads (uploader_id, filehash)");
+        } catch (e) {
+            this.Output.Warn(`Could not create unique upload hash index (duplicate uploads already exist?): ${e}`);
+        }
     }
 
     async query(text, params) {
