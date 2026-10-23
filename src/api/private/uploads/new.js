@@ -1,5 +1,5 @@
 import { APIRoute } from "http/routing";
-import { GeneratePrivateID, GeneratePublicID } from "utilities/id";
+import { GeneratePrivateID, EncodeUploadID } from "utilities/id";
 import hash from "utilities/hash";
 import { publicBaseUrl, publicProtocol } from "utilities/links";
 import crypto from 'crypto';
@@ -106,15 +106,8 @@ export default class UploadsNewAPIRoute extends APIRoute {
             });
         }
 
-        let publicKeySlice = user.username ? hash(user.username.slice(0, 2)).slice(0, 2) + user.username.slice(0, 1) : hash(user.internal_key.slice(0, 2)).slice(0, 2) + user.internal_key.slice(0, 1);
-
-        let ids = {
-            "private": GeneratePrivateID(),
-            "public": GeneratePublicID(8, publicKeySlice),
-            "delete": GeneratePrivateID()
-        };
-
-        const diskPath = `${__dirname}/../../../../privateuploads/${ids.private}`;
+        const diskFilename = GeneratePrivateID();
+        const diskPath = `${__dirname}/../../../../privateuploads/${diskFilename}`;
 
         const fileHash = crypto.createHash('sha256');
         let fileSizeInBytes = 0;
@@ -162,7 +155,7 @@ export default class UploadsNewAPIRoute extends APIRoute {
         }
 
         const datahash = fileHash.digest('hex');
-        let filename = ids.public;
+        let filename;
         let isNewUpload;
 
         try {
@@ -173,24 +166,30 @@ export default class UploadsNewAPIRoute extends APIRoute {
                 isNewUpload = false;
             }
             else {
-                const inserted = await server.db.query(`INSERT INTO uwuso.uploads (uploader_id, filename, disk_filename,
-                    mimetype, filehash, views, filesize, service_upload, upload_time, upload_domain) VALUES (
-                    $1::bigint, $2::text, $3::text,
+                const nextId = await server.db.query(`SELECT nextval(pg_get_serial_sequence('uwuso.uploads', 'id')) AS id`);
+                const uploadId = nextId.rows[0].id;
+                filename = EncodeUploadID(uploadId, server.db.fileIdKey);
+
+                const inserted = await server.db.query(`INSERT INTO uwuso.uploads (id, uploader_id, filename, disk_filename,
+                    mimetype, filehash, views, filesize, service_upload, upload_time, upload_domain)
+                    OVERRIDING SYSTEM VALUE VALUES (
+                    $11::bigint, $1::bigint, $2::text, $3::text,
                     $4::text, $5::text, $6::integer,
                     $7::bigint, $8::boolean,
                     $9::bigint, $10::text)
                     ON CONFLICT DO NOTHING
                     RETURNING filename`, [
                     user.id,
-                    ids.public,
-                    ids.private,
+                    filename,
+                    diskFilename,
                     data.mimetype,
                     datahash,
                     0,
                     fileSizeInBytes,
                     isServiceUpload,
                     Math.floor(+Date.now() / 1000),
-                    request.headers['host']
+                    request.headers['host'],
+                    uploadId
                 ]);
 
                 isNewUpload = inserted.rows.length > 0;

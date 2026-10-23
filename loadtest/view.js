@@ -30,7 +30,7 @@ export const options = {
     scenarios: {
         open_all: {
             executor: "shared-iterations",
-            vus: 10,
+            vus: 200,
             iterations: LINKS.length,
             maxDuration: "5m",
             exec: "openAll",
@@ -43,7 +43,7 @@ export const options = {
             timeUnit: "1s",
             duration: "45s",
             preAllocatedVUs: 50,
-            maxVUs: 200,
+            maxVUs: 1000,
             exec: "hotViews",
             tags: { phase: "hot_views" },
         },

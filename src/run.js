@@ -26,6 +26,7 @@ const run = async () => {
 
             ndb = await new NewDatabaseController();
             await ndb.ensureIndexes();
+            await ndb.loadFileIdKey();
 
             Output.Log("Connected to the database!");
             databaseConnectionSuccess = true;

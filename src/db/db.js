@@ -1,4 +1,5 @@
 import pg from "pg";
+import crypto from "crypto";
 import { PresetOutput } from "utilities/output";
 const { Pool } = pg;
 
@@ -37,6 +38,24 @@ export default class NewDatabaseController {
         } catch (e) {
             this.Output.Warn(`Could not create unique upload hash index (duplicate uploads already exist?): ${e}`);
         }
+
+        try {
+            await this.pool.query("CREATE UNIQUE INDEX IF NOT EXISTS uploads_filename_uindex ON uwuso.uploads (filename)");
+        } catch (e) {
+            this.Output.Warn(`Could not create unique upload filename index (duplicate filenames already exist?): ${e}`);
+        }
+    }
+
+    async loadFileIdKey() {
+        await this.pool.query(`
+            CREATE TABLE IF NOT EXISTS uwuso.settings (
+                key text PRIMARY KEY,
+                value text NOT NULL
+            )`);
+        await this.pool.query(`INSERT INTO uwuso.settings (key, value) VALUES ('file_id_key', $1::text) ON CONFLICT (key) DO NOTHING`,
+            [crypto.randomBytes(32).toString("hex")]);
+        const result = await this.pool.query(`SELECT value FROM uwuso.settings WHERE key = 'file_id_key'`);
+        this.fileIdKey = Buffer.from(result.rows[0].value, "hex");
     }
 
     async query(text, params) {

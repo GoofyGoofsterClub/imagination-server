@@ -135,3 +135,10 @@ CREATE INDEX IF NOT EXISTS idx_users_username ON uwuso.users (username);
 CREATE INDEX IF NOT EXISTS idx_invites_hash ON uwuso.invites (hash);
 CREATE INDEX IF NOT EXISTS idx_services_access_key ON uwuso.services (access_key);
 CREATE UNIQUE INDEX IF NOT EXISTS uploads_uploader_filehash_uindex ON uwuso.uploads (uploader_id, filehash);
+CREATE UNIQUE INDEX IF NOT EXISTS uploads_filename_uindex ON uwuso.uploads (filename);
+
+CREATE TABLE uwuso.settings (
+    key text PRIMARY KEY,
+    value text NOT NULL
+);
+ALTER TABLE uwuso.settings OWNER TO dbuser;
