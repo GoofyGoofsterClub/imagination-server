@@ -10,9 +10,13 @@ export default class RedisController {
 
     async connect() {
         if (this.redis) return false;
-        this.redis = await createClient({
-            url: this.host
+        const url = /^rediss?:\/\//.test(this.host) ? this.host : `redis://${this.host}`;
+        this.redis = createClient({
+            url,
+            socket: { connectTimeout: 5000, reconnectStrategy: (retries) => Math.min(retries * 500, 5000) }
         });
+        this.redis.on("error", (e) => this.Output.Warn(`Redis error: ${e.message}`));
+        await this.redis.connect();
         this.Output.Log("Redis connected.");
     }
 

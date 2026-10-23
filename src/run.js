@@ -3,6 +3,7 @@ import HTTPServer from "http/server";
 import HTTPRouting from "http/routing";
 import DatabaseController from "db/old";
 import NewDatabaseController from "db/db";
+import RedisController from "db/redis";
 
 Output.Log("Preparing the server...");
 const run = async () => {
@@ -31,8 +32,20 @@ const run = async () => {
         }
     }
 
+    let redis = null;
+    if (process.env.REDISHOST) {
+        const redisController = new RedisController(process.env.REDISHOST);
+        const connecting = redisController.connect();
+        connecting.catch((e) => Output.Warn("sys", `Could not connect to Redis: ${e}`));
+        const timeout = new Promise((resolve) => setTimeout(resolve, 5000).unref());
+        await Promise.race([connecting, timeout]).catch(() => {});
+        redis = redisController.redis;
+        if (!redis?.isReady)
+            Output.Warn("sys", "Redis is not ready yet, rate limits use process memory until it is.");
+    }
+
     Output.Log("Registering routes...");
-    const server = new HTTPServer(db, ndb);
+    const server = new HTTPServer(db, ndb, redis);
 
     HTTPRouting.RegisterRoutes(server);
 
