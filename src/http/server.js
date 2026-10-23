@@ -11,10 +11,11 @@ import Authenticate from "utilities/authentication";
 const SENSITIVE_HEADERS = ["authorization", "cookie", "x-api-key"];
 
 export default class HTTPServer {
-    constructor(db, _db, redis = null) {
+    constructor(db, _db, redis = null, viewCounter = null) {
         this.odb = db;
         this.db = _db;
         this.redis = redis;
+        this.viewCounter = viewCounter;
         this.server = fastify({
             logger: (process.env.ENV && process.env.ENV == 'DEV')
         });
@@ -84,6 +85,7 @@ export default class HTTPServer {
             "Output": this.Output,
             "ExternalLogging": this.externalLogging,
             "Ratelimits": [],
+            "ViewCounter": this.viewCounter,
             "Maintenance": false,
             "StatisticsCache": null
         };

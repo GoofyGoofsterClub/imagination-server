@@ -20,10 +20,7 @@ export default class ImageServing extends Route {
 
         let file = fileInfo.rows[0];
 
-        await Promise.all([
-            server.db.query(`UPDATE uwuso.users SET views = views + 1 WHERE id = $1::bigint`, [file.uploader_id]),
-            server.db.query(`UPDATE uwuso.uploads SET views = views + 1 WHERE id = $1::bigint`, [file.id])
-        ]);
+        server.server._public.ViewCounter.add(file.id, file.uploader_id);
 
         let cache = server.server._public.StatisticsCache;
         if (cache && cache.value)

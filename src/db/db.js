@@ -5,7 +5,7 @@ const { Pool } = pg;
 export default class NewDatabaseController {
     constructor() {
         this.Output = new PresetOutput("db");
-        this.pool = new Pool();
+        this.pool = new Pool({ max: Number(process.env.PGPOOL_MAX) || 20 });
 
         this.Output.Log("Database initialized.");
     }

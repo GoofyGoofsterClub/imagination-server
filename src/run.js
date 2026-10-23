@@ -4,6 +4,9 @@ import HTTPRouting from "http/routing";
 import DatabaseController from "db/old";
 import NewDatabaseController from "db/db";
 import RedisController from "db/redis";
+import ViewCounter from "utilities/viewcounter";
+
+let viewCounter = null;
 
 Output.Log("Preparing the server...");
 const run = async () => {
@@ -44,8 +47,10 @@ const run = async () => {
             Output.Warn("sys", "Redis is not ready yet, rate limits use process memory until it is.");
     }
 
+    viewCounter = new ViewCounter(ndb);
+
     Output.Log("Registering routes...");
-    const server = new HTTPServer(db, ndb, redis);
+    const server = new HTTPServer(db, ndb, redis, viewCounter);
 
     HTTPRouting.RegisterRoutes(server);
 
@@ -81,6 +86,7 @@ runWrapper().catch((error) => {
 
 async function gracefulShutdown(signal) {
     Output.Log("sys", `Received ${signal}, shutting down...`);
+    await viewCounter?.stop().catch(() => {});
     await shutdownLogger();
     process.exit(0);
 }
