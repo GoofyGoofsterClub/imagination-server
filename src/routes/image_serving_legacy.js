@@ -1,6 +1,7 @@
 import { Route } from "http/routing";
 import { getAnnouncement } from "utilities/announcement";
 import { isBrowserPageRequest } from "utilities/browser";
+import { publicBaseUrl } from "utilities/links";
 
 export default class ImageServing extends Route {
     constructor() {
@@ -42,8 +43,7 @@ export default class ImageServing extends Route {
         }
 
         const rawUrl = `/raw/${encodeURIComponent(request.params.uploader)}/${encodeURIComponent(file.filename)}`;
-        const protocol = request.headers["x-forwarded-proto"] || "http";
-        const embedUrl = `${protocol}://${request.headers.host}${rawUrl}`;
+        const embedUrl = `${publicBaseUrl(request)}${rawUrl}`;
         const announcement = await getAnnouncement(server.db);
         return reply.viewAsync("viewer.ejs", {
             filename: file.filename,

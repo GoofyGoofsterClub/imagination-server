@@ -176,7 +176,7 @@ async function CheckLogin() {
             return;
         }
 
-        document.getElementById("__dashboard_loggen_invite_result").innerText = "Invite link: https://" + window.location.host + "/invite/" + data.data.inviteCode;
+        document.getElementById("__dashboard_loggen_invite_result").innerText = "Invite link: " + window.location.origin + "/invite/" + data.data.inviteCode;
         document.getElementById("__dashboard_loggen_invite_result").style.display = "block";
         document.getElementById("__dashboard_loggen_invite_result").classList.remove("error-text");
     }
@@ -718,7 +718,7 @@ async function GetUploadsLegacy() {
         let row = table.insertRow();
         row.id = "__dashboard_logged_uploads_table_row_" + i;
         let cell = row.insertCell();
-        cell.innerHTML = `<a href="https://${window.location.host}/${UserInfo.displayName}/${data.data[i].filename}"><span class="code">[${data.data[i].filename}]</span></a>`;
+        cell.innerHTML = `<a href="${window.location.origin}/${UserInfo.displayName}/${data.data[i].filename}"><span class="code">[${data.data[i].filename}]</span></a>`;
         cell = row.insertCell();
         cell.innerText = data.data[i] == undefined ? "Unknown" : new Date(parseInt(data.data[i].upload_time) * 1000).toLocaleString();
         cell = row.insertCell();
@@ -775,7 +775,7 @@ async function GetUploads() {
     data.data.forEach((upload, index) => {
         const row = table.insertRow();
         row.id = `__dashboard_logged_uploads_table_row_${index}`;
-        row.insertCell().innerHTML = `<a href="https://${window.location.host}/${UserInfo.displayName}/${encodeURIComponent(upload.filename)}"><span class="code">[${upload.filename}]</span></a>`;
+        row.insertCell().innerHTML = `<a href="${window.location.origin}/${UserInfo.displayName}/${encodeURIComponent(upload.filename)}"><span class="code">[${upload.filename}]</span></a>`;
         row.insertCell().innerText = new Date(Number(upload.upload_time) * 1000).toLocaleString();
         row.insertCell().innerText = upload.upload_domain || "Unknown";
         const action = row.insertCell();
