@@ -8,6 +8,8 @@ import { PresetOutput } from "utilities/output";
 import { ExternalLogging, Field, buildMessage } from "utilities/logexternal";
 import Authenticate from "utilities/authentication";
 
+const SENSITIVE_HEADERS = ["authorization", "cookie", "x-api-key"];
+
 export default class HTTPServer {
     constructor(db, _db) {
         this.odb = db;
@@ -42,13 +44,14 @@ export default class HTTPServer {
             this.Output.Error("sys", "An error occured while processing a request:", error);
             let cookies = "";
             for (let cookie in request.cookies) {
-                cookies += `\`${cookie}\` = \`${request.cookies[cookie]}\`\n`;
+                cookies += `\`${cookie}\` = \`<redacted>\`\n`;
             }
-            let url = request.url;
-            if (url.includes("key")) {
-                url = request.url.replace(/key=(\w+)+/, "key=<redacted>");
-            }
-            let headersJson = request.headers ? JSON.stringify(request.headers) : null;
+            let url = request.url.replace(/([?&](?:key|code|token)=)[^&]*/gi, "$1<redacted>");
+            let headers = request.headers ? { ...request.headers } : null;
+            if (headers)
+                for (const name of SENSITIVE_HEADERS)
+                    if (headers[name]) headers[name] = "<redacted>";
+            let headersJson = headers ? JSON.stringify(headers) : null;
             let bodyJson = request.body ? JSON.stringify(request.body) : null;
             this.externalLogging.Log(buildMessage(
                 request.headers['host'],

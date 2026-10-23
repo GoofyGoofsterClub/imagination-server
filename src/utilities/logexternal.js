@@ -2,10 +2,14 @@ import axios from "axios";
 
 export class ExternalLogging
 {
-    constructor(webhook_url)
+    constructor(webhook_url, maxPerMinute = Number(process.env.LOG_WEBHOOK_MAX_PER_MINUTE) || 20)
     {
         this.webhook_url = webhook_url;
         this.enabled = this.webhook_url ? true : false;
+        this.maxPerMinute = maxPerMinute;
+        this.windowStart = 0;
+        this.sentInWindow = 0;
+        this.dropped = 0;
     }
 
     async Log(message)
@@ -13,9 +17,34 @@ export class ExternalLogging
         if(!this.enabled)
             return;
 
-        let res = await axios.post(this.webhook_url, message);
+        const now = Date.now();
+        if (now - this.windowStart >= 60000)
+        {
+            this.windowStart = now;
+            this.sentInWindow = 0;
+        }
 
-        return res;
+        if (this.sentInWindow >= this.maxPerMinute)
+        {
+            this.dropped++;
+            return;
+        }
+        this.sentInWindow++;
+
+        if (this.dropped > 0)
+        {
+            message = { ...message, content: `${message.content ?? ""}\n(${this.dropped} log message(s) were dropped due to rate limiting.)` };
+            this.dropped = 0;
+        }
+
+        try
+        {
+            return await axios.post(this.webhook_url, message, { timeout: 10000 });
+        }
+        catch (e)
+        {
+            console.error(`[err][logexternal] Failed to deliver webhook log: ${e.message}`);
+        }
     }
 }
 
