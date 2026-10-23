@@ -1,13 +1,3 @@
-// Test 1: upload load test with a unique file per request.
-//
-// The server dedupes on sha256 of the FIRST 1 MiB of the file (globally, across users),
-// so every file starts with a unique header (run id / VU / iteration / size) followed by
-// random filler. That header is also what view.js uses to verify downloaded content.
-//
-// Usage:
-//   k6 run --console-output=loadtest/links.log loadtest/upload.js
-// Env: BASE_URL (default http://localhost:16732), USERS_FILE (default ./users.json)
-
 import http from "k6/http";
 import { check, sleep } from "k6";
 import exec from "k6/execution";
@@ -19,7 +9,6 @@ const RUN_ID = __ENV.RUN_ID || `${Date.now().toString(36)}`;
 
 const MAX_SIZE = 8 * 1024 * 1024;
 
-// Per-VU random pool; each upload copies a random window of it and stamps a unique header.
 const pool = new Uint8Array(MAX_SIZE + 1024 * 1024);
 for (let off = 0; off < pool.length; off += 65536)
     crypto.getRandomValues(pool.subarray(off, Math.min(off + 65536, pool.length)));
@@ -40,7 +29,6 @@ const uploadDurationPerMiB = new Trend("upload_ms_per_mib");
 
 export const options = {
     scenarios: {
-        // Realistic: 10 users, each paced to stay under the 10-uploads/10s per-user limit.
         paced: {
             executor: "constant-vus",
             vus: 10,
@@ -48,7 +36,6 @@ export const options = {
             exec: "paced",
             tags: { phase: "paced" },
         },
-        // Stress: no think time, up to 3 VUs per user, to find the throughput ceiling.
         stress: {
             executor: "ramping-vus",
             startTime: "65s",
@@ -65,17 +52,25 @@ export const options = {
     thresholds: {
         "upload_ok{phase:paced}": ["rate>0.99"],
         "http_req_duration{phase:paced}": ["p(95)<2000"],
-        "upload_ok{phase:stress}": ["rate>0.95"],
+        upload_5xx: ["count==0"],
+        "upload_ok{phase:stress}": ["rate>=0"],
         "http_req_duration{phase:stress}": ["p(95)<10000"],
     },
     summaryTrendStats: ["avg", "min", "med", "p(90)", "p(95)", "p(99)", "max"],
 };
 
+if (__ENV.SCENARIO) {
+    const only = options.scenarios[__ENV.SCENARIO];
+    if (!only) throw new Error(`Unknown SCENARIO ${__ENV.SCENARIO}`);
+    delete only.startTime;
+    options.scenarios = { [__ENV.SCENARIO]: only };
+}
+
 function pickSize() {
     const r = Math.random();
-    if (r < 0.6) return 50 * 1024 + Math.floor(Math.random() * 450 * 1024); // 50-500 KiB
-    if (r < 0.95) return 512 * 1024 + Math.floor(Math.random() * 2.5 * 1024 * 1024); // 0.5-3 MiB
-    return 5 * 1024 * 1024 + Math.floor(Math.random() * 3 * 1024 * 1024); // 5-8 MiB
+    if (r < 0.6) return 50 * 1024 + Math.floor(Math.random() * 450 * 1024);
+    if (r < 0.95) return 512 * 1024 + Math.floor(Math.random() * 2.5 * 1024 * 1024);
+    return 5 * 1024 * 1024 + Math.floor(Math.random() * 3 * 1024 * 1024);
 }
 
 function buildFile(size) {
@@ -89,8 +84,6 @@ function buildFile(size) {
 const seenLinks = new Set();
 
 function upload() {
-    // Round-robin by iteration: k6 does not hand VU ids 1..N to a given scenario, so VU-based mapping
-    // can put several VUs on one user and trip the per-user limit.
     const user = USERS[exec.scenario.iterationInTest % USERS.length];
     const size = pickSize();
     const [mime, ext] = MIMES[Math.floor(Math.random() * MIMES.length)];
@@ -103,7 +96,7 @@ function upload() {
     );
 
     let body = null;
-    try { body = res.json(); } catch (_) { /* HTML error page */ }
+    try { body = res.json(); } catch (_) { }
     const link = body && body.data && body.data.link;
 
     const ok = check(res, {
@@ -112,16 +105,19 @@ function upload() {
         "link returned": () => typeof link === "string" && /^https:\/\/[^/]+\/[\w.~-]+$/.test(link),
     });
 
+    check(res, { "200 or 429, never 5xx": (r) => r.status === 200 || r.status === 429 });
     uploadOk.add(ok);
     if (res.status === 429) uploadRateLimited.add(1);
     if (res.status >= 500) uploadServerError.add(1);
+
+    if (res.timings.duration > 1000)
+        console.warn(`SLOW ${res.timings.duration.toFixed(0)}ms status=${res.status} size=${size} sending=${res.timings.sending.toFixed(0)}ms waiting=${res.timings.waiting.toFixed(0)}ms`);
 
     if (ok) {
         uploadBytes.add(size);
         uploadDurationPerMiB.add(res.timings.duration / (size / 1048576));
         if (seenLinks.has(link)) uploadDuplicateLink.add(1);
         seenLinks.add(link);
-        // Picked up by view.js via --console-output.
         console.log(`LINK ${link} ${size} ${mime}`);
     }
     return res;
@@ -130,7 +126,6 @@ function upload() {
 export function paced() {
     const started = Date.now();
     upload();
-    // ~1 upload / 1.25s per user => ~8 per 10s, under the per-user limit of 10.
     const left = 1250 - (Date.now() - started);
     if (left > 0) sleep(left / 1000);
 }

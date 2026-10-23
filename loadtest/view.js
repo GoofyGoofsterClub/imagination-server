@@ -1,12 +1,3 @@
-// Test 2: open every link returned by upload.js and verify the served content.
-//
-// The server returns https://<host>/<id> links; locally there is only plain HTTP,
-// so links are rewritten to BASE_URL before requesting.
-//
-// Usage (after upload.js):
-//   k6 run loadtest/view.js
-// Env: BASE_URL (default http://localhost:16732), LINKS_FILE (default ./links.log)
-
 import http from "k6/http";
 import { check } from "k6";
 import exec from "k6/execution";
@@ -15,7 +6,6 @@ import { Rate, Counter } from "k6/metrics";
 
 const BASE_URL = __ENV.BASE_URL || "http://localhost:16732";
 
-// Lines look like: time="..." level=info msg="LINK https://host/ID 12345 image/png" source=console
 const LINKS = new SharedArray("links", () => {
     const out = [];
     for (const line of open(__ENV.LINKS_FILE || "./links.log").split("\n")) {
@@ -38,7 +28,6 @@ const notFound = new Counter("not_found");
 
 export const options = {
     scenarios: {
-        // Open every uploaded link once: raw file, browser viewer page, /raw/ endpoint.
         open_all: {
             executor: "shared-iterations",
             vus: 10,
@@ -47,7 +36,6 @@ export const options = {
             exec: "openAll",
             tags: { phase: "open_all" },
         },
-        // Hot-path: many views on random links (each view does 2 UPDATEs in Postgres).
         hot_views: {
             executor: "constant-arrival-rate",
             startTime: "5s",
@@ -92,11 +80,9 @@ export function openAll() {
     const item = LINKS[exec.scenario.iterationInTest];
     const url = localUrl(item.link);
 
-    // 1. The link as a non-browser client (ShareX, curl, Discord embed fetcher) gets the file.
     const raw = http.get(url, { responseType: "binary", tags: { name: "link_raw" }, timeout: "60s" });
     contentOk.add(verifyContent(raw, item));
 
-    // 2. The link as a browser gets the HTML viewer page.
     const page = http.get(url, { headers: BROWSER_HEADERS, tags: { name: "link_viewer" } });
     viewerOk.add(check(page, {
         "viewer 200": (r) => r.status === 200,
@@ -104,12 +90,10 @@ export function openAll() {
         "viewer references raw": (r) => typeof r.body === "string" && r.body.includes(`/raw/${item.id}`),
     }));
 
-    // 3. The /raw/ URL the viewer embeds.
     const embedded = http.get(`${BASE_URL}/raw/${item.id}`, { responseType: "binary", tags: { name: "raw_endpoint" }, timeout: "60s" });
     contentOk.add(verifyContent(embedded, item));
 }
 
-// Small files only, so hot_views measures the per-view DB work, not disk/network bandwidth.
 const SMALL = [];
 for (let i = 0; i < LINKS.length; i++) if (LINKS[i].size < 512 * 1024) SMALL.push(i);
 
