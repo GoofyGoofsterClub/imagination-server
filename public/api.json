@@ -1,5 +1,5 @@
 {
-    "generationTimestamp": "2026-09-26T16:23:50.773Z",
+    "generationTimestamp": "2026-10-26T17:45:18.720Z",
     "routes": [
         {
             "path": "api/initial",
@@ -64,6 +64,50 @@
                 ],
                 "returns": "The saved announcement.",
                 "returnexample": "{ \"success\": true, \"data\": { \"message\": \"Maintenance soon\", \"severity\": \"warning\" } }"
+            }
+        },
+        {
+            "path": "api/private/admin/experiments/randomcustomurl",
+            "method": "POST",
+            "description": "Toggles the random custom URL experiment. When enabled, uploads without the custom_url parameter get a link on a random domain from the list.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": true,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    },
+                    {
+                        "type": "bool",
+                        "name": "enabled"
+                    },
+                    {
+                        "type": "array",
+                        "name": "domains"
+                    }
+                ],
+                "returns": "The saved experiment state.",
+                "returnexample": "{ \"success\": true, \"data\": { \"enabled\": true, \"domains\": [\"uwu.so\", \"mirror.example\"] } }"
+            }
+        },
+        {
+            "path": "api/private/admin/experiments",
+            "method": "GET",
+            "description": "Returns the current state of experiment options.",
+            "params": {
+                "private": false,
+                "needsauth": true,
+                "adminonly": true,
+                "params": [
+                    {
+                        "type": "string",
+                        "name": "key"
+                    }
+                ],
+                "returns": "Current state of experiment options.",
+                "returnexample": "{ \"success\": true, \"data\": { \"randomCustomUrl\": { \"enabled\": true, \"domains\": [\"uwu.so\", \"mirror.example\"] } } }"
             }
         },
         {

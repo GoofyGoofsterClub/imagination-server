@@ -2,6 +2,7 @@ import { APIRoute } from "http/routing";
 import { GeneratePrivateID, EncodeUploadID } from "utilities/id";
 import hash from "utilities/hash";
 import { publicBaseUrl, publicProtocol } from "utilities/links";
+import { pickRandomCustomUrl } from "utilities/experiments";
 import crypto from 'crypto';
 import { promises as fs, createWriteStream } from 'fs';
 import { Transform } from 'stream';
@@ -222,10 +223,13 @@ export default class UploadsNewAPIRoute extends APIRoute {
 
         const baseUrl = publicBaseUrl(request);
 
-        if (request.query.custom_url)
-            shortenedUrl = `${publicProtocol(request)}://${request.query.custom_url}/${filename}`;
+        const wantsShortener = process.env.SHORTENER_URI && request.query['shorten'] && !isServiceUpload;
+        const customUrl = request.query.custom_url || (!wantsShortener && await pickRandomCustomUrl(server.db));
 
-        else if (process.env.SHORTENER_URI && request.query['shorten'] && !isServiceUpload)
+        if (customUrl)
+            shortenedUrl = `${publicProtocol(request)}://${customUrl}/${filename}`;
+
+        else if (wantsShortener)
         {
             let shortenerRequest = await fetch(`https://${process.env.SHORTENER_URI}/api/link/shorten?key=${request.headers['authorization']}&link=${encodeURIComponent(`${baseUrl}/${filename}`)}`);
 

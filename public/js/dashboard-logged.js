@@ -51,6 +51,7 @@ async function CheckLogin() {
         document.getElementById("__dashboard_logged_users_block").style.display = "block";
         document.getElementById("__dashboard_logged_users_block_unavailable").style.display = "none";
         document.getElementById("__dashboard_announcement_admin").style.display = "block";
+        LoadExperiments();
         document.getElementById("__dashboard_logged_invite_block").style.display = "block";
         document.getElementById("__dashboard_logged_invite_block_unavailable").style.display = "none";
     }
@@ -322,6 +323,40 @@ async function LoadServiceAnnouncement(isAdmin) {
             document.getElementById("__dashboard_announcement_button_text").value = "";
             document.getElementById("__dashboard_announcement_button_url").value = "";
         }
+    };
+}
+
+async function LoadExperiments() {
+    document.getElementById("__dashboard_experiments_admin").style.display = "block";
+    const enabled = document.getElementById("__dashboard_experiments_random_custom_url_enabled");
+    const domains = document.getElementById("__dashboard_experiments_random_custom_url_domains");
+    const result = document.getElementById("__dashboard_experiments_result");
+
+    try {
+        const response = await fetch("/api/private/admin/experiments?key=" + encodeURIComponent(localStorage.getItem("key")));
+        const data = await response.json();
+        if (data.success) {
+            enabled.checked = data.data.randomCustomUrl.enabled;
+            domains.value = data.data.randomCustomUrl.domains.join("\n");
+        }
+    } catch (error) {
+        console.warn("Could not load experiments.", error);
+    }
+
+    document.getElementById("__dashboard_experiments_save").onclick = async () => {
+        const saveResponse = await fetch("/api/private/admin/experiments/randomcustomurl", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                key: localStorage.getItem("key"),
+                enabled: enabled.checked,
+                domains: domains.value.split(/[\s,]+/).filter(Boolean)
+            })
+        });
+        const saveData = await saveResponse.json();
+        result.innerText = saveData.success ? "Experiments saved." : saveData.error;
+        result.classList.toggle("error-text", !saveData.success);
+        if (saveData.success) domains.value = saveData.data.domains.join("\n");
     };
 }
 
