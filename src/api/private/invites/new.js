@@ -54,7 +54,7 @@ export default class InvitesNewAPIRoute extends APIRoute {
             };
 
         let pendingInvites = await server.db.query(`SELECT COUNT(*)::int AS n FROM uwuso.invites
-            WHERE inviter = $1::bigint AND valid_until * 1000 > Date.now()`, [user.id]);
+            WHERE inviter = $1::bigint AND valid_until > EXTRACT(epoch FROM NOW())::bigint`, [user.id]);
         if (pendingInvites.rows[0].n >= 100)
             return {
                 "success": false,
@@ -62,7 +62,7 @@ export default class InvitesNewAPIRoute extends APIRoute {
             };
 
         let activeInvite = await server.db.query(`SELECT id FROM uwuso.invites
-            WHERE username = $1::text AND valid_until * 1000 > Date.now()`, [request.query.target]);
+            WHERE username = $1::text AND valid_until > EXTRACT(epoch FROM NOW())::bigint`, [request.query.target]);
         if (activeInvite.rows.length > 0)
             return {
                 "success": false,
