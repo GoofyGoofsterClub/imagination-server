@@ -95,6 +95,12 @@ export default class HTTPServer {
                 Number(process.env.UPLOAD_RATE_LIMIT) || 10,
                 Number(process.env.UPLOAD_RATE_WINDOW) || 10
             ),
+            "CheckRateLimiter": new RateLimiter(
+                this.redis,
+                "ratelimit:check",
+                20,
+                60
+            ),
             "ViewCounter": this.viewCounter,
             "Maintenance": false,
             "StatisticsCache": null

@@ -18,7 +18,16 @@ export default class CheckSessionAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        // TO-DO: Add maintenance check? Idk why it was here but ig needed??
+        const limit = await server.server._public.CheckRateLimiter.hit(request.ip);
+
+        if (!limit.allowed) {
+            reply.status(429);
+            reply.header("Retry-After", limit.retryAfter);
+            return {
+                "success": false,
+                "error": "Too many requests."
+            };
+        }
 
         let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
 
