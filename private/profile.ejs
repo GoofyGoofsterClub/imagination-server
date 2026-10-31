@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/public/css/new.css" />
 </head>
 <script>
-  const USERNAME = "<%= it.username %>";
+  const USERNAME = <%~ JSON.stringify(it.username).replace(/</g, "\\u003c") %>;
 </script>
 <body style="opacity: 1 !important">
   <div class="navbar">
