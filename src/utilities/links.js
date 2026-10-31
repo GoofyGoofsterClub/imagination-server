@@ -14,8 +14,16 @@ export function publicHost(request) {
     const raw = request.headers?.["host"];
     if (typeof raw === "string") {
         const normalized = raw.trim().toLowerCase();
-        if (normalized && isValidDomain(normalized))
+        if (normalized && isValidDomain(normalized)) {
+            const allowed = process.env.PUBLIC_HOSTS;
+            if (allowed) {
+                const host = normalized.split(":")[0];
+                const list = allowed.split(",").map((entry) => entry.trim().toLowerCase()).filter(Boolean);
+                if (!list.includes(host))
+                    return process.env.PUBLIC_HOST || "localhost";
+            }
             return normalized;
+        }
     }
     return process.env.PUBLIC_HOST || "localhost";
 }
