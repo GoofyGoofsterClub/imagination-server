@@ -39,6 +39,7 @@ export default class HTTPServer {
         this.server.setNotFoundHandler(async (request, reply) => {
             reply.header("X-Frame-Options", "SAMEORIGIN");
             reply.header("Content-Security-Policy", "frame-ancestors 'self'");
+            reply.status(404);
             return reply.viewAsync("404.ejs", {
                 "domain": publicHost(request)
             });
