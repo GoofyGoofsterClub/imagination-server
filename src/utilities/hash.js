@@ -7,6 +7,8 @@ import fs from 'fs';
  * @description Hashes a string using SHA256.
 */
 export default function hash(data) {
+    if (data === null || data === undefined)
+        data = "";
     return crypto.createHash('sha256').update(data, 'utf8').digest('hex');
 }
 
