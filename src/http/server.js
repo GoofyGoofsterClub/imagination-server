@@ -139,11 +139,16 @@ export default class HTTPServer {
             root: `${__dirname}/../../private`
         });
 
-        let isMaintenance = false;
-
-        if (isMaintenance && isMaintenance.value && isMaintenance.value.enabled) {
-            this.server._public.Maintenance = isMaintenance;
-        }
+        // Load persisted maintenance state (set via /api/private/admin/globals/maintenance/modify)
+        this.db.query(`SELECT value FROM uwuso.settings WHERE key = $1::text`, ["maintenance"])
+            .then((result) => {
+                if (result.rows.length > 0) {
+                    const state = JSON.parse(result.rows[0].value);
+                    if (state && state.enabled)
+                        this.server._public.Maintenance = { value: state };
+                }
+            })
+            .catch(() => { });
     }
 
     async registerRoute(path, method, handler) {

@@ -42,9 +42,14 @@ export class Route {
         if (server.server._public.initialSetup) {
             return reply.viewAsync('initial-setup.ejs');
         }
-        if (server.server._public.Maintenance && server.server._public.Maintenance.value.mode >= 2) {
-            reply.status(503);
-            return reply.viewAsync('maintenance.ejs', { reason: server.server._public.Maintenance.value.message });
+        const maintenance = server.server._public.Maintenance;
+        if (maintenance && maintenance.value) {
+            const mode = Number(maintenance.value.mode) || 0;
+            const isDashboard = request.url === "/" || request.url.startsWith("/?");
+            if (mode === 2 || isDashboard) {
+                reply.status(503);
+                return reply.viewAsync('maintenance.ejs', { reason: maintenance.value.message });
+            }
         }
         return await handler(request, reply, server);
     }
@@ -66,9 +71,10 @@ export class APIRoute {
     async call(request, reply) { }
 
     async callWrapper(request, reply, server, handler) {
-        if (server.server._public.Maintenance && server.server._public.Maintenance.value.mode >= 2 && !this.excludeFromMaintenance) {
+        const maintenance = server.server._public.Maintenance;
+        if (maintenance && maintenance.value && (Number(maintenance.value.mode) || 0) >= 1 && !this.excludeFromMaintenance) {
             reply.status(503);
-            return reply.send({ success: false, error: `503 - Maintenance: ${server.server._public.Maintenance.value.message}` });
+            return reply.send({ success: false, error: `503 - Maintenance: ${maintenance.value.message}` });
         }
         return await handler(request, reply, server);
     }
