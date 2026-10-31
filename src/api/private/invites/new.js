@@ -53,6 +53,22 @@ export default class InvitesNewAPIRoute extends APIRoute {
                 "error": "Specified name is taken."
             };
 
+        let pendingInvites = await server.db.query(`SELECT COUNT(*)::int AS n FROM uwuso.invites
+            WHERE inviter = $1::bigint AND valid_until * 1000 > Date.now()`, [user.id]);
+        if (pendingInvites.rows[0].n >= 100)
+            return {
+                "success": false,
+                "error": "You have too many pending invites."
+            };
+
+        let activeInvite = await server.db.query(`SELECT id FROM uwuso.invites
+            WHERE username = $1::text AND valid_until * 1000 > Date.now()`, [request.query.target]);
+        if (activeInvite.rows.length > 0)
+            return {
+                "success": false,
+                "error": "An active invite for this name already exists."
+            };
+
         let inviteCode = hash(uuidv4());
 
         await server.db.query(`INSERT INTO uwuso.invites (username, hash, inviter, valid_until)
