@@ -107,6 +107,7 @@ CREATE TABLE uwuso.service_announcements (
     severity text NOT NULL,
     button_text text,
     button_url text,
+    image_url text,
     updated_at timestamptz NOT NULL DEFAULT NOW()
 );
 ALTER TABLE uwuso.service_announcements OWNER TO dbuser;

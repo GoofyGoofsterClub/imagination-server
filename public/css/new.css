@@ -288,6 +288,8 @@ input:disabled
 .service-announcement-critical { background: rgba(240, 70, 70, .22); }
 .service-announcement-message { display: block; min-width: 0; overflow-wrap: anywhere; }
 .service-announcement .input-button { float: none; position: static; justify-self: end; white-space: nowrap; }
+.service-announcement--with-image { grid-template-columns: auto minmax(0, 1fr) auto; }
+.service-announcement-image { width: 96px; height: 96px; object-fit: contain; border-radius: 6px; }
 @media (max-width: 600px) {
     .service-announcement { grid-template-columns: minmax(0, 1fr); }
 }

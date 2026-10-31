@@ -27,8 +27,10 @@ export default class NewDatabaseController {
                     severity text NOT NULL,
                     button_text text,
                     button_url text,
+                    image_url text,
                     updated_at timestamptz NOT NULL DEFAULT NOW()
                 )`);
+            await this.pool.query("ALTER TABLE uwuso.service_announcements ADD COLUMN IF NOT EXISTS image_url text");
         } catch (e) {
             this.Output.Warn(`Could not ensure indexes: ${e}`);
         }

@@ -31,6 +31,7 @@
     .service-announcement-critical { background: rgba(240, 70, 70, .22); }
     .service-announcement > span { flex: 1 1 240px; min-width: 0; overflow-wrap: anywhere; }
     .service-announcement .input-button { float: none; flex: 0 0 auto; }
+    .service-announcement .service-announcement-image { flex: 0 0 auto; width: 96px; height: 96px; object-fit: contain; border-radius: 6px; }
     .file-viewer-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; padding: 24px; }
     .file-viewer-content > .input-button { margin-top: 16px; }
     .image-lightbox { position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.88); overflow: hidden; }
@@ -52,6 +53,9 @@
   <header class="file-viewer-header"></header>
   <% if (it.announcement) { %>
     <aside class="service-announcement service-announcement-<%= it.announcement.severity %>">
+      <% if (it.announcement.image_url) { %>
+        <img class="service-announcement-image" src="<%= it.announcement.image_url %>" alt="" />
+      <% } %>
       <span><%~ it.announcement.message %></span>
       <% if (it.announcement.button_text && it.announcement.button_url) { %>
         <a class="input-button" href="<%= it.announcement.button_url %>" target="_blank" rel="noopener noreferrer"><%= it.announcement.button_text %></a>

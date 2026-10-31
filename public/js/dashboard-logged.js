@@ -264,6 +264,14 @@ async function LoadServiceAnnouncement(isAdmin) {
     if (data.success && data.data) {
         announcement.className = `service-announcement service-announcement-${data.data.severity}`;
         announcement.replaceChildren();
+        if (data.data.image_url) {
+            announcement.classList.add("service-announcement--with-image");
+            const image = document.createElement("img");
+            image.className = "service-announcement-image";
+            image.src = data.data.image_url;
+            image.alt = "";
+            announcement.appendChild(image);
+        }
         const message = document.createElement("span");
         message.className = "service-announcement-message";
         message.innerHTML = sanitizeAnnouncementHtml(data.data.message);
@@ -277,7 +285,7 @@ async function LoadServiceAnnouncement(isAdmin) {
             button.textContent = data.data.button_text;
             announcement.appendChild(button);
         }
-        announcement.style.display = "block";
+        announcement.style.display = "grid";
     } else {
         announcement.style.display = "none";
     }
@@ -288,6 +296,7 @@ async function LoadServiceAnnouncement(isAdmin) {
         document.getElementById("__dashboard_announcement_severity").value = data.data.severity;
         document.getElementById("__dashboard_announcement_button_text").value = data.data.button_text || "";
         document.getElementById("__dashboard_announcement_button_url").value = data.data.button_url || "";
+        document.getElementById("__dashboard_announcement_image_url").value = data.data.image_url || "";
     }
 
     document.getElementById("__dashboard_announcement_save").onclick = async () => {
@@ -300,7 +309,8 @@ async function LoadServiceAnnouncement(isAdmin) {
                 message: document.getElementById("__dashboard_announcement_text").value,
                 severity: document.getElementById("__dashboard_announcement_severity").value,
                 buttonText: document.getElementById("__dashboard_announcement_button_text").value,
-                buttonUrl: document.getElementById("__dashboard_announcement_button_url").value
+                buttonUrl: document.getElementById("__dashboard_announcement_button_url").value,
+                imageUrl: document.getElementById("__dashboard_announcement_image_url").value
             })
         });
         const saveData = await saveResponse.json();
