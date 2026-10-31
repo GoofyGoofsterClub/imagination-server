@@ -65,16 +65,14 @@ export default class UploadsNewAPIRoute extends APIRoute {
             }
         }
 
-        if (isServiceUpload || !user.superuser) {
-            const limit = await server.server._public.UploadRateLimiter.hit(isServiceUpload ? `service:${user.id}` : `user:${user.id}`);
-            if (!limit.allowed) {
-                reply.status(429);
-                reply.header("Retry-After", limit.retryAfter);
-                return reply.send({
-                    "success": false,
-                    "error": "You are uploading too fast."
-                });
-            }
+        const limit = await server.server._public.UploadRateLimiter.hit(isServiceUpload ? `service:${user.id}` : `user:${user.id}`);
+        if (!limit.allowed) {
+            reply.status(429);
+            reply.header("Retry-After", limit.retryAfter);
+            return reply.send({
+                "success": false,
+                "error": "You are uploading too fast."
+            });
         }
 
         const quota = Number(process.env.USER_STORAGE_QUOTA) || 0;
