@@ -109,6 +109,12 @@ export default class HTTPServer {
                 20,
                 60
             ),
+            "SessionGetRateLimiter": new RateLimiter(
+                this.redis,
+                "ratelimit:sessionget",
+                30,
+                60
+            ),
             "ViewCounter": this.viewCounter,
             "Maintenance": false,
             "StatisticsCache": null

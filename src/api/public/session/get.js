@@ -18,6 +18,17 @@ export default class PublicSessionGetAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
+        const limit = await server.server._public.SessionGetRateLimiter.hit(request.ip);
+
+        if (!limit.allowed) {
+            reply.status(429);
+            reply.header("Retry-After", limit.retryAfter);
+            return {
+                "success": false,
+                "error": "Too many requests."
+            };
+        }
+
         if (!request.query.target)
             return {
                 "success": false,
@@ -42,9 +53,9 @@ export default class PublicSessionGetAPIRoute extends APIRoute {
                     "invitedBy": null,
                     "administrator": false,
                     "views": 0,
-                    "badges": user.badges ?? [],
-                    "paint": user.paint ?? null,
-                    "isBanned": user.banned ?? false
+                    "badges": [],
+                    "paint": null,
+                    "isBanned": false
                 }
             };
 
