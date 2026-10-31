@@ -76,10 +76,17 @@ export default class HTTPServer {
             reply.header("X-Frame-Options", "SAMEORIGIN");
             reply.header("Content-Security-Policy", "frame-ancestors 'self'");
 
+            let errorMessage = error?.message ?? String(error);
+            errorMessage = String(errorMessage)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+
             return reply.viewAsync("error.ejs", {
                 "domain": request.headers['host'],
                 "error_title": "An error occured while processing your request",
-                "error_message": error
+                "error_message": errorMessage
             });
         });
     }
