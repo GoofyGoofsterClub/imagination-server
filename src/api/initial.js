@@ -20,8 +20,22 @@ export default class InitialSetupAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        if (typeof request.body === "string")
-            request.body = JSON.parse(request.body);
+        if (typeof request.body === "string") {
+            try {
+                request.body = JSON.parse(request.body);
+            }
+            catch (e) {
+                reply.status(400);
+                return { "error": "Invalid request body." };
+            }
+        }
+
+        if (!request.body || typeof request.body.rootUsername !== "string"
+            || request.body.rootUsername.length < 1 || request.body.rootUsername.length > 32
+            || !/^[a-zA-Z0-9_]+$/.test(request.body.rootUsername)) {
+            reply.status(400);
+            return { "error": "Invalid username." };
+        }
 
         let accessKey = "vX2~!" + uuidv4();
 
