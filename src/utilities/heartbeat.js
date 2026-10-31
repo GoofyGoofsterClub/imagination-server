@@ -7,7 +7,7 @@ export default class HeartbeatManager
     {
         this.Output = new PresetOutput("hbt");
         this.heartbeatUrl = heartbeatUrl;
-        this.secret = this.secret;
+        this.secret = secret;
         this.interval = 3000;
 
         this._interval = null;
