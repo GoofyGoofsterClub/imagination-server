@@ -50,6 +50,19 @@ export default class NewDatabaseController {
         } catch (e) {
             this.Output.Warn(`Could not create unique username index (duplicate usernames already exist?): ${e}`);
         }
+        try {
+            for (const [table, column, constraint] of [
+                ["uploads", "uploader_id", "uploader_id_fk"],
+                ["invites", "inviter", "inviter_fk"],
+                ["services", "owner", "owner_fk"],
+                ["events", "event_caller", "event_caller_fk"]
+            ]) {
+                await this.pool.query(`ALTER TABLE uwuso.${table} DROP CONSTRAINT IF EXISTS ${constraint}`);
+                await this.pool.query(`ALTER TABLE uwuso.${table} ADD CONSTRAINT ${constraint} FOREIGN KEY (${column}) REFERENCES uwuso.users (id) ON DELETE CASCADE ON UPDATE NO ACTION`);
+            }
+        } catch (e) {
+            this.Output.Warn(`Could not update foreign key constraints: ${e}`);
+        }
     }
 
     async loadFileIdKey() {
