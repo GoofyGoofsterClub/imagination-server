@@ -8,6 +8,7 @@ import { PresetOutput } from "utilities/output";
 import { ExternalLogging, Field, buildMessage } from "utilities/logexternal";
 import Authenticate from "utilities/authentication";
 import RateLimiter from "utilities/ratelimit";
+import { publicHost } from "utilities/links";
 
 const SENSITIVE_HEADERS = ["authorization", "cookie", "x-api-key"];
 
@@ -39,7 +40,7 @@ export default class HTTPServer {
             reply.header("X-Frame-Options", "SAMEORIGIN");
             reply.header("Content-Security-Policy", "frame-ancestors 'self'");
             return reply.viewAsync("404.ejs", {
-                "domain": request.headers['host']
+                "domain": publicHost(request)
             });
         });
     }
@@ -84,7 +85,7 @@ export default class HTTPServer {
                 .replace(/"/g, "&quot;");
 
             return reply.viewAsync("error.ejs", {
-                "domain": request.headers['host'],
+                "domain": publicHost(request),
                 "error_title": "An error occured while processing your request",
                 "error_message": errorMessage
             });

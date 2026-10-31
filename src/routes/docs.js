@@ -1,4 +1,5 @@
 import { Route } from "http/routing";
+import { publicHost } from "utilities/links";
 
 export default class EnableJSRoute extends Route
 {
@@ -10,7 +11,7 @@ export default class EnableJSRoute extends Route
     async call(request, reply)
     {
         return reply.viewAsync("docs.ejs", {
-            "domain": request.headers['host']
+            "domain": publicHost(request)
         });
     }
 }

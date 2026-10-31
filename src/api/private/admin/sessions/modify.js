@@ -3,6 +3,7 @@ import { Field, buildMessage } from "utilities/logexternal";
 import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 import { escapeIdentifier } from "pg";
 import hash from "utilities/hash";
+import { publicHost } from "utilities/links";
 
 const allowedFields = [
     "username",
@@ -121,7 +122,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
 
         // External logging
         server.externalLogging.Log(buildMessage(
-            request.headers['host'],
+            publicHost(request),
             "info",
             "A user's session has been modified.",
             `A user's session has been modified by \`${user.username}\`:\n\`${requestData.target}\`'s \`${requestData.field}\` has been set to \`${requestData.value}\``,

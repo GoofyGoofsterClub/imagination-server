@@ -1,7 +1,7 @@
 import { APIRoute } from "http/routing";
 import { GeneratePrivateID, EncodeUploadID } from "utilities/id";
 import hash from "utilities/hash";
-import { publicBaseUrl, publicProtocol } from "utilities/links";
+import { publicBaseUrl, publicProtocol, publicHost } from "utilities/links";
 import { isValidDomain, pickRandomCustomUrl } from "utilities/experiments";
 import crypto from 'crypto';
 import { promises as fs, createWriteStream } from 'fs';
@@ -187,7 +187,7 @@ export default class UploadsNewAPIRoute extends APIRoute {
                     fileSizeInBytes,
                     isServiceUpload,
                     Math.floor(+Date.now() / 1000),
-                    request.headers['host'],
+                    publicHost(request),
                     uploadId
                 ]);
 

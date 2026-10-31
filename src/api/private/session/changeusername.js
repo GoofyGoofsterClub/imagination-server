@@ -2,6 +2,7 @@ import { APIRoute } from "http/routing";
 import { buildMessage } from "utilities/logexternal";
 import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 import hash from "utilities/hash";
+import { publicBaseUrl } from "utilities/links";
 
 /*--includedoc
 
@@ -69,7 +70,7 @@ export default class ChangeUsername extends APIRoute {
             "info",
             "User changed their username.",
             `Username has been changed from \`${user.username}\` to \`${request.query.new_name}\``,
-            `https://${request.headers['host']}`
+            publicBaseUrl(request)
         ));
 
         return {

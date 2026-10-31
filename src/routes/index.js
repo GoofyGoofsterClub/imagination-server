@@ -1,4 +1,5 @@
 import { Route } from "http/routing";
+import { publicHost } from "utilities/links";
 
 export default class IndexRoute extends Route
 {
@@ -10,7 +11,7 @@ export default class IndexRoute extends Route
     async call(request, reply)
     {
         return reply.viewAsync("index.ejs", {
-            "domain": request.headers['host']
+            "domain": publicHost(request)
         });
     }
 }
