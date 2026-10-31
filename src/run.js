@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import Output, { shutdownLogger } from "utilities/output";
 import HTTPServer from "http/server";
 import HTTPRouting from "http/routing";
@@ -7,6 +9,8 @@ import RedisController from "db/redis";
 import ViewCounter from "utilities/viewcounter";
 
 let viewCounter = null;
+
+fs.mkdirSync(path.resolve(__dirname, "..", "privateuploads"), { recursive: true });
 
 Output.Log("Preparing the server...");
 const run = async () => {
@@ -37,8 +41,9 @@ const run = async () => {
     }
 
     let redis = null;
-    if (process.env.REDISHOST) {
-        const redisController = new RedisController(process.env.REDISHOST);
+    let redisHost = process.env.REDISHOST || process.env.REDIS_HOST;
+    if (redisHost) {
+        const redisController = new RedisController(redisHost);
         const connecting = redisController.connect();
         connecting.catch((e) => Output.Warn("sys", `Could not connect to Redis: ${e}`));
         const timeout = new Promise((resolve) => setTimeout(resolve, 5000).unref());
