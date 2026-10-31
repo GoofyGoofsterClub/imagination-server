@@ -54,23 +54,29 @@ export default class InvitesUseAPIRoute extends APIRoute {
 
         let accessKey = "vX2~!" + uuidv4();
 
-        await server.db.query(`INSERT INTO uwuso.users (username, access_key, permissions, private_profile, banned, views, uploads, superuser)
-            VALUES ($1::text, $2::text, $3::bigint,
-                    $4::boolean, $5::boolean, $6::bigint, $7::bigint, $8::boolean)`,
-            [
-                target.username,
-                hash(accessKey),
-                permissions(USER_PERMISSIONS.UPLOAD,
-                    USER_PERMISSIONS.VIEW_OWN_FILES,
-                    USER_PERMISSIONS.CHANGE_DISPLAY_NAME
-                ),
-                false,
-                false,
-                0,
-                0,
-                false
-            ]
-        );
+        try {
+                    await server.db.query(`INSERT INTO uwuso.users (username, access_key, permissions, private_profile, banned, views, uploads, superuser)
+                        VALUES ($1::text, $2::text, $3::bigint,
+                                $4::boolean, $5::boolean, $6::bigint, $7::bigint, $8::boolean)`,
+                        [
+                            target.username,
+                            hash(accessKey),
+                            permissions(USER_PERMISSIONS.UPLOAD,
+                                USER_PERMISSIONS.VIEW_OWN_FILES,
+                                USER_PERMISSIONS.CHANGE_DISPLAY_NAME
+                            ),
+                            false,
+                            false,
+                            0,
+                            0,
+                            false
+                        ]
+                    );
+        } catch (e) {
+            if (e.code === "23505")
+                return { "success": false, "error": "User already exists." };
+            throw e;
+        }
 
         return {
             "success": true,

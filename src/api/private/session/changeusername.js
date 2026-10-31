@@ -55,7 +55,13 @@ export default class ChangeUsername extends APIRoute {
         if (isUsernameTaken)
             return { "success": false, "error": "Display name is already taken." };
 
-        await server.db.query(`UPDATE uwuso.users SET username = $1 WHERE id = $2`, [request.query.new_name, user.id]);
+        try {
+            await server.db.query(`UPDATE uwuso.users SET username = $1 WHERE id = $2`, [request.query.new_name, user.id]);
+        } catch (e) {
+            if (e.code === "23505")
+                return { "success": false, "error": "Display name is already taken." };
+            throw e;
+        }
 
         // External logging for trolling prevention
         await server.server._public.ExternalLogging.Log(buildMessage(

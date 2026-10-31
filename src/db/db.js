@@ -44,6 +44,12 @@ export default class NewDatabaseController {
         } catch (e) {
             this.Output.Warn(`Could not create unique upload filename index (duplicate filenames already exist?): ${e}`);
         }
+
+        try {
+            await this.pool.query("CREATE UNIQUE INDEX IF NOT EXISTS users_username_uindex ON uwuso.users (username)");
+        } catch (e) {
+            this.Output.Warn(`Could not create unique username index (duplicate usernames already exist?): ${e}`);
+        }
     }
 
     async loadFileIdKey() {
