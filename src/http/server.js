@@ -36,6 +36,8 @@ export default class HTTPServer {
 
     async register404() {
         this.server.setNotFoundHandler(async (request, reply) => {
+            reply.header("X-Frame-Options", "SAMEORIGIN");
+            reply.header("Content-Security-Policy", "frame-ancestors 'self'");
             return reply.viewAsync("404.ejs", {
                 "domain": request.headers['host']
             });
@@ -71,6 +73,8 @@ export default class HTTPServer {
             ));
 
             reply.status(500);
+            reply.header("X-Frame-Options", "SAMEORIGIN");
+            reply.header("Content-Security-Policy", "frame-ancestors 'self'");
 
             return reply.viewAsync("error.ejs", {
                 "domain": request.headers['host'],

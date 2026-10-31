@@ -37,6 +37,8 @@ export class Route {
     async call(request, reply) { }
 
     async callWrapper(request, reply, server, handler) {
+        reply.header("X-Frame-Options", "SAMEORIGIN");
+        reply.header("Content-Security-Policy", "frame-ancestors 'self'");
         if (server.server._public.initialSetup) {
             return reply.viewAsync('initial-setup.ejs');
         }
