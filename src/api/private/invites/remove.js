@@ -1,4 +1,5 @@
 import { APIRoute } from "http/routing";
+import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 import hash from "utilities/hash";
 
 /*--includedoc
@@ -18,6 +19,20 @@ export default class InvitesRemoveAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
+        let user = await server.db.findUserByAccessKey(hash(request.query.key));
+
+        if (!user)
+            return {
+                "success": false,
+                "error": "Invalid key."
+            };
+
+        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
+            return {
+                "success": false,
+                "error": "You are not an administrator."
+            };
+
         if (!request.query.code)
             return {
                 "success": false,
@@ -26,7 +41,7 @@ export default class InvitesRemoveAPIRoute extends APIRoute {
 
         let target = await server.db.query(`SELECT * FROM uwuso.invites WHERE hash = $1::text`, [request.query.code]);
 
-        if (target.rows.length < 0)
+        if (target.rows.length < 1)
             return {
                 "success": false,
                 "error": "Invalid code."
