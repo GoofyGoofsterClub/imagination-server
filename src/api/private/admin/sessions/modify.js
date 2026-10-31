@@ -4,11 +4,15 @@ import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 import { escapeIdentifier } from "pg";
 import hash from "utilities/hash";
 
-const restrictedFields = [
-    "key",
-    "protected",
-    "displayName",
-    "permissions"
+const allowedFields = [
+    "username",
+    "private_profile",
+    "banned",
+    "views",
+    "uploads",
+    "superuser",
+    "badges",
+    "paint"
 ];
 
 const permissionFields = {
@@ -60,7 +64,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
                 "error": "Missing parameters."
             };
 
-        if (restrictedFields.includes(requestData.field))
+        if (!allowedFields.includes(requestData.field))
             return {
                 "success": false,
                 "error": "You cannot modify this field."
@@ -79,6 +83,19 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
                 "success": false,
                 "error": "You cannot modify this user."
             };
+
+        if (requestData.field === "username") {
+            if (typeof requestData.value !== "string" || requestData.value.length > 32 || !/^[a-zA-Z0-9_]+$/.test(requestData.value))
+                return {
+                    "success": false,
+                    "error": "Invalid username."
+                };
+
+            let isUsernameTaken = await server.db.findUserByDisplayName(requestData.value);
+
+            if (isUsernameTaken && isUsernameTaken.id !== target.id)
+                return { "success": false, "error": "Display name is already taken." };
+        }
 
         if (hasPermission(target.permissions, USER_PERMISSIONS.ADMINISTRATOR) && requestData.field === "banned")
             return {
