@@ -37,6 +37,13 @@ const run = async () => {
         }
         catch (e) {
             Output.Error("sys", `An error occurred while connecting to database: ${e}`);
+            // Release the partially-established connections so retries do not
+            // exhaust the databases' connection slots
+            try { if (db && db.client) await db.client.close(); } catch (_) { }
+            try { if (ndb) await ndb.pool.end(); } catch (_) { }
+            db = null;
+            ndb = null;
+            await new Promise((resolve) => setTimeout(resolve, 1000).unref());
         }
     }
 
