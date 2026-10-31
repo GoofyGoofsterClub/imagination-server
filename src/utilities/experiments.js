@@ -2,6 +2,12 @@ const RANDOM_CUSTOM_URL_KEY = "experiment_random_custom_url";
 const DOMAIN_PATTERN = /^(?=.{1,253}(:|$))([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)*[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(:\d{1,5})?$/;
 export const MAX_RANDOM_CUSTOM_URL_DOMAINS = 100;
 
+export function isValidDomain(domain) {
+    if (typeof domain !== "string") return false;
+    const normalized = domain.trim().toLowerCase();
+    return normalized.length > 0 && DOMAIN_PATTERN.test(normalized);
+}
+
 export function normalizeDomains(domains) {
     if (!Array.isArray(domains)) return null;
     const normalized = [...new Set(domains

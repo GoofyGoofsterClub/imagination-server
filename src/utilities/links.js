@@ -1,7 +1,10 @@
 export function publicProtocol(request) {
     const forwarded = request.headers["x-forwarded-proto"];
-    if (forwarded)
-        return forwarded.split(",")[0].trim();
+    if (forwarded) {
+        const proto = forwarded.split(",")[0].trim().toLowerCase();
+        if (proto === "http" || proto === "https")
+            return proto;
+    }
     return process.env.PUBLIC_PROTOCOL || "https";
 }
 
