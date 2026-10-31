@@ -230,7 +230,7 @@ export default class UploadsNewAPIRoute extends APIRoute {
 
         else if (wantsShortener)
         {
-            let shortenerRequest = await fetch(`https://${process.env.SHORTENER_URI}/api/link/shorten?key=${request.headers['authorization']}&link=${encodeURIComponent(`${baseUrl}/${filename}`)}`);
+            let shortenerRequest = await fetch(`https://${process.env.SHORTENER_URI}/api/link/shorten?key=${hash(request.headers['authorization'])}&link=${encodeURIComponent(`${baseUrl}/${filename}`)}`);
 
             if (shortenerRequest.status == 200) {
                 let shortenerRequestJSON = await shortenerRequest.json();
