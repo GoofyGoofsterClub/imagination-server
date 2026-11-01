@@ -2,12 +2,22 @@ import { APIRoute } from "http/routing";
 import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 import hash from "utilities/hash";
 
-const restrictedFields = [
-    // for future use
+const allowedFields = [
+    "id",
+    "username",
+    "permissions",
+    "private_profile",
+    "banned",
+    "views",
+    "uploads",
+    "superuser",
+    "badges",
+    "paint",
+    "access_key"
 ];
 
-const administratorReplacements = {
-    "key": "<redacted>"
+const redactedFields = {
+    "access_key": "<redacted>"
 }
 
 /*--includedoc
@@ -53,7 +63,11 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute {
             };
 
 
-        if (request.query.field && restrictedFields.includes(request.query.field))
+        let field = request.query.field;
+        if (field === "key")
+            field = "access_key";
+
+        if (field && !allowedFields.includes(field))
             return {
                 "success": false,
                 "error": "You cannot get this field."
@@ -67,12 +81,25 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute {
                 "error": "Invalid target."
             };
 
-        if (request.query.field && hasPermission(target.permissions, USER_PERMISSIONS.ADMINISTRATOR))
-            target[request.query.field] = administratorReplacements[request.query.field];
+        if (field) {
+            let value = target[field];
+            if (value !== undefined
+                && field in redactedFields
+                && hasPermission(target.permissions, USER_PERMISSIONS.ADMINISTRATOR)
+                && !hasPermission(user.permissions, USER_PERMISSIONS.GET_OTHERS_KEYS))
+                value = redactedFields[field];
+
+            return {
+                "success": true,
+                "data": value
+            };
+        }
+
+        const { access_key, ...rest } = target;
 
         return {
             "success": true,
-            "data": !request.query.field ? target : target[request.query.field]
+            "data": rest
         };
     }
 }
