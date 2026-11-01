@@ -1,5 +1,6 @@
 import { APIRoute } from "http/routing";
 import { buildMessage } from "utilities/logexternal";
+import { publicHost, publicBaseUrl } from "utilities/links";
 import hash from "utilities/hash";
 
 /*--includedoc
@@ -36,11 +37,11 @@ export default class DeleteSessionAPIRoute extends APIRoute {
 
         // External logging for trolling prevention
         await server.server._public.ExternalLogging.Log(buildMessage(
-            request.headers['host'],
+            publicHost(request),
             "info",
             "User changed deleted their profile.",
             ` \`${user.username}\` has deleted their account forever. Goodbye.`,
-            `https://${request.headers['host']}`
+            publicBaseUrl(request)
         ));
 
         return {

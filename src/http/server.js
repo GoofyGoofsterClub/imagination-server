@@ -59,9 +59,17 @@ export default class HTTPServer {
                 for (const name of SENSITIVE_HEADERS)
                     if (headers[name]) headers[name] = "<redacted>";
             let headersJson = headers ? JSON.stringify(headers) : null;
-            let bodyJson = request.body ? JSON.stringify(request.body) : null;
+            let bodyJson = null;
+            if (request.body) {
+                let redactedBody = request.body;
+                if (typeof redactedBody === "object" && !Array.isArray(redactedBody) && "key" in redactedBody)
+                    redactedBody = { ...redactedBody, key: "<redacted>" };
+                else if (typeof redactedBody === "string")
+                    redactedBody = redactedBody.replace(/("key"\s*:\s*")[^"]*(")/g, "$1<redacted>$2");
+                bodyJson = JSON.stringify(redactedBody);
+            }
             this.externalLogging.Log(buildMessage(
-                request.headers['host'],
+                publicHost(request),
                 "sys",
                 "An error occured while processing a request:",
                 `Error has been thrown:\n\`\`\`${error.stack}\`\`\``,

@@ -2,7 +2,7 @@ import { APIRoute } from "http/routing";
 import { buildMessage } from "utilities/logexternal";
 import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 import hash from "utilities/hash";
-import { publicBaseUrl } from "utilities/links";
+import { publicBaseUrl, publicHost } from "utilities/links";
 
 /*--includedoc
 
