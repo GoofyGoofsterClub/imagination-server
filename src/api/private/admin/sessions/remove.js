@@ -54,6 +54,12 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute {
                 "error": "Invalid target."
             };
 
+        if (target.superuser)
+            return {
+                "success": false,
+                "error": "You cannot remove a superuser."
+            };
+
         if (hasPermission(target.permissions, USER_PERMISSIONS.ADMINISTRATOR) || hasPermission(target.permissions, USER_PERMISSIONS.DELETE_ACCOUNTS)) {
             if (user.username == target.username)
                 return {
@@ -69,7 +75,7 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute {
 
         let uploads = await server.db.query(`SELECT disk_filename FROM uwuso.uploads WHERE uploader_id = $1::bigint`, [target.id]);
         await server.db.query(`DELETE FROM uwuso.users WHERE id = $1::bigint`, [target.id]);
-        await Promise.all(uploads.rows.map((upload) => fs.promises.unlink(`${__dirname}/../../../../../privateuploads/${upload.disk_filename}`).catch(() => { })));
+        await Promise.all(uploads.rows.map((upload) => fs.promises.unlink(`${__dirname}/../../../../../privateuploads/${upload.disk_filename}`).catch(() => { }))));
 
         return {
             "success": true
