@@ -7,6 +7,7 @@ export default class NewDatabaseController {
     constructor() {
         this.Output = new PresetOutput("db");
         this.pool = new Pool({ max: Number(process.env.PGPOOL_MAX) || 20 });
+        this.pool.on("error", (err) => this.Output.Warn(`Idle pool client error: ${err.message}`));
 
         this.Output.Log("Database initialized.");
     }
