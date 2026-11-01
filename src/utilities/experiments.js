@@ -1,6 +1,13 @@
 const RANDOM_CUSTOM_URL_KEY = "experiment_random_custom_url";
+const EXPERIMENT_CACHE_TTL_MS = 60 * 1000;
 const DOMAIN_PATTERN = /^(?=.{1,253}(:|$))([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)*[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(:\d{1,5})?$/;
 export const MAX_RANDOM_CUSTOM_URL_DOMAINS = 100;
+
+let experimentCache = { value: undefined, expiresAt: 0 };
+
+export function clearExperimentCache() {
+    experimentCache = { value: undefined, expiresAt: 0 };
+}
 
 export function isValidDomain(domain) {
     if (typeof domain !== "string") return false;
@@ -19,21 +26,30 @@ export function normalizeDomains(domains) {
 }
 
 export async function getRandomCustomUrlExperiment(db) {
+    const now = Date.now();
+    if (now < experimentCache.expiresAt) return experimentCache.value;
     const result = await db.query(`SELECT value FROM uwuso.settings WHERE key = $1::text`, [RANDOM_CUSTOM_URL_KEY]);
-    if (result.rows.length < 1) return { enabled: false, domains: [] };
-    try {
-        const parsed = JSON.parse(result.rows[0].value);
-        return { enabled: !!parsed.enabled, domains: normalizeDomains(parsed.domains) ?? [] };
+    let value;
+    if (result.rows.length < 1) {
+        value = { enabled: false, domains: [] };
+    } else {
+        try {
+            const parsed = JSON.parse(result.rows[0].value);
+            value = { enabled: !!parsed.enabled, domains: normalizeDomains(parsed.domains) ?? [] };
+        }
+        catch (e) {
+            value = { enabled: false, domains: [] };
+        }
     }
-    catch (e) {
-        return { enabled: false, domains: [] };
-    }
+    experimentCache = { value, expiresAt: now + EXPERIMENT_CACHE_TTL_MS };
+    return value;
 }
 
 export async function setRandomCustomUrlExperiment(db, enabled, domains) {
     const value = { enabled: !!enabled, domains };
     await db.query(`INSERT INTO uwuso.settings (key, value) VALUES ($1::text, $2::text)
         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [RANDOM_CUSTOM_URL_KEY, JSON.stringify(value)]);
+    clearExperimentCache();
     return value;
 }
 
