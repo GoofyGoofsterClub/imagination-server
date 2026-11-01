@@ -31,6 +31,22 @@ export default class NewDatabaseController {
                     updated_at timestamptz NOT NULL DEFAULT NOW()
                 )`);
             await this.pool.query("ALTER TABLE uwuso.service_announcements ADD COLUMN IF NOT EXISTS image_url text");
+            await this.pool.query("ALTER TABLE uwuso.uploads ALTER COLUMN uploader_id DROP NOT NULL");
+            await this.pool.query(`
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM pg_constraint
+                        WHERE conname = 'uploader_id_fk'
+                        AND confdeltype <> 's'
+                    ) THEN
+                        ALTER TABLE uwuso.uploads DROP CONSTRAINT uploader_id_fk;
+                        ALTER TABLE uwuso.uploads ADD CONSTRAINT uploader_id_fk
+                            FOREIGN KEY (uploader_id) REFERENCES uwuso.users (id)
+                            ON DELETE SET NULL ON UPDATE NO ACTION;
+                    END IF;
+                END
+                $$`);
         } catch (e) {
             this.Output.Warn(`Could not ensure indexes: ${e}`);
         }

@@ -42,7 +42,7 @@ CREATE TABLE uwuso.uploads (
 ALTER TABLE uwuso.uploads ADD COLUMN id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ;
 
 
-ALTER TABLE uwuso.uploads ADD COLUMN uploader_id bigint NOT NULL;
+ALTER TABLE uwuso.uploads ADD COLUMN uploader_id bigint;
 
 
 ALTER TABLE uwuso.uploads ADD COLUMN filename text NOT NULL;
@@ -114,7 +114,7 @@ ALTER TABLE uwuso.service_announcements OWNER TO dbuser;
 
 ALTER TABLE uwuso.uploads ADD CONSTRAINT uploader_id_fk FOREIGN KEY (uploader_id)
 REFERENCES uwuso.users (id) MATCH SIMPLE
-ON DELETE CASCADE ON UPDATE NO ACTION;
+ON DELETE SET NULL ON UPDATE NO ACTION;
 
 ALTER TABLE uwuso.invites ADD CONSTRAINT inviter_fk FOREIGN KEY (inviter)
 REFERENCES uwuso.users (id) MATCH SIMPLE
