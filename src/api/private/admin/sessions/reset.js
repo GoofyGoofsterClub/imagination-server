@@ -54,6 +54,12 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
                 "error": "Invalid target."
             };
 
+        if (target.superuser)
+            return {
+                "success": false,
+                "error": "You cannot reset a superuser's key."
+            };
+
 
         let accessKey = "vX2~!" + uuidv4();
 
