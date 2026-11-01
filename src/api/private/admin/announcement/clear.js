@@ -1,6 +1,7 @@
 import { APIRoute } from "http/routing";
 import { hasPermission, USER_PERMISSIONS } from "utilities/permissions";
 import hash from "utilities/hash";
+import { clearAnnouncementCache } from "utilities/announcement";
 
 /*--includedoc
 
@@ -24,6 +25,7 @@ export default class AdminAnnouncementClearAPIRoute extends APIRoute {
             return { "success": false, "error": "You are not an administrator." };
 
         await server.db.query(`DELETE FROM uwuso.service_announcements WHERE id = 1`);
+        clearAnnouncementCache();
         return { "success": true };
     }
 }

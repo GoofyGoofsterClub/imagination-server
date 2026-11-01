@@ -1,7 +1,7 @@
 import { APIRoute } from "http/routing";
 import { hasPermission, USER_PERMISSIONS } from "utilities/permissions";
 import hash from "utilities/hash";
-import { getAnnouncement } from "utilities/announcement";
+import { getAnnouncement, clearAnnouncementCache } from "utilities/announcement";
 
 /*--includedoc
 
@@ -55,6 +55,8 @@ export default class AdminAnnouncementAPIRoute extends APIRoute {
                 image_url = EXCLUDED.image_url,
                 updated_at = EXCLUDED.updated_at`,
             [message, severity, buttonText || null, buttonUrl || null, imageUrl || null]);
+
+        clearAnnouncementCache();
 
         return { "success": true, "data": await getAnnouncement(server.db) };
     }
