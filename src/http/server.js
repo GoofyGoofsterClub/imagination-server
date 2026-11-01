@@ -151,7 +151,8 @@ export default class HTTPServer {
             engine: {
                 eta: etaEngine
             },
-            root: `${__dirname}/../../private`
+            root: `${__dirname}/../../private`,
+            options: { cache: true }
         });
 
         // Load persisted maintenance state (set via /api/private/admin/globals/maintenance/modify)
