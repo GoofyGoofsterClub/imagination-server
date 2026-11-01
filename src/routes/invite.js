@@ -19,7 +19,15 @@ export default class InviteRoute extends Route {
                 "error_message": "The invite you have provided is invalid."
             });
 
-        let doesUserExist = await server.db.findUserByDisplayName(inviteInfo.rows[0].username);
+        let invite = inviteInfo.rows[0];
+
+        if (invite.valid_until * 1000 < Date.now())
+            return reply.viewAsync("error.ejs", {
+                "error_title": "Invalid invite",
+                "error_message": "The invite you have provided is invalid."
+            });
+
+        let doesUserExist = await server.db.findUserByDisplayName(invite.username);
 
         if (doesUserExist)
             return reply.viewAsync("error.ejs", {
@@ -28,7 +36,7 @@ export default class InviteRoute extends Route {
             });
 
         return reply.viewAsync("invite.ejs", {
-            "invite": inviteInfo.rows[0]
+            "invite": invite
         });
     }
 }

@@ -32,21 +32,6 @@ export default class NewDatabaseController {
                 )`);
             await this.pool.query("ALTER TABLE uwuso.service_announcements ADD COLUMN IF NOT EXISTS image_url text");
             await this.pool.query("ALTER TABLE uwuso.uploads ALTER COLUMN uploader_id DROP NOT NULL");
-            await this.pool.query(`
-                DO $$
-                BEGIN
-                    IF EXISTS (
-                        SELECT 1 FROM pg_constraint
-                        WHERE conname = 'uploader_id_fk'
-                        AND confdeltype <> 's'
-                    ) THEN
-                        ALTER TABLE uwuso.uploads DROP CONSTRAINT uploader_id_fk;
-                        ALTER TABLE uwuso.uploads ADD CONSTRAINT uploader_id_fk
-                            FOREIGN KEY (uploader_id) REFERENCES uwuso.users (id)
-                            ON DELETE SET NULL ON UPDATE NO ACTION;
-                    END IF;
-                END
-                $$`);
         } catch (e) {
             this.Output.Warn(`Could not ensure indexes: ${e}`);
         }
@@ -69,14 +54,14 @@ export default class NewDatabaseController {
             this.Output.Warn(`Could not create unique username index (duplicate usernames already exist?): ${e}`);
         }
         try {
-            for (const [table, column, constraint] of [
-                ["uploads", "uploader_id", "uploader_id_fk"],
-                ["invites", "inviter", "inviter_fk"],
-                ["services", "owner", "owner_fk"],
-                ["events", "event_caller", "event_caller_fk"]
+            for (const [table, column, constraint, deleteRule] of [
+                ["uploads", "uploader_id", "uploader_id_fk", "SET NULL"],
+                ["invites", "inviter", "inviter_fk", "CASCADE"],
+                ["services", "owner", "owner_fk", "CASCADE"],
+                ["events", "event_caller", "event_caller_fk", "CASCADE"]
             ]) {
                 await this.pool.query(`ALTER TABLE uwuso.${table} DROP CONSTRAINT IF EXISTS ${constraint}`);
-                await this.pool.query(`ALTER TABLE uwuso.${table} ADD CONSTRAINT ${constraint} FOREIGN KEY (${column}) REFERENCES uwuso.users (id) ON DELETE CASCADE ON UPDATE NO ACTION`);
+                await this.pool.query(`ALTER TABLE uwuso.${table} ADD CONSTRAINT ${constraint} FOREIGN KEY (${column}) REFERENCES uwuso.users (id) ON DELETE ${deleteRule} ON UPDATE NO ACTION`);
             }
         } catch (e) {
             this.Output.Warn(`Could not update foreign key constraints: ${e}`);
