@@ -1,6 +1,7 @@
 import { APIRoute } from "http/routing";
 import hash from "utilities/hash";
 import fs from "fs";
+import { invalidateFileByFilename, invalidateAllFiles } from "utilities/filecache";
 
 /*--includedoc
 
@@ -45,6 +46,8 @@ export default class DeleteUploadAPIRoute extends APIRoute {
 
             await server.db.query(`DELETE FROM uwuso.uploads WHERE uploader_id = $1::bigint`, [user.id]);
 
+            invalidateAllFiles();
+
             await Promise.all(uploads.map((upload) => fs.promises.unlink(`${__dirname}/../../../../privateuploads/${upload.disk_filename}`).catch(() => {})));
 
             server.server._public.StatisticsCache = null;
@@ -71,6 +74,8 @@ export default class DeleteUploadAPIRoute extends APIRoute {
             };
 
         await server.db.query(`DELETE FROM uwuso.uploads WHERE uploader_id = $1::bigint AND filename = $2::text`, [user.id, request.query.filename]);
+
+        invalidateFileByFilename(request.query.filename);
 
         await fs.promises.unlink(`${__dirname}/../../../../privateuploads/${fileInfo.disk_filename}`);
 

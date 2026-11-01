@@ -2,6 +2,7 @@ import { Route } from "http/routing";
 import { getAnnouncement } from "utilities/announcement";
 import { isBrowserPageRequest } from "utilities/browser";
 import { publicBaseUrl } from "utilities/links";
+import { getFileByFilename } from "utilities/filecache";
 
 export default class NewImageServing extends Route {
     constructor() {
@@ -9,17 +10,15 @@ export default class NewImageServing extends Route {
     }
 
     async call(request, reply, server) {
-        let fileInfo = await server.db.query(`SELECT id, uploader_id, filename, disk_filename, mimetype FROM uwuso.uploads WHERE filename = $1::text LIMIT 1`, [request.params.filename]);
+        let file = await getFileByFilename(server.db, request.params.filename);
 
-        if (fileInfo.rows.length < 1) {
+        if (!file) {
             reply.status(404);
             return reply.viewAsync("error.ejs", {
                 "error_title": "Not Found",
                 "error_message": "<p>This page doesn't exist.</p><img src='/public/img/uhhh.jpg'>"
             });
         }
-
-        let file = fileInfo.rows[0];
 
         server.server._public.ViewCounter.add(file.id, file.uploader_id);
 

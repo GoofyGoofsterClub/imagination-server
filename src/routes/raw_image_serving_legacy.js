@@ -1,4 +1,5 @@
 import { Route } from "http/routing";
+import { getFileByFilename } from "utilities/filecache";
 
 const DOCUMENT_MIMETYPES = new Set([
     "text/html", "application/xhtml+xml", "text/xhtml", "text/xml", "application/xml",
@@ -14,13 +15,12 @@ export default class RawLegacyImageServing extends Route {
     }
 
     async call(request, reply, server) {
-        const fileInfo = await server.db.query(`SELECT filename, disk_filename, mimetype FROM uwuso.uploads WHERE filename = $1::text LIMIT 1`, [request.params.filename]);
-        if (fileInfo.rows.length < 1) {
+        const file = await getFileByFilename(server.db, request.params.filename);
+        if (!file) {
             reply.status(404);
             return reply.viewAsync("error.ejs", { error_title: "Not Found", error_message: "<p>This file does not exist.</p>" });
         }
 
-        const file = fileInfo.rows[0];
         reply.header("X-Content-Type-Options", "nosniff");
         if (request.query.download === "1" || isDocumentMimetype(file.mimetype))
             reply.header("Content-Disposition", `attachment; filename="${file.filename}"`);
