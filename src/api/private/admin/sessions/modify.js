@@ -85,6 +85,12 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
                 "error": "You cannot modify this user."
             };
 
+        if (requestData.field === "superuser" && !user.superuser)
+            return {
+                "success": false,
+                "error": "Only a superuser can modify this field."
+            };
+
         if (requestData.field === "username") {
             if (typeof requestData.value !== "string" || requestData.value.length > 32 || !/^[a-zA-Z0-9_]+$/.test(requestData.value))
                 return {
