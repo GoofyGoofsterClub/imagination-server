@@ -2,6 +2,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const sharp = require('sharp');
+const babel = require('@babel/core');
 
 const root = path.resolve(__dirname, '..');
 const publicDir = path.join(root, 'public');
@@ -64,6 +65,18 @@ async function build() {
         await emit(key, rewrite(content));
     }
     for (const file of all.filter(f => f.endsWith('.html'))) {
+        if (file.endsWith('.js')) {
+            content = babel.transformSync(content, {
+                babelrc: false, configFile: false, compact: true,
+                shouldPrintComment: value => /@license|^!|copyright/i.test(value),
+                plugins: [() => ({ visitor: {
+                    FunctionDeclaration(ast) {
+                        if (['GetUsersLegacy', 'GetUploadsLegacy'].includes(ast.node.id?.name)
+                            && !ast.scope.parent.getBinding(ast.node.id.name)?.referenced) ast.remove();
+                    }
+                } })]
+            }).code;
+        }
         const key = `/public/${path.relative(publicDir, file).split(path.sep).join('/')}`;
         await emit(key, rewrite(await fs.readFile(file, 'utf8')));
     }
