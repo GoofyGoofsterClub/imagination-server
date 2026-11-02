@@ -12,9 +12,11 @@ const { clearListCounts } = require('../lib/utilities/pagination');
 const { invalidateAllFiles } = require('../lib/utilities/filecache');
 const { generatePreview, getPreview, deletePreviewFiles } = require('../lib/utilities/previews');
 const sharp = require('sharp');
+const { migrate } = require('../lib/migrate');
 
 test('isolated PostgreSQL: quotas, stable cursors, raw ranges and previews', { skip: !process.env.PERF_TEST_DATABASE_URL }, async t => {
     // This URL must identify a disposable database, never a production connection.
+    await migrate({ connectionString: process.env.PERF_TEST_DATABASE_URL });
     const pool = new pg.Pool({ connectionString: process.env.PERF_TEST_DATABASE_URL, options: '-c imagination.storage_quota=1000000' });
     const db = Object.create(Database.prototype);
     Object.assign(db, { pool, metrics: { queries: 0, failures: 0, totalMs: 0, poolWaitMs: 0 }, Output: { Log() {} } });
