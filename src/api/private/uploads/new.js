@@ -7,6 +7,8 @@ import crypto from 'crypto';
 import { promises as fs, createWriteStream } from 'fs';
 import { Transform } from 'stream';
 import { pipeline } from 'stream/promises';
+import { clearListCounts } from 'utilities/pagination';
+import { enqueuePreview } from 'utilities/previews';
 
 /*--includedoc
 
@@ -211,11 +213,8 @@ export default class UploadsNewAPIRoute extends APIRoute {
             await fs.unlink(diskPath).catch(() => {});
 
         if (isNewUpload) {
-            let cache = server.server._public.StatisticsCache;
-            if (cache && cache.value) {
-                cache.value.uploads = Number(cache.value.uploads) + 1;
-                cache.value.count = cache.value.uploads;
-            }
+            clearListCounts();
+            enqueuePreview({ disk_filename: diskFilename, mimetype: data.mimetype });
 
             if (!isServiceUpload)
                 await server.db.query(`UPDATE uwuso.users SET uploads = uploads + 1 WHERE id = $1::bigint`, [user.id]);

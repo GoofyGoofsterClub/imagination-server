@@ -64,11 +64,14 @@
   <% } %>
   <main class="file-viewer-content" id="file-viewer-content">
     <% if (it.kind === "image") { %>
-      <img class="file-viewer-media" src="<%= it.rawUrl %>" alt="<%= it.filename %>" />
+      <img class="file-viewer-media" src="<%= it.previewUrl ? it.previewUrl + '/1280' : it.rawUrl %>"
+        <% if (it.preview) { %> width="<%= it.preview.width %>" height="<%= it.preview.height %>"
+          srcset="<%= it.previewUrl %>/640 640w, <%= it.previewUrl %>/1280 1280w" sizes="calc(100vw - 48px)" <% } %>
+        decoding="async" fetchpriority="high" alt="<%= it.filename %>" />
     <% } else if (it.kind === "video") { %>
-      <video class="file-viewer-media" src="<%= it.rawUrl %>" controls playsinline></video>
+      <video class="file-viewer-media" src="<%= it.rawUrl %>" preload="metadata" controls playsinline></video>
     <% } else if (it.kind === "audio") { %>
-      <audio class="file-viewer-media" src="<%= it.rawUrl %>" controls></audio>
+      <audio class="file-viewer-media" src="<%= it.rawUrl %>" preload="metadata" controls></audio>
     <% } else if (it.kind === "pdf") { %>
       <iframe class="file-viewer-frame" src="<%= it.rawUrl %>" title="<%= it.filename %>"></iframe>
     <% } else { %>
@@ -93,7 +96,7 @@
         <button class="input-button" id="image-zoom-in" type="button">+</button>
         <button class="input-button" id="image-lightbox-close" type="button">Close</button>
       </div>
-      <img class="image-lightbox-image" id="image-lightbox-image" draggable="false" src="<%= it.rawUrl %>" alt="<%= it.filename %>" />
+      <img class="image-lightbox-image" id="image-lightbox-image" draggable="false" data-src="<%= it.rawUrl %>" alt="<%= it.filename %>" />
       <span class="image-lightbox-hint small-text">Scroll to zoom · drag to move · double-click to zoom</span>
     </div>
   <% } %>
@@ -119,6 +122,7 @@
         renderImage();
       };
       const openLightbox = () => {
+        if (!lightboxImage.hasAttribute('src')) lightboxImage.src = lightboxImage.dataset.src;
         lightbox.classList.add('is-open');
         document.body.style.overflow = 'hidden';
         setScale(1);
@@ -170,22 +174,6 @@
       lightboxImage.addEventListener('lostpointercapture', stopDragging);
     }
 
-    const header = document.querySelector('.file-viewer-header');
-    const content = document.querySelector('#file-viewer-content');
-    const button = document.querySelector('#file-viewer-download');
-    const media = document.querySelector('.file-viewer-media, .file-viewer-frame');
-    if (!button || !media) return;
-
-    const placeDownloadButton = () => {
-      if (media.getBoundingClientRect().bottom + button.offsetHeight + 24 <= window.innerHeight)
-        content.appendChild(button);
-      else
-        header.appendChild(button);
-    };
-    media.addEventListener('load', placeDownloadButton);
-    media.addEventListener('loadedmetadata', placeDownloadButton);
-    placeDownloadButton();
-    window.addEventListener('resize', placeDownloadButton);
   })();
 </script>
 </body>

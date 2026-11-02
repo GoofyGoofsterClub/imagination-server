@@ -3,6 +3,8 @@ import { getAnnouncement } from "utilities/announcement";
 import { isBrowserPageRequest } from "utilities/browser";
 import { publicBaseUrl } from "utilities/links";
 import { getFileByFilename } from "utilities/filecache";
+import { getPreview } from 'utilities/previews';
+import serveUpload from 'utilities/serveupload';
 
 export default class NewImageServing extends Route {
     constructor() {
@@ -10,6 +12,8 @@ export default class NewImageServing extends Route {
     }
 
     async call(request, reply, server) {
+        reply.header('Vary', 'Accept, User-Agent');
+        reply.header('Cache-Control', 'private, no-cache');
         let file = await getFileByFilename(server.db, request.params.filename);
 
         if (!file) {
@@ -21,10 +25,6 @@ export default class NewImageServing extends Route {
         }
 
         server.server._public.ViewCounter.add(file.id, file.uploader_id);
-
-        let cache = server.server._public.StatisticsCache;
-        if (cache && cache.value)
-            cache.value.views = Number(cache.value.views) + 1;
 
         const browserImageTypes = [
             "image/avif", "image/bmp", "image/gif", "image/jpeg", "image/png",
@@ -38,17 +38,22 @@ export default class NewImageServing extends Route {
             if (kind === "other")
                 reply.header("Content-Disposition", `attachment; filename="${file.filename}"`);
             reply.type(file.mimetype);
-            return reply.sendFile(file.disk_filename, `${__dirname}/../../privateuploads`, { contentType: false });
+            return serveUpload(reply, file.disk_filename);
         }
 
         const rawUrl = `/raw/${encodeURIComponent(file.filename)}`;
         const embedUrl = `${publicBaseUrl(request)}${rawUrl}`;
-        const announcement = await getAnnouncement(server.db);
+        const [announcement, preview] = await Promise.all([
+            getAnnouncement(server.db).catch(() => null),
+            kind === 'image' ? getPreview(file) : null
+        ]);
         return reply.viewAsync("viewer.ejs", {
             filename: file.filename,
             mimetype: file.mimetype,
             kind,
             rawUrl,
+            preview,
+            previewUrl: preview ? `/preview/${encodeURIComponent(file.filename)}` : null,
             downloadUrl: `${rawUrl}?download=1`,
             embedUrl,
             announcement
