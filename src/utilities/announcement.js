@@ -1,8 +1,10 @@
 import AsyncCache from "utilities/cache";
+import { invalidate, onInvalidation } from 'utilities/cachebus';
 const announcementCache = new AsyncCache({ ttl: 10000, max: 1, stale: true });
+onInvalidation('announcement', () => announcementCache.clear());
 
 export function clearAnnouncementCache() {
-    announcementCache.clear();
+    invalidate('announcement');
 }
 
 export async function getAnnouncement(db) {

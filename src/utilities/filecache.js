@@ -1,6 +1,8 @@
 import AsyncCache from "utilities/cache";
+import { invalidate, onInvalidation } from 'utilities/cachebus';
 
 const fileCache = new AsyncCache({ max: 10000 });
+onInvalidation('files', filename => filename ? fileCache.delete(filename) : fileCache.clear());
 
 export function getFileByFilename(db, filename) {
     return fileCache.get(filename, async () => {
@@ -11,5 +13,5 @@ export function getFileByFilename(db, filename) {
     });
 }
 
-export function invalidateFileByFilename(filename) { fileCache.delete(filename); }
-export function invalidateAllFiles() { fileCache.clear(); }
+export function invalidateFileByFilename(filename) { invalidate('files', filename); }
+export function invalidateAllFiles() { invalidate('files'); }

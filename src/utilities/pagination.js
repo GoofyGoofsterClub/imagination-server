@@ -1,9 +1,11 @@
 import AsyncCache from 'utilities/cache';
+import { invalidate, onInvalidation } from 'utilities/cachebus';
 
 const counts = new AsyncCache({ ttl: 15000, max: 1000 });
+onInvalidation('list-counts', () => counts.clear());
 
 export function cachedCount(key, load) { return counts.get(key, load); }
-export function clearListCounts() { counts.clear(); }
+export function clearListCounts() { invalidate('list-counts'); }
 export function encodeCursor(values) { return Buffer.from(JSON.stringify(values)).toString('base64url'); }
 export function decodeCursor(value) {
     if (!value) return null;
