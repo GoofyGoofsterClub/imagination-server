@@ -70,13 +70,51 @@ test('page changes retain slide/fade, stagger and hero transitions', async ({ pa
     expect(calls).toEqual(expect.arrayContaining([
         expect.objectContaining({ target: 'content', duration: 200, opacity: [1, 0], translateY: [0, 100] }),
         expect.objectContaining({ target: 'content', duration: 200, opacity: [0, 1], translateY: [100, 0] }),
-        expect.objectContaining({ target: 'children', duration: 100, staggered: true }),
+        expect.objectContaining({ target: 'children', staggered: true }),
         expect.objectContaining({ target: 'hero', duration: 200 })
     ]));
     await expect(page.locator('.big-showoff')).toBeHidden();
     await page.evaluate(() => ChangePage('welcome'));
     await expect.poll(() => page.locator('.big-showoff').evaluate(element => element.getBoundingClientRect().height)).toBe(expandedHeight);
     await expect(page.locator('body > .content')).toHaveCSS('opacity', '1');
+});
+
+test('larger pages use faster item animations and a bounded stagger', async ({ page }) => {
+    await page.goto('/');
+    const timings = await page.evaluate(() => {
+        const original = window.anime;
+        const timings = [];
+        function recorded(options) {
+            if (Array.isArray(options.targets)) {
+                const children = options.targets;
+                timings.push({
+                    count: children.length,
+                    duration: options.duration,
+                    gap: options.delay(children[1], 1, children.length),
+                    total: options.delay(children.at(-1), children.length - 1, children.length) + options.duration
+                });
+            }
+            return original(options);
+        }
+        Object.assign(recorded, original);
+        window.anime = recorded;
+        const content = document.createElement('div');
+        document.body.appendChild(content);
+        for (const count of [4, 8, 60]) {
+            stopPageMotion(content);
+            content.replaceChildren(...Array.from({ length: count }, () => document.createElement('p')));
+            animatePageIn(content);
+        }
+        stopPageMotion(content);
+        content.remove();
+        window.anime = original;
+        return timings;
+    });
+    expect(timings[1].gap).toBeLessThan(timings[0].gap);
+    expect(timings[2].gap).toBeLessThan(timings[1].gap);
+    expect(timings[1].duration).toBeLessThan(timings[0].duration);
+    expect(timings[2].duration).toBeLessThan(timings[1].duration);
+    for (const timing of timings) expect(timing.total).toBeLessThanOrEqual(520);
 });
 
 test('interrupted transitions and reduced motion keep the final page usable', async ({ page }) => {

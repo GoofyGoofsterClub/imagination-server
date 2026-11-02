@@ -33,10 +33,13 @@ function animatePageOut(content) {
 
 function animatePageIn(content) {
     if (!motionEnabled()) { stopPageMotion(content); return; }
+    const children = [...content.children];
+    // Compress the stagger as the page grows; the full reveal stays under 520ms.
+    const speed = Math.max(1, children.length / 4);
     anime({ targets: content, opacity: [0, 1], translateY: [100, 0], duration: 200, easing: 'linear' });
     anime({
-        targets: [...content.children], opacity: [0, 1], translateY: [-30, 0],
-        duration: 100, easing: 'linear', delay: anime.stagger(120)
+        targets: children, opacity: [0, 1], translateY: [-30, 0],
+        duration: Math.max(40, 100 / speed), easing: 'linear', delay: anime.stagger(120 / speed)
     });
 }
 
