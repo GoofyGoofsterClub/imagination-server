@@ -233,11 +233,16 @@ export default class UploadsNewAPIRoute extends APIRoute {
 
         else if (wantsShortener)
         {
-            let shortenerRequest = await fetch(`https://${process.env.SHORTENER_URI}/api/link/shorten?key=${hash(request.headers['authorization'])}&link=${encodeURIComponent(`${baseUrl}/${filename}`)}`);
-
-            if (shortenerRequest.status == 200) {
-                let shortenerRequestJSON = await shortenerRequest.json();
-                shortenedUrl = shortenerRequestJSON.data.link;
+            try {
+                let shortenerRequest = await fetch(`https://${process.env.SHORTENER_URI}/api/link/shorten?key=${hash(request.headers['authorization'])}&link=${encodeURIComponent(`${baseUrl}/${filename}`)}`, {
+                    signal: AbortSignal.timeout(Number(process.env.SHORTENER_TIMEOUT_MS) || 3000)
+                });
+                if (shortenerRequest.ok) {
+                    let shortenerRequestJSON = await shortenerRequest.json();
+                    shortenedUrl = shortenerRequestJSON.data?.link;
+                }
+            } catch (error) {
+                server.Output.Warn('Shortener unavailable; returning original URL.');
             }
         }
 
