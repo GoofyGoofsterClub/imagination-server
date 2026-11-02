@@ -6,7 +6,15 @@ const { Pool } = pg;
 export default class NewDatabaseController {
     constructor() {
         this.Output = new PresetOutput("db");
-        this.pool = new Pool({ max: Number(process.env.PGPOOL_MAX) || 20 });
+        this.pool = new Pool({
+            max: Number(process.env.PGPOOL_MAX) || 20,
+            connectionTimeoutMillis: Number(process.env.PG_CONNECT_TIMEOUT_MS) || 5000,
+            statement_timeout: Number(process.env.PG_STATEMENT_TIMEOUT_MS) || 15000,
+            idle_in_transaction_session_timeout: 15000,
+            options: `-c imagination.storage_quota=${Math.max(0, Math.floor(Number(process.env.USER_STORAGE_QUOTA) || 0))}`,
+            application_name: 'imagination-server'
+        });
+        this.metrics = { queries: 0, failures: 0, totalMs: 0, poolWaitMs: 0 };
         this.pool.on("error", (err) => this.Output.Warn(`Idle pool client error: ${err.message}`));
 
         this.Output.Log("Database initialized.");
@@ -83,12 +91,27 @@ export default class NewDatabaseController {
 
     async query(text, params) {
         const start = Date.now();
-        const res = await this.pool.query(text, params);
-        const duration = Date.now() - start;
-
-        if (duration >= 100)
-            this.Output.Log(`Executed a query :: ${(duration / 1000).toFixed(2)}s :: ${res.rowCount} rows`);
-        return res;
+        let client;
+        this.metrics.queries++;
+        try {
+            client = await this.pool.connect();
+            const acquiredAt = Date.now();
+            this.metrics.poolWaitMs += acquiredAt - start;
+            const res = await client.query(text, params);
+            const duration = Date.now() - start;
+            if (duration >= 100) {
+                // Fingerprint only: never emit SQL literals, tokens, or bind parameters.
+                const fingerprint = crypto.createHash('sha256').update(text).digest('hex').slice(0, 12);
+                this.Output.Log(`Slow query ${fingerprint}: total=${duration}ms pool=${acquiredAt - start}ms rows=${res.rowCount}`);
+            }
+            return res;
+        } catch (error) {
+            this.metrics.failures++;
+            throw error;
+        } finally {
+            this.metrics.totalMs += Date.now() - start;
+            client?.release();
+        }
     }
 
     async getAmountOfUsers() {
