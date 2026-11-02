@@ -22,11 +22,11 @@ const run = async () => {
 
     while (!databaseConnectionSuccess) {
         try {
-            db = await new DatabaseController(
+            db = process.env.LEGACY_MONGO_ENABLED === 'true' ? await new DatabaseController(
                 process.env.MONGO_HOST,
                 process.env.MONGO_PORT,
                 'boobspics'
-            ).connect();
+            ).connect() : null;
 
             ndb = await new NewDatabaseController();
             await ndb.loadFileIdKey();
