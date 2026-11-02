@@ -1,2 +1,13 @@
 node_modules
 npm-debug.log
+.git
+.env
+.env.*
+lib
+privateuploads
+loadtest
+test
+test-results
+playwright-report
+public/assets
+public/asset-manifest.json
