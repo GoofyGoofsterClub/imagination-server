@@ -136,8 +136,7 @@ export default class HTTPServer {
             ),
             "PerformanceRateLimiter": new RateLimiter(this.redis, 'ratelimit:performance', 60, 60),
             "ViewCounter": this.viewCounter,
-            "Maintenance": false,
-            "StatisticsCache": null
+            "Maintenance": false
         };
 
         // Register synchronously before Fastify boots; await readiness only after all routes exist.

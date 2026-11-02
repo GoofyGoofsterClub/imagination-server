@@ -1,4 +1,5 @@
 import { APIRoute } from "http/routing";
+import { getStatistics } from "utilities/statistics";
 
 /*--includedoc
 
@@ -17,30 +18,7 @@ export default class UploadsCountAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        const cacheTTL = 60 * 1000;
-        const now = Date.now();
-        const cache = server.server._public.StatisticsCache;
-
-        if (cache && now - cache.createdAt < cacheTTL)
-            return cache.value;
-
-        const collection = await server.db.query(`
-            SELECT COUNT(id)::bigint AS uploads,
-                   COALESCE(SUM(views), 0)::bigint AS views
-            FROM uwuso.uploads`);
-        const uploads = collection.rows[0].uploads;
-        const views = collection.rows[0].views;
-        const value = {
-            // Keep count for backwards compatibility with existing API clients.
-            "count": uploads,
-            "uploads": uploads,
-            "views": views
-        };
-
-        server.server._public.StatisticsCache = {
-            createdAt: now,
-            value
-        };
-        return value;
+        reply.header("Cache-Control", "public, max-age=10, stale-while-revalidate=60");
+        return getStatistics(server.db);
     }
 }
