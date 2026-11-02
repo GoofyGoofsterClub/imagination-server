@@ -56,6 +56,19 @@ export default class NewDatabaseController {
         } catch (e) {
             this.Output.Warn(`Could not create unique upload filename index (duplicate filenames already exist?): ${e}`);
         }
+    async transaction(callback) {
+        const client = await this.pool.connect();
+        try {
+            await client.query('BEGIN');
+            const result = await callback(client);
+            await client.query('COMMIT');
+            return result;
+        } catch (error) {
+            try { await client.query('ROLLBACK'); } catch (_) { }
+            throw error;
+        } finally { client.release(); }
+    }
+
 
         try {
             await this.pool.query("CREATE UNIQUE INDEX IF NOT EXISTS users_username_uindex ON uwuso.users (username)");
