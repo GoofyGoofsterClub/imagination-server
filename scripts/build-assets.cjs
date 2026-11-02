@@ -45,6 +45,9 @@ async function build() {
         await emit(key, await fs.readFile(path.join(fontRoot, 'files', path.basename(key))));
     }
     await fs.copyFile(path.join(fontRoot, 'LICENSE'), path.join(out, 'Raleway-LICENSE.txt'));
+    const vitalsRoot = path.resolve(path.dirname(require.resolve('web-vitals')), '..');
+    await emit('/public/js/web-vitals.js', await fs.readFile(path.join(vitalsRoot, 'dist/web-vitals.iife.js')));
+    await fs.copyFile(path.join(vitalsRoot, 'LICENSE'), path.join(out, 'web-vitals-LICENSE.txt'));
 
     const all = await files(publicDir);
     // Images and JSON first, CSS/JS next, HTML fragments last (their dependencies are now known).
@@ -62,9 +65,6 @@ async function build() {
         const key = `/public/${path.relative(publicDir, file).split(path.sep).join('/')}`;
         let content = await fs.readFile(file, 'utf8');
         if (key === '/public/css/new.css') content = fonts + '\n' + content;
-        await emit(key, rewrite(content));
-    }
-    for (const file of all.filter(f => f.endsWith('.html'))) {
         if (file.endsWith('.js')) {
             content = babel.transformSync(content, {
                 babelrc: false, configFile: false, compact: true,
@@ -77,13 +77,20 @@ async function build() {
                 } })]
             }).code;
         }
+        await emit(key, rewrite(content));
+    }
+    for (const file of all.filter(f => f.endsWith('.html'))) {
         const key = `/public/${path.relative(publicDir, file).split(path.sep).join('/')}`;
         await emit(key, rewrite(await fs.readFile(file, 'utf8')));
     }
     const views = path.join(root, 'lib', 'views');
     await fs.mkdir(views, { recursive: true });
     for (const name of await fs.readdir(path.join(root, 'private'))) {
-        if (name.endsWith('.ejs')) await fs.writeFile(path.join(views, name), rewrite(await fs.readFile(path.join(root, 'private', name), 'utf8')));
+        if (name.endsWith('.ejs')) {
+            let template = await fs.readFile(path.join(root, 'private', name), 'utf8');
+            template = template.replace('</head>', `<% if (it.performanceEnabled) { %><script defer src="/public/js/web-vitals.js"></script><script defer src="/public/js/performance.js"></script><% } %></head>`);
+            await fs.writeFile(path.join(views, name), rewrite(template));
+        }
     }
     await fs.writeFile(path.join(publicDir, 'asset-manifest.json'), JSON.stringify(manifest));
     console.log(`Built ${Object.keys(manifest).length} fingerprinted assets and production templates.`);

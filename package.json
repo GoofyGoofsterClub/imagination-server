@@ -52,6 +52,7 @@
     "@playwright/test": "^1.64.1",
     "babel-plugin-const-enum": "^1.2.0",
     "babel-plugin-module-resolver": "^5.0.0",
-    "babel-preset-minify": "^0.5.2"
+    "babel-preset-minify": "^0.5.2",
+    "web-vitals": "^6.2.3"
   }
 }

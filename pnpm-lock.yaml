@@ -108,6 +108,9 @@ importers:
       babel-preset-minify:
         specifier: ^0.5.2
         version: 0.5.2
+      web-vitals:
+        specifier: ^6.2.3
+        version: 6.2.3
 
 packages:
 
@@ -2558,6 +2561,9 @@ packages:
   v8flags@3.2.0:
     resolution: {integrity: sha512-mH8etigqMfiGWdeXpaaqGfs6BndypxusHHcv2qSHyZkGEznCd/qAXCWWRzeowtL54147cktFOC4P5y+kl8d8Jg==}
     engines: {node: '>= 0.10'}
+
+  web-vitals@6.2.3:
+    resolution: {integrity: sha512-Dmy+vdO1UPMqXiAtZSNayhl4f794Bxfd94W4HIj2HlYtczEQfEOon969memlcpcHrTuOKLa5baFjX7WbgmOq+A==}
 
   webidl-conversions@7.0.0:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
@@ -5831,6 +5837,8 @@ snapshots:
   v8flags@3.2.0:
     dependencies:
       homedir-polyfill: 1.0.3
+
+  web-vitals@6.2.3: {}
 
   webidl-conversions@7.0.0: {}
 

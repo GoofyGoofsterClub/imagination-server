@@ -10,6 +10,7 @@ import { ExternalLogging, Field, buildMessage } from "utilities/logexternal";
 import Authenticate from "utilities/authentication";
 import RateLimiter from "utilities/ratelimit";
 import { publicHost } from "utilities/links";
+import { recordRequest } from "utilities/metrics";
 
 const SENSITIVE_HEADERS = ["authorization", "cookie", "x-api-key"];
 
@@ -20,7 +21,15 @@ export default class HTTPServer {
         this.redis = redis;
         this.viewCounter = viewCounter;
         this.server = fastify({
-            logger: (process.env.ENV && process.env.ENV == 'DEV')
+            logger: (process.env.ENV && process.env.ENV == 'DEV'),
+            trustProxy: process.env.TRUST_PROXY ? process.env.TRUST_PROXY.split(',').map(value => value.trim()) : false,
+            requestTimeout: Number(process.env.HTTP_REQUEST_TIMEOUT_MS) || 120000
+        });
+        this.server.addHook('onRequest', async (request, reply) => {
+            if (request.url.startsWith('/api/private/')) reply.header('Cache-Control', 'no-store');
+        });
+        this.server.addHook('onResponse', async (request, reply) => {
+            recordRequest(request.routeOptions.url || 'unmatched', reply.statusCode, reply.elapsedTime);
         });
         this.server.odb = db;
         this.server.db = db;
@@ -125,6 +134,7 @@ export default class HTTPServer {
                 30,
                 60
             ),
+            "PerformanceRateLimiter": new RateLimiter(this.redis, 'ratelimit:performance', 60, 60),
             "ViewCounter": this.viewCounter,
             "Maintenance": false,
             "StatisticsCache": null
