@@ -51,30 +51,12 @@ services:
     env_file:
       - ./.env
 
-  migrate:
-    build: .
-    image: imagination-server:local
-    command: ["node", "lib/migrate.js"]
-    depends_on:
-      postgres:
-        condition: service_healthy
-    env_file:
-      - ./.env
-    environment:
-      - PGHOST=postgres
-      - PGPORT=5432
-      - PGUSER=$PGUSER
-      - PGPASSWORD=$PGPASSWORD
-      - PGDATABASE=uwuso
-
   web:
     image: imagination-server:local
     depends_on:
       postgres:
         condition: service_healthy
         restart: true
-      migrate:
-        condition: service_completed_successfully
       redis:
         condition: service_started
         restart: true

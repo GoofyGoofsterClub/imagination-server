@@ -1,4 +1,4 @@
--- Run explicitly with pnpm migrate, never on application startup.
+-- Applied automatically on the first startup that needs this version.
 CREATE TABLE IF NOT EXISTS uwuso.settings (key text PRIMARY KEY, value text NOT NULL);
 CREATE TABLE IF NOT EXISTS uwuso.service_announcements (
     id integer PRIMARY KEY, message text NOT NULL, severity text NOT NULL,

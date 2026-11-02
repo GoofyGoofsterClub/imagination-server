@@ -10,6 +10,7 @@ import ViewCounter from "utilities/viewcounter";
 import { getStatistics } from 'utilities/statistics';
 import { stopPreviews } from 'utilities/previews';
 import { startCacheBus, stopCacheBus } from 'utilities/cachebus';
+import { migrate } from './migrate';
 
 let viewCounter = null;
 let httpServer = null;
@@ -37,10 +38,9 @@ const run = async () => {
             ).connect() : null;
 
             ndb = await new NewDatabaseController();
+            Output.Log('Preparing database schema...');
+            await migrate();
             await ndb.loadFileIdKey();
-            await ndb.query(`SELECT version FROM uwuso.schema_migrations WHERE version = '002-online-indexes'`).then(result => {
-                if (!result.rows.length) throw new Error('Run pnpm migrate before starting the server.');
-            });
 
             Output.Log("Connected to the database!");
             databaseConnectionSuccess = true;
@@ -53,7 +53,7 @@ const run = async () => {
             try { if (ndb) await ndb.pool.end(); } catch (_) { }
             db = null;
             ndb = null;
-            if (e.code === '42P01' || /migration|required|pnpm migrate/i.test(e.message)) throw e;
+            if (e.migrationFailure || e.code === '42P01') throw e;
             await new Promise((resolve) => setTimeout(resolve, 1000));
         }
     }

@@ -22,7 +22,7 @@ export default class NewDatabaseController {
 
     async loadFileIdKey() {
         const result = await this.pool.query(`SELECT value FROM uwuso.settings WHERE key = 'file_id_key'`);
-        if (!result.rows.length) throw new Error('Database migration required: run pnpm migrate before starting the server.');
+        if (!result.rows.length) throw new Error('Database initialization did not create the file-ID key.');
         this.fileIdKey = Buffer.from(result.rows[0].value, "hex");
     }
 

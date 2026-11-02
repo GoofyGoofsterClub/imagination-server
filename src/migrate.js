@@ -17,18 +17,25 @@ const indexes = [
     ['users_username_uindex', 'uwuso.users (username)', true]
 ];
 
-async function migrate() {
+export async function migrate({ connectionString } = {}) {
     const client = new pg.Client({
+        connectionString,
         connectionTimeoutMillis: 5000,
         statement_timeout: Number(process.env.MIGRATION_STATEMENT_TIMEOUT_MS) || 0,
         lock_timeout: 5000,
         application_name: 'imagination-migrations'
     });
-    await client.connect();
+    let connected = false;
     try {
-        // Fail fast if another deploy is migrating, rather than queueing forever.
-        const lock = await client.query('SELECT pg_try_advisory_lock(18745201) AS acquired');
-        if (!lock.rows[0].acquired) throw new Error('Another migration is running. Retry after it completes.');
+        await client.connect();
+        connected = true;
+        // A blocking SELECT would retain a snapshot that CREATE INDEX CONCURRENTLY
+        // can wait for, deadlocking against the advisory lock. Wait between short queries.
+        const waitUntil = Date.now() + (Number(process.env.MIGRATION_WAIT_TIMEOUT_MS) || 300000);
+        while (!(await client.query('SELECT pg_try_advisory_lock(18745201) AS acquired')).rows[0].acquired) {
+            if (Date.now() >= waitUntil) throw new Error('Timed out waiting for another starter to initialize the database.');
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
         await client.query('CREATE TABLE IF NOT EXISTS uwuso.schema_migrations (version text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT NOW())');
         const applied = new Set((await client.query('SELECT version FROM uwuso.schema_migrations')).rows.map(row => row.version));
         if (!applied.has('001-runtime-schema')) {
@@ -44,7 +51,7 @@ async function migrate() {
             for (const [name, definition, unique] of indexes) {
                 const existing = await client.query('SELECT indisvalid FROM pg_index WHERE indexrelid = to_regclass($1)', [`uwuso.${name}`]);
                 if (existing.rows[0] && !existing.rows[0].indisvalid)
-                    throw new Error(`Index ${name} is invalid from an interrupted build. Inspect and drop it concurrently before retrying.`);
+                    await client.query(`DROP INDEX CONCURRENTLY IF EXISTS uwuso.${name}`);
                 await client.query(`CREATE ${unique ? 'UNIQUE ' : ''}INDEX CONCURRENTLY IF NOT EXISTS ${name} ON ${definition}`);
             }
             // Only remove known redundant indexes after the replacement is valid.
@@ -59,7 +66,12 @@ async function migrate() {
             await client.query(`INSERT INTO uwuso.schema_migrations (version) VALUES ('003-substring-search')`);
         }
         console.log('Database migrations complete.');
+    } catch (error) {
+        if (connected) error.migrationFailure = true;
+        throw error;
     } finally { await client.end(); }
 }
 
-migrate().catch(error => { console.error(error.message); process.exitCode = 1; });
+if (require.main === module) {
+    migrate().catch(error => { console.error(error.message); process.exitCode = 1; });
+}
