@@ -1,7 +1,7 @@
 import AsyncCache from 'utilities/cache';
 import { invalidate, onInvalidation } from 'utilities/cachebus';
 
-const counts = new AsyncCache({ ttl: 15000, max: 1000 });
+const counts = new AsyncCache({ ttl: 15000, max: 1000, name: 'list-counts' });
 onInvalidation('list-counts', () => counts.clear());
 
 export function cachedCount(key, load) { return counts.get(key, load); }

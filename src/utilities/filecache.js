@@ -1,7 +1,7 @@
 import AsyncCache from "utilities/cache";
 import { invalidate, onInvalidation } from 'utilities/cachebus';
 
-const fileCache = new AsyncCache({ max: 10000 });
+const fileCache = new AsyncCache({ max: 10000, name: 'files' });
 onInvalidation('files', filename => filename ? fileCache.delete(filename) : fileCache.clear());
 
 export function getFileByFilename(db, filename) {

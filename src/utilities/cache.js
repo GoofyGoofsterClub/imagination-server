@@ -1,12 +1,18 @@
+const registry = new Map();
+export function getCacheMetrics() {
+    return [...registry].map(([name, cache]) => ({ name, size: cache.entries.size, hits: cache.hits, misses: cache.misses }));
+}
+
 /** Bounded, process-local cache with coalesced loads and race-safe invalidation. */
 export default class AsyncCache {
-    constructor({ ttl = 60000, max = 1000, stale = false } = {}) {
+    constructor({ ttl = 60000, max = 1000, stale = false, name } = {}) {
         this.ttl = ttl;
         this.max = max;
         this.stale = stale;
         this.entries = new Map();
         this.hits = 0;
         this.misses = 0;
+        if (name) registry.set(name, this);
     }
 
     get(key, load) {

@@ -1,7 +1,7 @@
 import AsyncCache from "utilities/cache";
 import { invalidate, onInvalidation } from 'utilities/cachebus';
 
-const cache = new AsyncCache({ max: 1, stale: true });
+const cache = new AsyncCache({ max: 1, stale: true, name: 'statistics' });
 onInvalidation('statistics', () => cache.clear());
 
 export function getStatistics(db) {

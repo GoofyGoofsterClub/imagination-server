@@ -1,6 +1,6 @@
 import AsyncCache from "utilities/cache";
 import { invalidate, onInvalidation } from 'utilities/cachebus';
-const announcementCache = new AsyncCache({ ttl: 10000, max: 1, stale: true });
+const announcementCache = new AsyncCache({ ttl: 10000, max: 1, stale: true, name: 'announcements' });
 onInvalidation('announcement', () => announcementCache.clear());
 
 export function clearAnnouncementCache() {

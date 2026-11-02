@@ -4,7 +4,7 @@ const RANDOM_CUSTOM_URL_KEY = "experiment_random_custom_url";
 const DOMAIN_PATTERN = /^(?=.{1,253}(:|$))([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)*[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(:\d{1,5})?$/;
 export const MAX_RANDOM_CUSTOM_URL_DOMAINS = 100;
 
-const experimentCache = new AsyncCache({ max: 1, stale: true });
+const experimentCache = new AsyncCache({ max: 1, stale: true, name: 'experiments' });
 onInvalidation('experiments', () => experimentCache.clear());
 
 export function clearExperimentCache() {

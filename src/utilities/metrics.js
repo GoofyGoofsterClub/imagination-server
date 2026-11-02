@@ -1,4 +1,5 @@
 import { monitorEventLoopDelay } from 'perf_hooks';
+import { getCacheMetrics } from 'utilities/cache';
 
 const requests = new Map();
 const webVitals = new Map();
@@ -24,6 +25,7 @@ export function getMetrics(db) {
     return {
         uptimeSeconds: process.uptime(),
         memory: process.memoryUsage(),
+        caches: getCacheMetrics(),
         eventLoopMs: { mean: eventLoop.mean / 1e6 || 0, p99: eventLoop.percentile(99) / 1e6, max: eventLoop.max / 1e6 },
         database: { total: db.pool.totalCount, idle: db.pool.idleCount, waiting: db.pool.waitingCount, ...db.metrics },
         bucketUpperBoundsMs: buckets.map(value => Number.isFinite(value) ? value : '+Inf'),

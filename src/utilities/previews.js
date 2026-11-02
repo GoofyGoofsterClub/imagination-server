@@ -6,7 +6,7 @@ import { invalidate, onInvalidation } from 'utilities/cachebus';
 
 const directory = path.resolve(__dirname, '../../privateuploads');
 const supported = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif']);
-const metadata = new AsyncCache({ max: 10000 });
+const metadata = new AsyncCache({ max: 10000, name: 'previews' });
 onInvalidation('previews', filename => metadata.delete(filename));
 const queue = new Map();
 let running = false;
