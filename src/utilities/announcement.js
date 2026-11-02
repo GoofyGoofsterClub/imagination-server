@@ -1,18 +1,16 @@
-const ANNOUNCEMENT_CACHE_TTL_MS = 10 * 1000;
-let announcementCache = { value: undefined, expiresAt: 0 };
+import AsyncCache from "utilities/cache";
+const announcementCache = new AsyncCache({ ttl: 10000, max: 1, stale: true });
 
 export function clearAnnouncementCache() {
-    announcementCache = { value: undefined, expiresAt: 0 };
+    announcementCache.clear();
 }
 
 export async function getAnnouncement(db) {
-    const now = Date.now();
-    if (now < announcementCache.expiresAt) return announcementCache.value;
+    return announcementCache.get("announcement", async () => {
     const result = await db.query(`
         SELECT message, severity, button_text, button_url, image_url
         FROM uwuso.service_announcements
         WHERE id = 1`);
-    const value = result.rows[0] ?? null;
-    announcementCache = { value, expiresAt: now + ANNOUNCEMENT_CACHE_TTL_MS };
-    return value;
+        return result.rows[0] ?? null;
+    });
 }

@@ -1,12 +1,12 @@
+import AsyncCache from "utilities/cache";
 const RANDOM_CUSTOM_URL_KEY = "experiment_random_custom_url";
-const EXPERIMENT_CACHE_TTL_MS = 60 * 1000;
 const DOMAIN_PATTERN = /^(?=.{1,253}(:|$))([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)*[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(:\d{1,5})?$/;
 export const MAX_RANDOM_CUSTOM_URL_DOMAINS = 100;
 
-let experimentCache = { value: undefined, expiresAt: 0 };
+const experimentCache = new AsyncCache({ max: 1, stale: true });
 
 export function clearExperimentCache() {
-    experimentCache = { value: undefined, expiresAt: 0 };
+    experimentCache.clear();
 }
 
 export function isValidDomain(domain) {
@@ -26,8 +26,7 @@ export function normalizeDomains(domains) {
 }
 
 export async function getRandomCustomUrlExperiment(db) {
-    const now = Date.now();
-    if (now < experimentCache.expiresAt) return experimentCache.value;
+    return experimentCache.get("experiment", async () => {
     const result = await db.query(`SELECT value FROM uwuso.settings WHERE key = $1::text`, [RANDOM_CUSTOM_URL_KEY]);
     let value;
     if (result.rows.length < 1) {
@@ -41,8 +40,8 @@ export async function getRandomCustomUrlExperiment(db) {
             value = { enabled: false, domains: [] };
         }
     }
-    experimentCache = { value, expiresAt: now + EXPERIMENT_CACHE_TTL_MS };
     return value;
+    });
 }
 
 export async function setRandomCustomUrlExperiment(db, enabled, domains) {
