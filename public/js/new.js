@@ -3,6 +3,42 @@ const pageLoads = new Map();
 const scriptLoads = new Map();
 let navigationId = 0;
 let currentPage = 'welcome';
+let pendingExit = null;
+let heroMotionId = 0;
+
+function motionEnabled() {
+    return typeof anime === 'function' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function stopPageMotion(content) {
+    if (pendingExit) { pendingExit(); pendingExit = null; }
+    if (typeof anime === 'function') anime.remove([content, ...content.children]);
+    for (const element of [content, ...content.children]) {
+        element.style.removeProperty('opacity');
+        element.style.removeProperty('transform');
+    }
+}
+
+function animatePageOut(content) {
+    if (!motionEnabled()) return Promise.resolve();
+    return new Promise(resolve => {
+        pendingExit = resolve;
+        anime({
+            targets: content, opacity: [1, 0], translateY: [0, 100],
+            duration: 200, easing: 'linear',
+            complete: () => { if (pendingExit === resolve) pendingExit = null; resolve(); }
+        });
+    });
+}
+
+function animatePageIn(content) {
+    if (!motionEnabled()) { stopPageMotion(content); return; }
+    anime({ targets: content, opacity: [0, 1], translateY: [100, 0], duration: 200, easing: 'linear' });
+    anime({
+        targets: [...content.children], opacity: [0, 1], translateY: [-30, 0],
+        duration: 100, easing: 'linear', delay: anime.stagger(120)
+    });
+}
 
 document.addEventListener('keydown', (event) => {
     if (/INPUT|TEXTAREA/.test(document.activeElement.tagName) || event.key.length !== 1) return;
@@ -18,8 +54,24 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-function showHero(show) {
-    document.documentElement.classList.toggle('inner-page', !show);
+function showHero(show, animate = false) {
+    const id = ++heroMotionId;
+    const hero = document.querySelector('.big-showoff');
+    const from = hero.getBoundingClientRect().height;
+    if (typeof anime === 'function') anime.remove(hero);
+    const finish = () => {
+        if (id !== heroMotionId) return;
+        document.documentElement.classList.toggle('inner-page', !show);
+        hero.style.removeProperty('height');
+        hero.style.removeProperty('display');
+    };
+    if (animate && motionEnabled()) {
+        document.documentElement.classList.remove('inner-page');
+        hero.style.display = 'block';
+        hero.style.removeProperty('height');
+        const expandedHeight = hero.getBoundingClientRect().height;
+        anime({ targets: hero, height: [from, show ? expandedHeight : 0], duration: 200, easing: 'linear', complete: finish });
+    } else finish();
     const image = document.querySelector('.anime-girl');
     if (show && image && !image.hasAttribute('src')) {
         image.srcset = image.dataset.srcset;
@@ -63,35 +115,43 @@ function loadScript(src) {
     return scriptLoads.get(src);
 }
 
-async function ApplyPageContent(html, page, id) {
+async function ApplyPageContent(html, page, id, animate = false) {
     const template = document.createElement('template');
     template.innerHTML = html;
     const scripts = [...template.content.querySelectorAll('preload-script')].map(element => element.getAttribute('src'));
     template.content.querySelectorAll('preload-script').forEach(element => element.remove());
     if (id !== navigationId) return;
-    document.querySelector('body > .content').replaceChildren(template.content);
+    const content = document.querySelector('body > .content');
+    content.replaceChildren(template.content);
     Translatable.translateGroup(Translatable.find('body'));
+    // Reveal the new page before optional scripts or API calls finish.
+    if (animate) animatePageIn(content);
+    else stopPageMotion(content);
     await Promise.all(scripts.map(loadScript));
     if (id !== navigationId) return;
     await window.PageInitializers[page]?.();
 }
 
-async function ChangePage(page) {
+async function ChangePage(page, animate = true) {
     const id = ++navigationId;
     page = resolvePage(page);
     currentPage = page;
     const navPage = page === 'dashboard-logged' ? 'dashboard' : page;
     document.querySelectorAll('.nav-el[data-content]').forEach(element => element.classList.toggle('current', element.dataset.content === navPage));
-    showHero(page === 'welcome');
+    showHero(page === 'welcome', animate);
     const content = document.querySelector('body > .content');
+    stopPageMotion(content);
     content.setAttribute('aria-busy', 'true');
     try {
         const html = await loadPage(page);
         if (id !== navigationId) return;
-        await ApplyPageContent(html, page, id);
+        if (animate) await animatePageOut(content);
+        if (id !== navigationId) return;
+        await ApplyPageContent(html, page, id, animate);
         if (page === 'welcome') GetUploadCount();
     } catch (error) {
         if (id !== navigationId) return;
+        stopPageMotion(content);
         const message = document.createElement('p');
         message.textContent = error.message;
         const retry = document.createElement('button');
@@ -157,7 +217,7 @@ function initialize() {
     });
     initializeLanguage().catch(console.warn);
     if (page === 'welcome') GetUploadCount();
-    else ChangePage(page);
+    else ChangePage(page, false);
     window.addEventListener('hashchange', () => ChangePage(requestedPage()));
     // Analytics never gates visible content or controls.
     window.addEventListener('load', () => {
