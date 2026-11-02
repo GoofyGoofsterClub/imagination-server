@@ -1,4 +1,4 @@
-CheckLogin();
+window.PageInitializers['dashboard-logged'] = initializeLoggedDashboard;
 
 var UserInfo = {};
 var AllUsers = [];
@@ -25,33 +25,37 @@ function selectText(nodeId) {
     }
 }
 
-async function CheckLogin() {
+async function initializeLoggedDashboard() {
     let key = localStorage.getItem("key");
     if (key == null) {
         ChangePage("dashboard");
         return;
     }
-    let response = await fetch("/api/private/session/check?key=" + key);
-    let data = await response.json();
-    if (!data.success) {
-        ChangePage("dashboard");
-        return;
+    let userInfo;
+    try {
+        userInfo = await GetUserInfo();
+    } catch (error) {
+        if (error.status === 401) {
+            localStorage.removeItem('key');
+            return ChangePage('dashboard');
+        }
+        if (error.status === 403) return ChangePage('banned');
+        // Temporary outages/rate limits must not erase valid credentials.
+        throw error;
     }
-
-    let userInfo = await GetUserInfo();
     if (userInfo.isBanned) {
         ChangePage("banned");
         return;
     }
 
     document.getElementById("__dashboard_logged_displayname").innerText = userInfo.displayName;
-    LoadServiceAnnouncement(userInfo.administrator);
+    LoadServiceAnnouncement(userInfo.administrator).catch(console.warn);
 
     if (userInfo.administrator) {
         document.getElementById("__dashboard_logged_users_block").style.display = "block";
         document.getElementById("__dashboard_logged_users_block_unavailable").style.display = "none";
         document.getElementById("__dashboard_announcement_admin").style.display = "block";
-        LoadExperiments();
+        LoadExperiments().catch(console.warn);
         document.getElementById("__dashboard_logged_invite_block").style.display = "block";
         document.getElementById("__dashboard_logged_invite_block_unavailable").style.display = "none";
     }
@@ -213,10 +217,10 @@ async function CheckLogin() {
     }
 
     setupDashboardFilters();
-    GetUploads();
+    GetUploads().catch(console.warn);
 
     if (userInfo.administrator) {
-        GetUsers();
+        GetUsers().catch(console.warn);
     }
 }
 
@@ -372,8 +376,12 @@ async function LoadExperiments() {
 
 async function GetUserInfo() {
     let key = localStorage.getItem("key");
-    let response = await fetch("/api/private/session/info?key=" + key);
-    let data = await response.json();
+    if (window.dashboardSession?.key === key) {
+        UserInfo = window.dashboardSession.data;
+        delete window.dashboardSession;
+        return UserInfo;
+    }
+    let data = await FetchJSON("/api/private/session/info", { headers: { Authorization: key } });
     UserInfo = data.data;
     return data.data;
 }
@@ -648,6 +656,7 @@ async function GetUsersLegacy() {
 
 function logOutLoggedIn() {
     localStorage.removeItem("key");
+    delete window.dashboardSession;
     ChangePage("dashboard");
 }
 
@@ -681,7 +690,8 @@ async function GetUsers() {
     const page = window.dashboardUsersPage || 1;
     const search = document.getElementById("__dashboard_logged_users_search").value.trim();
     const key = localStorage.getItem("key");
-    const response = await fetch(`/api/private/admin/sessions?key=${encodeURIComponent(key)}&page=${page}&search=${encodeURIComponent(search)}`);
+    const cursor = window.dashboardUsersCursors?.[page - 1] || '';
+    const response = await AppFetch(`/api/private/admin/sessions?key=${encodeURIComponent(key)}&page=${page}&pagination=cursor&cursor=${encodeURIComponent(cursor)}&search=${encodeURIComponent(search)}`);
     const data = await response.json();
     if (!data.success) return;
 
@@ -793,7 +803,10 @@ function updatePagination(type, data) {
     const next = document.getElementById(`__dashboard_logged_${type}_next`);
     label.innerText = data.total === 0 ? "No results" : `Page ${data.page} of ${data.totalPages} (${data.total} total)`;
     previous.disabled = data.page <= 1;
-    next.disabled = data.page >= data.totalPages;
+    next.disabled = !data.hasNext;
+    const cursorKey = `dashboard${type[0].toUpperCase()}${type.slice(1)}Cursors`;
+    window[cursorKey] = window[cursorKey] || [null];
+    window[cursorKey][data.page] = data.nextCursor;
     previous.onclick = () => { window[`dashboard${type[0].toUpperCase()}${type.slice(1)}Page`] = data.page - 1; type === "users" ? GetUsers() : GetUploads(); };
     next.onclick = () => { window[`dashboard${type[0].toUpperCase()}${type.slice(1)}Page`] = data.page + 1; type === "users" ? GetUsers() : GetUploads(); };
 }
@@ -803,6 +816,8 @@ async function GetUploads() {
     const params = new URLSearchParams({
         key: localStorage.getItem("key"),
         page,
+        pagination: 'cursor',
+        cursor: window.dashboardUploadsCursors?.[page - 1] || '',
         search: document.getElementById("__dashboard_logged_uploads_search").value.trim(),
         sort: document.getElementById("__dashboard_logged_uploads_sort").value
     });
@@ -810,7 +825,7 @@ async function GetUploads() {
     const to = document.getElementById("__dashboard_logged_uploads_to").value;
     if (from) params.set("from", Math.floor(new Date(from).getTime() / 1000));
     if (to) params.set("to", Math.floor(new Date(to).getTime() / 1000));
-    const response = await fetch(`/api/private/session/uploads?${params}`);
+    const response = await AppFetch(`/api/private/session/uploads?${params}`);
     const data = await response.json();
     const table = document.getElementById("__dashboard_logged_uploads_table");
     while (table.rows.length > 1) table.deleteRow(1);
@@ -833,10 +848,10 @@ async function GetUploads() {
 }
 
 function setupDashboardFilters() {
-    document.getElementById("__dashboard_logged_users_search_button").onclick = () => { window.dashboardUsersPage = 1; GetUsers(); };
+    document.getElementById("__dashboard_logged_users_search_button").onclick = () => { window.dashboardUsersPage = 1; window.dashboardUsersCursors = [null]; GetUsers().catch(console.warn); };
     document.getElementById("__dashboard_logged_users_search").onkeydown = (event) => { if (event.key === "Enter") document.getElementById("__dashboard_logged_users_search_button").click(); };
-    document.getElementById("__dashboard_logged_uploads_search_button").onclick = () => { window.dashboardUploadsPage = 1; GetUploads(); };
-    document.getElementById("__dashboard_logged_uploads_sort").onchange = () => { window.dashboardUploadsPage = 1; GetUploads(); };
+    document.getElementById("__dashboard_logged_uploads_search_button").onclick = () => { window.dashboardUploadsPage = 1; window.dashboardUploadsCursors = [null]; GetUploads().catch(console.warn); };
+    document.getElementById("__dashboard_logged_uploads_sort").onchange = () => { window.dashboardUploadsPage = 1; window.dashboardUploadsCursors = [null]; GetUploads().catch(console.warn); };
 }
 
 async function DeleteFile(index, filename, deletehash) {

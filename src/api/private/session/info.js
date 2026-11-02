@@ -19,16 +19,20 @@ export default class CheckSessionInfoAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
+        let user = await server.db.findUserByAccessKey(hash(request.headers.authorization || request.query.key));
 
-        if (!user)
+        if (!user) {
+            reply.code(401);
             return {
                 "success": false,
                 "error": "Invalid key."
             };
+        }
 
-        if (user.banned)
+        if (user.banned) {
+            reply.code(403);
             return { "success": false, "error": "You are banned." };
+        }
 
         return {
             "success": true,

@@ -1,5 +1,4 @@
-CheckLogin();
-
+window.PageInitializers.dashboard = async function () {
 document.getElementById("__dashboard_login_token").onkeyup = function(event) {
     if (event.keyCode === 13) {
         document.getElementById("__dashboard_login_button").click();
@@ -15,11 +14,11 @@ document.getElementById("__dashboard_login_button").onclick = function() {
         UnlockInput();
         return;
     }
-    fetch("/api/private/session/check?key=" + key).then(async function(response) {
-        let data = await response.json();
+    FetchJSON("/api/private/session/info", { headers: { Authorization: key } }).then(async function(data) {
         if (data.success)
         {
             localStorage.setItem("key", key);
+            window.dashboardSession = { key, data: data.data };
             ChangePage("dashboard-logged");
         }
         else
@@ -27,37 +26,13 @@ document.getElementById("__dashboard_login_button").onclick = function() {
             setDashboardResult("ERROR: " + data.error);
             UnlockInput();
         }
+    }).catch(error => {
+        setDashboardResult(error.status === 429 ? 'Too many attempts. Please wait and retry.' : error.message);
+        UnlockInput();
     });
 
 }
-
-async function CheckLogin()
-{
-    LockInput();
-    let key = localStorage.getItem("key");
-    if (key == null)
-    {
-        UnlockInput();
-        return;
-    }
-    let response = await fetch("/api/private/session/check?key=" + key);
-    let data = await response.json();
-    if (data.success)
-    {
-        ChangePage("dashboard-logged");
-    }
-    else
-    {
-        if (data.maintenance)
-        {
-            ChangePage("maintenance");
-            window.maintenanceReason = data.error;
-            return;
-        }
-        UnlockInput();
-        localStorage.removeItem("key");
-    }
-}
+};
 
 function LockInput()
 {
