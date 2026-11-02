@@ -9,9 +9,9 @@ function sanitizePaintStyle(value) {
     return value;
 }
 
-window.onload = async () => {
-    let response = await fetch('/api/public/session/get?target=' + encodeURIComponent(USERNAME));
-    let profileInfo = await response.json();
+async function initializeProfile() {
+    try {
+    let profileInfo = await FetchJSON('/api/public/session/get?target=' + encodeURIComponent(USERNAME));
 
     if (!profileInfo.success) {
         document.querySelector("#_profile_not_found").style.display = "block";
@@ -54,4 +54,15 @@ window.onload = async () => {
         document.querySelector(".profile").classList.add("banned");
     }
     document.querySelector(".profile").style.display = "block";
-};
+    } catch (error) {
+        document.querySelector('#_profile_not_found').style.display = 'block';
+        const message = document.querySelector('#_profile_error_text');
+        message.textContent = 'Could not load this profile. ' + error.message + ' ';
+        const retry = document.createElement('button');
+        retry.className = 'input-button';
+        retry.textContent = 'Try again';
+        retry.onclick = () => { document.querySelector('#_profile_not_found').style.display = 'none'; initializeProfile(); };
+        message.appendChild(retry);
+    }
+}
+initializeProfile();
