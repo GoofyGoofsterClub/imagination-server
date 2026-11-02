@@ -130,7 +130,7 @@ export default class NewDatabaseController {
     }
 
     async findUserByAccessKey(accesskey) {
-        let users = await this.query("SELECT * FROM uwuso.users WHERE access_key = $1 LIMIT 1", [accesskey]);
+        let users = await this.query("SELECT id, username, permissions, banned, superuser FROM uwuso.users WHERE access_key = $1 LIMIT 1", [accesskey]);
         return users.rows[0];
     }
 
