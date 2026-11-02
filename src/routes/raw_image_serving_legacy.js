@@ -1,5 +1,6 @@
 import { Route } from "http/routing";
 import { getFileByFilename } from "utilities/filecache";
+import serveUpload from 'utilities/serveupload';
 
 const DOCUMENT_MIMETYPES = new Set([
     "text/html", "application/xhtml+xml", "text/xhtml", "text/xml", "application/xml",
@@ -25,6 +26,6 @@ export default class RawLegacyImageServing extends Route {
         if (request.query.download === "1" || isDocumentMimetype(file.mimetype))
             reply.header("Content-Disposition", `attachment; filename="${file.filename}"`);
         reply.type(file.mimetype);
-        return reply.sendFile(file.disk_filename, `${__dirname}/../../privateuploads`, { contentType: false });
+        return serveUpload(reply, file.disk_filename);
     }
 }
