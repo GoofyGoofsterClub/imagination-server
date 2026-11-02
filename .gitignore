@@ -10,6 +10,10 @@ lerna-debug.log*
 yarn.lock
 
 lib/*
+public/assets/
+public/asset-manifest.json
+test-results/
+playwright-report/
 privateuploads/*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
