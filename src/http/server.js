@@ -2,6 +2,7 @@ import fastify from "fastify";
 import fastifyMultipart from "@fastify/multipart";
 import fastifyCookie from "@fastify/cookie";
 import fastifyStatic from "@fastify/static";
+import fastifyCompress from "@fastify/compress";
 import eta from "eta";
 import pointOfView from "@fastify/view";
 import { PresetOutput } from "utilities/output";
@@ -30,7 +31,7 @@ export default class HTTPServer {
             this.Output.Log("External logging enabled!");
         else
             this.Output.Log("External logging is not enabled, please set the LOG_WEBHOOK environment variable to enable it.");
-        this.registerPlugins();
+        this.pluginsReady = this.registerPlugins();
         this.registerErrorHandler();
         this.register404();
     }
@@ -129,17 +130,31 @@ export default class HTTPServer {
             "StatisticsCache": null
         };
 
-        await this.server.register(fastifyMultipart, {
+        // Register synchronously before Fastify boots; await readiness only after all routes exist.
+        this.server.register(fastifyCompress, {
+            global: process.env.COMPRESS_RESPONSES !== 'false',
+            encodings: ['br', 'gzip'],
+            brotliOptions: { params: { 1: 4 } },
+            threshold: 1024,
+            customTypes: /^(text\/|application\/(json|javascript|xml))/
+        });
+        this.server.register(fastifyMultipart, {
             limits: {
                 fileSize: Number(process.env.MAX_UPLOAD_SIZE) || 10 * 1024 * 1024 * 1024,
                 files: 1
             }
         });
-        await this.server.register(fastifyCookie);
-        await this.server.register(fastifyStatic, {
+        this.server.register(fastifyCookie);
+        this.server.register(fastifyStatic, {
             root: `${__dirname}/../../public`,
             prefix: "/public/",
-            maxAge: 86400000
+            maxAge: 0,
+            setHeaders(response, filePath) {
+                if (/\/public\/assets\/[^/]+\.[a-f0-9]{16}\.[^/]+$/.test(filePath))
+                    response.header('Cache-Control', 'public, max-age=31536000, immutable');
+                else if (filePath.includes('/public/'))
+                    response.header('Cache-Control', 'public, max-age=0, must-revalidate');
+            }
         });
         const etaEngine = {
             configure: (opts) => eta.configure(opts),
@@ -151,12 +166,14 @@ export default class HTTPServer {
             engine: {
                 eta: etaEngine
             },
-            root: `${__dirname}/../../private`,
+            root: `${__dirname}/../views`,
+            production: process.env.NODE_ENV === 'production',
+            defaultContext: { performanceEnabled: process.env.ENABLE_RUM === 'true' },
             options: { cache: true }
         });
 
         // Load persisted maintenance state (set via /api/private/admin/globals/maintenance/modify)
-        this.db.query(`SELECT value FROM uwuso.settings WHERE key = $1::text`, ["maintenance"])
+        await this.db.query(`SELECT value FROM uwuso.settings WHERE key = $1::text`, ["maintenance"])
             .then((result) => {
                 if (result.rows.length > 0) {
                     const state = JSON.parse(result.rows[0].value);
