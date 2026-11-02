@@ -13,6 +13,7 @@ export default class RedisController {
         const url = /^rediss?:\/\//.test(this.host) ? this.host : `redis://${this.host}`;
         this.redis = createClient({
             url,
+            disableOfflineQueue: true,
             socket: { connectTimeout: 5000, reconnectStrategy: (retries) => Math.min(retries * 500, 5000) }
         });
         this.redis.on("error", (e) => this.Output.Warn(`Redis error: ${e.message}`));

@@ -1,3 +1,5 @@
+import { withDeadline } from "utilities/deadline";
+
 export default class RateLimiter {
     constructor(redis, prefix, limit, windowSeconds) {
         this.redis = redis;
@@ -5,20 +7,21 @@ export default class RateLimiter {
         this.limit = limit;
         this.windowSeconds = windowSeconds;
         this.local = new Map();
+        this.redisRetryAt = 0;
     }
 
     async hit(key) {
-        if (this.redis && this.redis.isReady) {
+        if (this.redis && this.redis.isReady && Date.now() >= this.redisRetryAt) {
             try {
                 const redisKey = `${this.prefix}:${key}`;
-                const [, count, ttl] = await this.redis.multi()
+                const [, count, ttl] = await withDeadline(() => this.redis.multi()
                     .set(redisKey, "0", { EX: this.windowSeconds, NX: true })
                     .incr(redisKey)
                     .ttl(redisKey)
-                    .exec();
+                    .exec(), Number(process.env.REDIS_COMMAND_TIMEOUT_MS) || 500, "Redis rate limit");
                 return { allowed: count <= this.limit, count, retryAfter: Math.max(ttl, 1) };
             }
-            catch (e) { }
+            catch (e) { this.redisRetryAt = Date.now() + 5000; }
         }
 
         const now = Date.now();
