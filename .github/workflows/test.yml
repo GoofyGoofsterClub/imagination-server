@@ -1,0 +1,48 @@
+name: test
+on:
+  push:
+  pull_request:
+
+jobs:
+  performance-regressions:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      postgres:
+        image: postgres:17.6
+        env:
+          POSTGRES_USER: dbuser
+          POSTGRES_PASSWORD: performance-test-only
+          POSTGRES_DB: uwuso
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U dbuser -d uwuso"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: dbuser
+      PGPASSWORD: performance-test-only
+      PGDATABASE: uwuso
+      PERF_TEST_DATABASE_URL: postgresql://dbuser:performance-test-only@127.0.0.1:5432/uwuso
+      PERF_TEST_REDIS_URL: redis://127.0.0.1:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: psql -v ON_ERROR_STOP=1 -f docker-entrypoint-initdb.d/uwu.sql
+      - run: pnpm build
+      - run: pnpm migrate
+      - run: pnpm migrate
+      - run: pnpm test
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:browser
