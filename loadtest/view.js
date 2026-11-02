@@ -30,7 +30,7 @@ export const options = {
     scenarios: {
         open_all: {
             executor: "shared-iterations",
-            vus: 200,
+            vus: Math.min(200, LINKS.length),
             iterations: LINKS.length,
             maxDuration: "5m",
             exec: "openAll",
@@ -54,6 +54,8 @@ export const options = {
         "http_req_duration{phase:open_all}": ["p(95)<2000"],
         "http_req_duration{phase:hot_views}": ["p(95)<500"],
         "http_req_failed{phase:hot_views}": ["rate<0.01"],
+        "http_req_duration{name:link_viewer}": ["p(95)<2000"],
+        "http_req_duration{name:raw_endpoint}": ["p(95)<2000"],
     },
     summaryTrendStats: ["avg", "min", "med", "p(90)", "p(95)", "p(99)", "max"],
 };
@@ -65,13 +67,11 @@ function localUrl(link) {
 function verifyContent(res, item) {
     if (res.status === 404) notFound.add(1);
     const body = res.body ? new Uint8Array(res.body) : new Uint8Array(0);
-    let header = "";
-    for (let i = 0; i < Math.min(80, body.length); i++) header += String.fromCharCode(body[i]);
-    const parts = header.split("|");
+    const signature = [137, 80, 78, 71, 13, 10, 26, 10];
     return check(res, {
         "file 200": (r) => r.status === 200,
         "file size matches": () => body.length === item.size,
-        "file header intact": () => parts[0] === "IMGLT" && Number(parts[4]) === item.size,
+        "file header intact": () => signature.every((value, index) => body[index] === value),
         "content-type matches": (r) => (r.headers["Content-Type"] || "").startsWith(item.mime),
     });
 }
@@ -96,6 +96,10 @@ export function openAll() {
 
 const SMALL = [];
 for (let i = 0; i < LINKS.length; i++) if (LINKS[i].size < 512 * 1024) SMALL.push(i);
+if (!SMALL.length) {
+    delete options.scenarios.hot_views;
+    for (const name of Object.keys(options.thresholds)) if (name.includes('phase:hot_views')) delete options.thresholds[name];
+}
 
 export function hotViews() {
     const item = LINKS[SMALL[Math.floor(Math.random() * SMALL.length)]];

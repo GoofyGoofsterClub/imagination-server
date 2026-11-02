@@ -7,18 +7,8 @@ const BASE_URL = __ENV.BASE_URL || "http://localhost:16732";
 const USERS = JSON.parse(open(__ENV.USERS_FILE || "./users.json")).users;
 const RUN_ID = __ENV.RUN_ID || `${Date.now().toString(36)}`;
 
-const MAX_SIZE = 8 * 1024 * 1024;
-
-const pool = new Uint8Array(MAX_SIZE + 1024 * 1024);
-for (let off = 0; off < pool.length; off += 65536)
-    crypto.getRandomValues(pool.subarray(off, Math.min(off + 65536, pool.length)));
-
-const MIMES = [
-    ["image/png", "png"],
-    ["image/jpeg", "jpg"],
-    ["image/webp", "webp"],
-    ["image/gif", "gif"],
-];
+// Generate once with node scripts/generate-load-fixtures.cjs before running k6.
+const IMAGES = ['small', 'medium', 'large', 'huge'].map(name => new Uint8Array(open(`./fixtures/${name}.png`, 'b')));
 
 const uploadOk = new Rate("upload_ok");
 const uploadBytes = new Counter("upload_bytes");
@@ -26,6 +16,8 @@ const uploadRateLimited = new Counter("upload_429");
 const uploadServerError = new Counter("upload_5xx");
 const uploadDuplicateLink = new Counter("upload_duplicate_link");
 const uploadDurationPerMiB = new Trend("upload_ms_per_mib");
+const successfulUploadDuration = new Trend("successful_upload_duration", true);
+const successfulUploads = new Counter('successful_uploads');
 
 export const options = {
     scenarios: {
@@ -51,10 +43,10 @@ export const options = {
     },
     thresholds: {
         "upload_ok{phase:paced}": ["rate>0.99"],
-        "http_req_duration{phase:paced}": ["p(95)<2000"],
+        "successful_upload_duration{phase:paced}": ["p(95)<2000"],
         upload_5xx: ["count==0"],
-        "upload_ok{phase:stress}": ["rate>=0"],
-        "http_req_duration{phase:stress}": ["p(95)<10000"],
+        "successful_uploads{phase:stress}": ["count>0"],
+        "successful_upload_duration{phase:stress}": ["p(95)<10000"],
     },
     summaryTrendStats: ["avg", "min", "med", "p(90)", "p(95)", "p(99)", "max"],
 };
@@ -64,30 +56,42 @@ if (__ENV.SCENARIO) {
     if (!only) throw new Error(`Unknown SCENARIO ${__ENV.SCENARIO}`);
     delete only.startTime;
     options.scenarios = { [__ENV.SCENARIO]: only };
+    for (const name of Object.keys(options.thresholds)) {
+        if (name.includes('{phase:') && !name.includes(`{phase:${__ENV.SCENARIO}}`)) delete options.thresholds[name];
+    }
 }
 
-function pickSize() {
-    const r = Math.random();
-    if (r < 0.6) return 50 * 1024 + Math.floor(Math.random() * 450 * 1024);
-    if (r < 0.95) return 512 * 1024 + Math.floor(Math.random() * 2.5 * 1024 * 1024);
-    return 5 * 1024 * 1024 + Math.floor(Math.random() * 3 * 1024 * 1024);
-}
-
-function buildFile(size) {
-    const start = Math.floor(Math.random() * (pool.length - size));
-    const buf = pool.slice(start, start + size);
-    const header = `IMGLT|${RUN_ID}|${exec.vu.idInTest}|${exec.vu.iterationInInstance}|${size}|${Date.now()}|`;
-    for (let i = 0; i < header.length; i++) buf[i] = header.charCodeAt(i);
-    return buf;
+function buildFile() {
+    const random = Math.random();
+    const image = IMAGES[random < 0.3 ? 0 : random < 0.6 ? 1 : random < 0.95 ? 2 : 3];
+    // A valid ancillary tEXt chunk makes uploads unique without corrupting image bytes.
+    const text = `loadtest\0IMGLT|${RUN_ID}|${exec.vu.idInTest}|${exec.vu.iterationInInstance}|${Date.now()}|`;
+    const chunk = new Uint8Array(text.length + 12);
+    const view = new DataView(chunk.buffer);
+    view.setUint32(0, text.length);
+    chunk.set([116, 69, 88, 116], 4);
+    for (let i = 0; i < text.length; i++) chunk[i + 8] = text.charCodeAt(i);
+    let crc = 0xffffffff;
+    for (let i = 4; i < chunk.length - 4; i++) {
+        crc ^= chunk[i];
+        for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
+    }
+    view.setUint32(chunk.length - 4, (crc ^ 0xffffffff) >>> 0);
+    const output = new Uint8Array(image.length + chunk.length);
+    output.set(image.subarray(0, 33));
+    output.set(chunk, 33);
+    output.set(image.subarray(33), 33 + chunk.length);
+    return output;
 }
 
 const seenLinks = new Set();
 
 function upload() {
     const user = USERS[exec.scenario.iterationInTest % USERS.length];
-    const size = pickSize();
-    const [mime, ext] = MIMES[Math.floor(Math.random() * MIMES.length)];
-    const file = buildFile(size);
+    const file = buildFile();
+    const size = file.length;
+    const mime = 'image/png';
+    const ext = 'png';
 
     const res = http.post(
         `${BASE_URL}/api/private/uploads/new`,
@@ -114,6 +118,8 @@ function upload() {
         console.warn(`SLOW ${res.timings.duration.toFixed(0)}ms status=${res.status} size=${size} sending=${res.timings.sending.toFixed(0)}ms waiting=${res.timings.waiting.toFixed(0)}ms`);
 
     if (ok) {
+        successfulUploads.add(1);
+        successfulUploadDuration.add(res.timings.duration);
         uploadBytes.add(size);
         uploadDurationPerMiB.add(res.timings.duration / (size / 1048576));
         if (seenLinks.has(link)) uploadDuplicateLink.add(1);
@@ -131,7 +137,9 @@ export function paced() {
 }
 
 export function stress() {
-    upload();
+    const response = upload();
+    // Don't benchmark an artificial retry storm against the rate limiter.
+    if (response.status === 429) sleep(Math.max(1, Number(response.headers['Retry-After']) || 1));
 }
 
 export function handleSummary(data) {
@@ -149,7 +157,7 @@ function textSummary(data) {
         "==== upload test ====",
     ];
     for (const phase of ["paced", "stress"]) {
-        const d = `http_req_duration{phase:${phase}}`;
+        const d = `successful_upload_duration{phase:${phase}}`;
         lines.push(
             `[${phase}] ok=${(v(`upload_ok{phase:${phase}}`, "rate") * 100).toFixed(2)}%` +
             `  p50=${v(d, "med").toFixed(0)}ms p95=${v(d, "p(95)").toFixed(0)}ms p99=${v(d, "p(99)").toFixed(0)}ms max=${v(d, "max").toFixed(0)}ms`,
