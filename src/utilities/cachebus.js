@@ -6,6 +6,7 @@ const origin = crypto.randomUUID();
 const channel = 'imagination:cache-invalidations:v1';
 let publisher = null;
 let subscriber = null;
+let readyListener = null;
 
 export function onInvalidation(topic, listener) {
     if (!listeners.has(topic)) listeners.set(topic, new Set());
@@ -23,7 +24,7 @@ export function startCacheBus(redis) {
     if (!redis) return;
     publisher = redis;
     const connect = async () => {
-        if (subscriber) return;
+        if (subscriber || publisher !== redis) return;
         subscriber = redis.duplicate({ disableOfflineQueue: true });
         subscriber.on('error', () => {}); // TTLs remain the fallback during outages.
         try {
@@ -38,11 +39,14 @@ export function startCacheBus(redis) {
             });
         } catch (_) { }
     };
-    if (redis.isReady) connect();
-    else redis.once('ready', connect);
+    if (redis.isReady) return connect();
+    readyListener = connect;
+    redis.once('ready', readyListener);
 }
 
 export async function stopCacheBus() {
+    if (readyListener) publisher?.removeListener('ready', readyListener);
+    readyListener = null;
     publisher = null;
     if (subscriber) {
         try { await withDeadline(() => subscriber.quit(), 1000, 'Cache subscriber shutdown'); }
