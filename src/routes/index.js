@@ -1,5 +1,6 @@
 import { Route } from "http/routing";
 import { publicHost } from "utilities/links";
+import { assetManifest, defaultTranslations, languages, jsonForScript } from "utilities/assets";
 
 export default class IndexRoute extends Route
 {
@@ -11,7 +12,8 @@ export default class IndexRoute extends Route
     async call(request, reply)
     {
         return reply.viewAsync("index.ejs", {
-            "domain": publicHost(request)
+            "domain": publicHost(request),
+            "bootstrap": jsonForScript({ assets: assetManifest, translations: defaultTranslations, languages })
         });
     }
 }

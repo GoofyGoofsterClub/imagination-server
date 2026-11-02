@@ -1,295 +1,171 @@
-var keystrokes = "";
+var keystrokes = '';
+const pageLoads = new Map();
+const scriptLoads = new Map();
+let navigationId = 0;
+let currentPage = 'welcome';
 
-document.addEventListener('keydown', (e) => {
-    if (document.activeElement.tagName == "INPUT" || document.activeElement.tagName == "TEXTAREA")
-        return;
-
-    if (e.key.length == 1) {
-        keystrokes += e.key;
-    }
-
-    if (keystrokes.length > 10)
-        keystrokes = keystrokes.substring(1);
-
-    if (keystrokes.includes("arab")) {
-        document.querySelector('.anime-girl').src = "/public/img/censored-sagiri.png";
-        keystrokes = "";
-    }
-    if (keystrokes.includes("tv")) {
-        document.querySelector('.anime-girl').src = "/public/img/censored-sagiri2.png";
-    }
-    if (keystrokes.includes("scp")) {
-        document.querySelector('.anime-girl').src = "/public/img/scp-sagiri.png";
+document.addEventListener('keydown', (event) => {
+    if (/INPUT|TEXTAREA/.test(document.activeElement.tagName) || event.key.length !== 1) return;
+    keystrokes = (keystrokes + event.key).slice(-10);
+    const image = document.querySelector('.anime-girl');
+    if (!image) return;
+    for (const [word, filename] of [['arab', 'censored-sagiri.png'], ['tv', 'censored-sagiri2.png'], ['scp', 'scp-sagiri.png']]) {
+        if (keystrokes.includes(word)) {
+            image.removeAttribute('srcset');
+            image.src = AssetUrl('/public/img/' + filename);
+            keystrokes = '';
+        }
     }
 });
 
-window.onload = async () => {
-    // get the text after # in url
-    var url = window.location.href;
-    var urlSplit = url.split('#');
-    var urlHash = urlSplit[urlSplit.length - 1];
-
-    Translatable.setAvailableLanguages(await Translatable.getLanguages());
-
-    let languageStored = localStorage.getItem("language");
-
-    if (languageStored && availableLanguages.find(x => x.code == languageStored)) {
-        Translatable.setLanguage(languageStored);
-        let languageBox = availableLanguages.find(x => x.code == languageStored);
-
-        if (languageBox.rtl)
-            document.body.style.setProperty("direction", "rtl");
-        else
-            document.body.style.setProperty("direction", "initial");
+function showHero(show) {
+    document.documentElement.classList.toggle('inner-page', !show);
+    const image = document.querySelector('.anime-girl');
+    if (show && image && !image.hasAttribute('src')) {
+        image.srcset = image.dataset.srcset;
+        image.sizes = '903px';
+        image.src = image.dataset.src;
     }
-    else {
-        Translatable.setLanguage(availableLanguages[0]);
-        localStorage.setItem("language", availableLanguages[0].code);
+}
+
+function requestedPage() {
+    const value = location.hash.slice(1) || 'welcome';
+    return /^[a-z-]+$/.test(value) ? value : 'welcome';
+}
+
+function resolvePage(page) {
+    return page === 'dashboard' && localStorage.getItem('key') ? 'dashboard-logged' : page;
+}
+
+function loadPage(page) {
+    if (!pageLoads.has(page)) {
+        const pending = AppFetch('/public/popovers/' + page + '.html').then(response => {
+            if (!response.ok) throw new Error('Could not load this page. Please try again.');
+            return response.text();
+        }).catch(error => { pageLoads.delete(page); throw error; });
+        pageLoads.set(page, pending);
     }
+    return pageLoads.get(page);
+}
 
-    Translatable.setGlobalTranslationObject(await Translatable.getTranslationObject(CurrentLanguage));
-
-    defaultLanguage = await Translatable.getTranslationObject(availableLanguages[0].code);
-
-    let languageSelector = document.querySelector("#__main_language_select");
-
-    for (var l = 0; l < availableLanguages.length; l++) {
-        let newLanguageOption = document.createElement("option");
-        newLanguageOption.id = availableLanguages[l].code;
-        newLanguageOption.innerText = availableLanguages[l].name;
-
-        if (newLanguageOption.id == CurrentLanguage)
-            newLanguageOption.selected = true;
-
-        languageSelector.appendChild(newLanguageOption);
+function loadScript(src) {
+    if (!scriptLoads.has(src)) {
+        const pending = new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            const timeout = setTimeout(() => { script.remove(); reject(new Error('Page script timed out. Please retry.')); }, 10000);
+            script.src = src;
+            script.onload = () => { clearTimeout(timeout); resolve(); };
+            script.onerror = () => { clearTimeout(timeout); script.remove(); reject(new Error('Could not load page controls. Please retry.')); };
+            document.head.appendChild(script);
+        }).catch(error => { scriptLoads.delete(src); throw error; });
+        scriptLoads.set(src, pending);
     }
+    return scriptLoads.get(src);
+}
 
-    languageSelector.onchange = async function (event) {
-        let languageId = event.target.options[event.target.selectedIndex].id;
-        Translatable.setLanguage(languageId);
-        localStorage.setItem("language", languageId);
-        Translatable.setGlobalTranslationObject(await Translatable.getTranslationObject(CurrentLanguage));
-        Translatable.translateGroup(Translatable.find("body"), CurrentLanguage);
-
-        let languageBox = availableLanguages.find(x => x.code == CurrentLanguage);
-
-        if (languageBox.rtl)
-            document.body.style.setProperty("direction", "rtl");
-        else
-            document.body.style.setProperty("direction", "initial");
-    }
-
-    // if there is no hash, set it to home
-    if (urlHash == url) urlHash = 'welcome';
-
-    // get the element with the hash
-    var target = document.querySelector(`.nav-el[data-content="${urlHash}"]`);
-    if (target == null) target = document.querySelector(`.nav-el[data-content="welcome"]`);
-    target.classList.add("current");
-
-    var initialPage = target.getAttribute('data-content');
-    if (initialPage == "dashboard") {
-        let key = localStorage.getItem("key");
-        if (key != null) {
-            let response = await fetch("/api/private/session/check?key=" + encodeURIComponent(key));
-            let data = await response.json();
-            if (data.success)
-                initialPage = "dashboard-logged";
-            else if (data.maintenance) {
-                window.maintenanceReason = data.error;
-                initialPage = "maintenance";
-            }
-            else
-                localStorage.removeItem("key");
-        }
-    }
-
-    var newData = await fetch('/public/popovers/' + initialPage + '.html');
-    var newDataText = await newData.text();
-    await ApplyPageContent(newDataText);
-
-    Translatable.translateGroup(Translatable.find("body"), CurrentLanguage);
-
-    anime({
-        targets: 'body>.content',
-        opacity: 1,
-        translateY: 0,
-        duration: 200,
-        easing: 'linear'
-    });
-
-    anime({
-        targets: 'body',
-        opacity: 1,
-        duration: 600,
-        easing: 'linear'
-    });
-    if (urlHash != 'welcome') {
-        anime({
-            targets: '.big-showoff',
-            height: 0,
-            duration: 200,
-            easing: 'linear',
-            complete: () => {
-                document.querySelector('.big-showoff').style.display = 'none';
-            }
-        });
-    }
-    anime({
-        targets: '.anime-girl',
-        keyframes: [
-            {
-                rotate: 20,
-                scale: 0.95
-            },
-            {
-                rotate: -20,
-                scale: 1.05
-            },
-            {
-                rotate: 0,
-                scale: 1
-            }
-        ],
-        delay: 0,
-        easing: 'cubicBezier(.5, .05, .1, .3)',
-        loop: true,
-        duration: 10000
-    });
-    anime({
-        targets: '.stagger-header',
-        translateY: 0,
-        opacity: 1,
-        easing: 'linear',
-        duration: 500,
-        delay: anime.stagger(600)
-    });
-    anime({
-        targets: '.nav-el',
-        opacity: 1,
-        easing: 'linear',
-        duration: 200,
-        delay: anime.stagger(100)
-    });
-
-    var navButtons = document.querySelectorAll('.nav-el[data-content]');
-    for (var i = 0; i < navButtons.length; i++) {
-        navButtons[i].addEventListener('click', async (e) => {
-            e.preventDefault();
-            var target = e.target;
-            if (target.tagName == 'SPAN') target = target.parentElement;
-            if (target.classList.contains('current')) return;
-
-            document.querySelector('.nav-el.current').classList.remove('current');
-            target.classList.add('current');
-
-            await ChangePage(target.getAttribute('data-content'));
-        });
-    }
-};
+async function ApplyPageContent(html, page, id) {
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    const scripts = [...template.content.querySelectorAll('preload-script')].map(element => element.getAttribute('src'));
+    template.content.querySelectorAll('preload-script').forEach(element => element.remove());
+    if (id !== navigationId) return;
+    document.querySelector('body > .content').replaceChildren(template.content);
+    Translatable.translateGroup(Translatable.find('body'));
+    await Promise.all(scripts.map(loadScript));
+    if (id !== navigationId) return;
+    await window.PageInitializers[page]?.();
+}
 
 async function ChangePage(page) {
-    let newData = await fetch('/public/popovers/' + page + '.html');
+    const id = ++navigationId;
+    page = resolvePage(page);
+    currentPage = page;
+    const navPage = page === 'dashboard-logged' ? 'dashboard' : page;
+    document.querySelectorAll('.nav-el[data-content]').forEach(element => element.classList.toggle('current', element.dataset.content === navPage));
+    showHero(page === 'welcome');
+    const content = document.querySelector('body > .content');
+    content.setAttribute('aria-busy', 'true');
+    try {
+        const html = await loadPage(page);
+        if (id !== navigationId) return;
+        await ApplyPageContent(html, page, id);
+        if (page === 'welcome') GetUploadCount();
+    } catch (error) {
+        if (id !== navigationId) return;
+        const message = document.createElement('p');
+        message.textContent = error.message;
+        const retry = document.createElement('button');
+        retry.className = 'input-button';
+        retry.textContent = 'Try again';
+        retry.onclick = () => ChangePage(page);
+        content.replaceChildren(message, retry);
+    } finally {
+        if (id === navigationId) content.removeAttribute('aria-busy');
+    }
+}
 
-    anime({
-        targets: 'body>.content',
-        opacity: 0,
-        translateY: 100,
-        duration: 200,
-        easing: 'linear'
+function SetContent(html) { document.querySelector('body > .content').innerHTML = html; }
+
+async function GetUploadCount() {
+    try {
+        const data = await FetchJSON('/api/public/uploads/count');
+        const uploads = document.getElementById('__upload_counter');
+        const views = document.getElementById('__views_counter');
+        if (uploads) uploads.textContent = Number(data.uploads ?? data.count).toLocaleString();
+        if (views) views.textContent = Number(data.views ?? 0).toLocaleString();
+    } catch (error) { console.warn('Statistics unavailable.', error); }
+}
+
+async function initializeLanguage() {
+    Translatable.setAvailableLanguages(window.__APP.languages);
+    defaultLanguage = window.__APP.translations;
+    globalTranslationObject = defaultLanguage;
+    const stored = localStorage.getItem('language');
+    Translatable.setLanguage(stored || 'en');
+    const selector = document.querySelector('#__main_language_select');
+    selector.replaceChildren(...availableLanguages.map(language => new Option(language.name, language.code)));
+    selector.value = CurrentLanguage;
+    const apply = async () => {
+        try {
+            Translatable.setGlobalTranslationObject(await Translatable.getTranslationObject(CurrentLanguage));
+        } catch (error) {
+            Translatable.setGlobalTranslationObject(defaultLanguage);
+            console.warn('Using default translations.', error);
+        }
+        document.documentElement.lang = CurrentLanguage === 'jp' ? 'ja' : CurrentLanguage === 'sa' ? 'ar' : CurrentLanguage;
+        document.body.style.direction = availableLanguages.find(language => language.code === CurrentLanguage)?.rtl ? 'rtl' : 'initial';
+        Translatable.translateGroup(Translatable.find('body'));
+    };
+    selector.onchange = () => {
+        Translatable.setLanguage(selector.value);
+        localStorage.setItem('language', CurrentLanguage);
+        apply();
+    };
+    await apply();
+}
+
+function initialize() {
+    const page = requestedPage();
+    showHero(page === 'welcome');
+    document.querySelectorAll('.nav-el[data-content]').forEach(element => {
+        element.classList.toggle('current', element.dataset.content === page);
+        element.onclick = event => {
+            event.preventDefault();
+            history.replaceState(null, '', '#' + element.dataset.content);
+            ChangePage(element.dataset.content);
+        };
     });
-
-    let navButton = document.querySelector(`.nav-el[data-content="${page}"]`);
-    if (navButton == null) navButton = null;
-
-    if (navButton != null) {
-        document.querySelector('.nav-el.current').classList.remove('current');
-        navButton.classList.add('current');
-    }
-
-    if (page == "welcome") {
-        document.querySelector('.big-showoff').style.display = 'block';
-        anime({
-            targets: '.big-showoff',
-            height: '600px',
-            duration: 200,
-            easing: 'linear'
-        });
-    }
-    else {
-        anime({
-            targets: '.big-showoff',
-            height: 0,
-            duration: 200,
-            easing: 'linear',
-            onComplete: () => {
-                document.querySelector('.big-showoff').style.display = 'none';
-            }
-        });
-    }
-
-    if (newData.status != 200) {
-        SetContent("<h1>Not Found</h1><p>No such page exists. Contact the server administrator if you think this is a mistake.</p>");
-    }
-    else {
-        newData = await newData.text();
-        await ApplyPageContent(newData);
-    }
-
-    var els = document.querySelectorAll('body>.content>*');
-    for (var i = 0; i < els.length; i++) {
-        els[i].style.opacity = 0;
-        els[i].style.transform = "translateY(-30px)";
-    }
-    document.querySelector('body>.content').getElementsByClassName.transform = "translateY(-100px)";
-
-    anime({
-        targets: 'body>.content',
-        opacity: 1,
-        translateY: 0,
-        duration: 200,
-        easing: 'linear'
-    });
-    anime({
-        targets: 'body>.content>*',
-        opacity: 1,
-        translateY: 0,
-        duration: 100,
-        easing: 'linear',
-        delay: anime.stagger(120)
-    });
-    Translatable.translateGroup(Translatable.find("body"), CurrentLanguage);
+    initializeLanguage().catch(console.warn);
+    if (page === 'welcome') GetUploadCount();
+    else ChangePage(page);
+    window.addEventListener('hashchange', () => ChangePage(requestedPage()));
+    // Analytics never gates visible content or controls.
+    window.addEventListener('load', () => {
+        const script = document.createElement('script');
+        script.src = 'https://a.uwu.so/script.js';
+        script.dataset.websiteId = '04d5eaa1-173a-4e93-ac90-c1a523f759e9';
+        document.head.appendChild(script);
+    }, { once: true });
 }
 
-function ApplyPageContent(html) {
-    document.querySelector('body>.content').innerHTML = html;
-    let parser = new DOMParser();
-    let doc = parser.parseFromString(html, 'text/html');
-    let scripts = doc.getElementsByTagName('preload-script');
-    let pending = [];
-    for (var i = 0; i < scripts.length; i++) {
-        let src = scripts[i].getAttribute('src');
-        if (document.querySelector(`script[src="${src}"]`) != null)
-            document.querySelector(`script[src="${src}"]`).remove();
-        let scriptElement = document.createElement('script');
-        pending.push(new Promise((resolve) => {
-            scriptElement.onload = resolve;
-            scriptElement.onerror = resolve;
-        }));
-        scriptElement.src = src;
-        document.head.appendChild(scriptElement);
-    }
-    return Promise.all(pending);
-}
-
-function SetContent(content) {
-    document.querySelector('body>.content').innerHTML = content;
-}
-
-async function GetUploadCount(event) {
-    const response = await fetch('/api/public/uploads/count');
-    const data = await response.json();
-    document.getElementById("__upload_counter").innerText = Number(data.uploads ?? data.count).toLocaleString();
-    document.getElementById("__views_counter").innerText = Number(data.views ?? 0).toLocaleString();
-    event.remove();
-}
+initialize();

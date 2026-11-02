@@ -5,10 +5,17 @@ var defaultLanguage = {};
 
 class Translatable
 {
+    static translations = new Map();
     static async getTranslationObject(language)
     {
-        let languageObject = await fetch(`/public/translations/${language}.json`);
-        return await languageObject.json();
+        if (language === 'en' && window.__APP?.translations) return window.__APP.translations;
+        if (!this.translations.has(language)) {
+            this.translations.set(language, FetchJSON(`/public/translations/${language}.json`).catch(error => {
+                this.translations.delete(language);
+                throw error;
+            }));
+        }
+        return this.translations.get(language);
     }
 
     static async getLanguages()
