@@ -1,0 +1,54 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const { gunzipSync } = require('node:zlib');
+const { fixtureServer } = require('./fixtures.cjs');
+const manifest = require('../public/asset-manifest.json');
+
+test('serves visible initial content, fingerprinted assets, compression and private API headers', async t => {
+    const { server } = await fixtureServer();
+    t.after(() => server.stop());
+    const home = await server.server.inject('/');
+    assert.equal(home.statusCode, 200, home.body);
+    assert.match(home.body, /Welcome!/);
+    assert.match(home.body, /window.__APP/);
+    assert.doesNotMatch(home.body, /style="opacity: 0"/);
+    assert.doesNotMatch(home.body, /<script src="\/public\/js/);
+    const asset = await server.server.inject({ url: manifest['/public/js/new.js'], headers: { 'accept-encoding': 'gzip' } });
+    assert.equal(asset.statusCode, 200);
+    assert.match(asset.headers['cache-control'], /immutable/);
+    assert.equal(asset.headers['content-encoding'], 'gzip');
+    assert.match(gunzipSync(asset.rawPayload).toString(), /initialize/);
+    const css = await server.server.inject(manifest['/public/css/new.css']);
+    assert.match(css.body, /@font-face/);
+    assert.doesNotMatch(css.body, /fonts.googleapis.com/);
+    const invalid = await server.server.inject('/api/private/session/info?key=invalid');
+    assert.equal(invalid.statusCode, 401);
+    assert.equal(invalid.headers['cache-control'], 'no-store');
+    const valid = await server.server.inject({ url: '/api/private/session/info', headers: { authorization: 'fixture-key' } });
+    assert.equal(valid.json().data.displayName, 'fixture');
+    const list = await server.server.inject('/api/private/session/uploads?key=fixture-key&pagination=cursor');
+    assert.equal(list.json().data.length, 2);
+    assert.equal(list.json().pagination, 'cursor');
+    const badCursor = await server.server.inject('/api/private/session/uploads?key=fixture-key&pagination=cursor&cursor=not-valid');
+    assert.equal(badCursor.statusCode, 400);
+    const media = await server.server.inject({ url: '/unknown-file', headers: { 'user-agent': 'Mozilla/5.0', accept: 'text/html' } });
+    assert.match(media.headers.vary, /Accept/);
+    assert.match(media.headers.vary, /User-Agent/);
+    assert.match(media.headers['cache-control'], /private/);
+});
+
+test('optional browser metrics are validated and never publicly readable', async t => {
+    const previous = process.env.ENABLE_RUM;
+    process.env.ENABLE_RUM = 'true';
+    const { server } = await fixtureServer();
+    t.after(async () => { await server.stop(); if (previous === undefined) delete process.env.ENABLE_RUM; else process.env.ENABLE_RUM = previous; });
+    const home = await server.server.inject('/');
+    assert.match(home.body, /web-vitals\.[a-f0-9]+\.js/);
+    const good = await server.server.inject({ method: 'POST', url: '/api/public/performance', payload: { name: 'LCP', pageType: 'home', value: 1200 } });
+    assert.equal(good.statusCode, 204);
+    const bad = await server.server.inject({ method: 'POST', url: '/api/public/performance', payload: { name: 'LCP', pageType: '/private-name', value: -1 } });
+    assert.equal(bad.statusCode, 400);
+    const read = await server.server.inject('/api/private/admin/metrics?key=fixture-key');
+    assert.equal(read.statusCode, 403);
+    assert.equal(read.headers['cache-control'], 'no-store');
+});
