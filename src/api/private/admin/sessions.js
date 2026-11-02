@@ -1,6 +1,7 @@
 import { APIRoute } from "http/routing";
 import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 import hash from "utilities/hash";
+import { cachedCount, decodeCursor, encodeCursor } from 'utilities/pagination';
 
 /*--includedoc
 
@@ -41,6 +42,7 @@ export default class AdminGetSessionsAPIRoute extends APIRoute {
 
 
         const page = Math.max(1, parseInt(request.query.page, 10) || 1);
+        if (page > 1000000) return { success: false, error: 'Page is too large. Use cursor pagination.' };
         const pageSize = 50;
         const search = (request.query.search || "").trim();
         const offset = (page - 1) * pageSize;
@@ -50,23 +52,32 @@ export default class AdminGetSessionsAPIRoute extends APIRoute {
             filters.push(`%${search}%`);
             whereClause = `WHERE username ILIKE $1::text`;
         }
+        const countFilters = [...filters];
+        const countClause = whereClause;
+        const cursorMode = request.query.pagination === 'cursor';
+        let cursor;
+        try { cursor = decodeCursor(request.query.cursor); }
+        catch (error) { reply.code(400); return { success: false, error: error.message }; }
+        if (cursorMode && cursor) {
+            filters.push(...cursor);
+            whereClause += `${whereClause ? ' AND' : 'WHERE'} (username, id) > ($${filters.length - 1}::text, $${filters.length}::bigint)`;
+        }
         const limitIndex = filters.length + 1;
         const offsetIndex = filters.length + 2;
 
-        const result = await server.db.query(`
-            SELECT id, username, permissions, banned, superuser,
-                   COUNT(*) OVER() AS total_count
+        const [result, total] = await Promise.all([server.db.query(`
+            SELECT id, username, permissions, banned, superuser
             FROM uwuso.users
             ${whereClause}
-            ORDER BY username ASC
-            LIMIT $${limitIndex}::integer OFFSET $${offsetIndex}::integer`,
-            [...filters, pageSize, offset]);
+            ORDER BY username ASC, id ASC
+            LIMIT $${limitIndex}::integer ${cursorMode ? '' : `OFFSET $${offsetIndex}::integer`}`,
+            cursorMode ? [...filters, pageSize + 1] : [...filters, pageSize, offset]),
+            cachedCount(JSON.stringify(['users', search]), async () => Number((await server.db.query(
+                `SELECT COUNT(id) AS count FROM uwuso.users ${countClause}`, countFilters)).rows[0].count))]);
+        const hasNext = cursorMode ? result.rows.length > pageSize : page * pageSize < total;
+        const last = result.rows[Math.min(result.rows.length, pageSize) - 1];
 
-        const total = result.rows.length > 0 ? Number(result.rows[0].total_count) : Number((await server.db.query(
-            `SELECT COUNT(id) AS count FROM uwuso.users ${whereClause}`, search ? [filters[0]] : []
-        )).rows[0].count);
-
-        const users = result.rows.map((session) => ({
+        const users = result.rows.slice(0, pageSize).map((session) => ({
             id: session.id,
             username: session.username,
             banned: session.banned,
@@ -78,6 +89,9 @@ export default class AdminGetSessionsAPIRoute extends APIRoute {
         return {
             "success": true,
             "data": users,
+            "pagination": cursorMode ? 'cursor' : 'offset',
+            "hasNext": hasNext,
+            "nextCursor": hasNext && last ? encodeCursor([last.username, String(last.id)]) : null,
             "page": page,
             "pageSize": pageSize,
             "total": total,
