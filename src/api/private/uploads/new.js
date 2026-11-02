@@ -161,45 +161,51 @@ export default class UploadsNewAPIRoute extends APIRoute {
         let isNewUpload;
 
         try {
-            const existing = await server.db.query(`SELECT filename FROM uwuso.uploads WHERE uploader_id = $1::bigint AND filehash = $2::text LIMIT 1`, [user.id, datahash]);
+            await server.db.transaction(async client => {
+                // Serialize only matching content for the same uploader, across replicas.
+                // This also works on legacy databases that contain duplicate hashes and
+                // therefore cannot have a unique (uploader_id, filehash) index.
+                await client.query(`SELECT pg_advisory_xact_lock(hashtextextended($1::text, 0))`, [`${user.id}:${datahash}`]);
+                const existing = await client.query(`SELECT filename FROM uwuso.uploads WHERE uploader_id = $1::bigint AND filehash = $2::text ORDER BY id ASC LIMIT 1`, [user.id, datahash]);
 
-            if (existing.rows.length > 0) {
-                filename = existing.rows[0].filename;
-                isNewUpload = false;
-            }
-            else {
-                const nextId = await server.db.query(`SELECT nextval(pg_get_serial_sequence('uwuso.uploads', 'id')) AS id`);
-                const uploadId = nextId.rows[0].id;
-                filename = EncodeUploadID(uploadId, server.db.fileIdKey);
-
-                const inserted = await server.db.query(`INSERT INTO uwuso.uploads (id, uploader_id, filename, disk_filename,
-                    mimetype, filehash, views, filesize, service_upload, upload_time, upload_domain)
-                    OVERRIDING SYSTEM VALUE VALUES (
-                    $11::bigint, $1::bigint, $2::text, $3::text,
-                    $4::text, $5::text, $6::integer,
-                    $7::bigint, $8::boolean,
-                    $9::bigint, $10::text)
-                    ON CONFLICT DO NOTHING
-                    RETURNING filename`, [
-                    user.id,
-                    filename,
-                    diskFilename,
-                    data.mimetype,
-                    datahash,
-                    0,
-                    fileSizeInBytes,
-                    isServiceUpload,
-                    Math.floor(+Date.now() / 1000),
-                    publicHost(request),
-                    uploadId
-                ]);
-
-                isNewUpload = inserted.rows.length > 0;
-                if (!isNewUpload) {
-                    const winner = await server.db.query(`SELECT filename FROM uwuso.uploads WHERE uploader_id = $1::bigint AND filehash = $2::text LIMIT 1`, [user.id, datahash]);
-                    filename = winner.rows[0].filename;
+                if (existing.rows.length > 0) {
+                    filename = existing.rows[0].filename;
+                    isNewUpload = false;
                 }
-            }
+                else {
+                    const nextId = await client.query(`SELECT nextval(pg_get_serial_sequence('uwuso.uploads', 'id')) AS id`);
+                    const uploadId = nextId.rows[0].id;
+                    filename = EncodeUploadID(uploadId, server.db.fileIdKey);
+
+                    const inserted = await client.query(`INSERT INTO uwuso.uploads (id, uploader_id, filename, disk_filename,
+                        mimetype, filehash, views, filesize, service_upload, upload_time, upload_domain)
+                        OVERRIDING SYSTEM VALUE VALUES (
+                        $11::bigint, $1::bigint, $2::text, $3::text,
+                        $4::text, $5::text, $6::integer,
+                        $7::bigint, $8::boolean,
+                        $9::bigint, $10::text)
+                        ON CONFLICT DO NOTHING
+                        RETURNING filename`, [
+                        user.id,
+                        filename,
+                        diskFilename,
+                        data.mimetype,
+                        datahash,
+                        0,
+                        fileSizeInBytes,
+                        isServiceUpload,
+                        Math.floor(+Date.now() / 1000),
+                        publicHost(request),
+                        uploadId
+                    ]);
+
+                    isNewUpload = inserted.rows.length > 0;
+                    if (!isNewUpload) {
+                        const winner = await client.query(`SELECT filename FROM uwuso.uploads WHERE uploader_id = $1::bigint AND filehash = $2::text ORDER BY id ASC LIMIT 1`, [user.id, datahash]);
+                        filename = winner.rows[0].filename;
+                    }
+                }
+            });
         }
         catch (e) {
             await fs.unlink(diskPath).catch(() => {});

@@ -48,11 +48,23 @@ export async function migrate({ connectionString } = {}) {
             } catch (error) { await client.query('ROLLBACK'); throw error; }
         }
         if (!applied.has('002-online-indexes')) {
-            for (const [name, definition, unique] of indexes) {
+            const createIndex = async (name, definition, unique = false) => {
                 const existing = await client.query('SELECT indisvalid FROM pg_index WHERE indexrelid = to_regclass($1)', [`uwuso.${name}`]);
                 if (existing.rows[0] && !existing.rows[0].indisvalid)
                     await client.query(`DROP INDEX CONCURRENTLY IF EXISTS uwuso.${name}`);
                 await client.query(`CREATE ${unique ? 'UNIQUE ' : ''}INDEX CONCURRENTLY IF NOT EXISTS ${name} ON ${definition}`);
+            };
+            for (const [name, definition, unique] of indexes) {
+                try {
+                    await createIndex(name, definition, unique);
+                } catch (error) {
+                    if (name !== 'uploads_uploader_filehash_uindex' || error.code !== '23505') throw error;
+                    // Old installations allowed duplicate hashes. Keep every existing
+                    // record/link/file; new uploads use a transaction-scoped hash lock.
+                    await client.query(`DROP INDEX CONCURRENTLY IF EXISTS uwuso.uploads_uploader_filehash_uindex`);
+                    await createIndex('idx_uploads_uploader_filehash', 'uwuso.uploads (uploader_id, filehash)');
+                    console.warn('Existing duplicate upload hashes found; preserved all uploads and installed a non-unique lookup index.');
+                }
             }
             // Only remove known redundant indexes after the replacement is valid.
             for (const name of ['idx_uploads_filename', 'idx_users_username', 'idx_uploads_uploader_time'])
