@@ -83,8 +83,13 @@ test('isolated PostgreSQL: quotas, stable cursors, raw ranges and previews', { s
         if (previousAccel === undefined) delete process.env.MEDIA_ACCEL_PREFIX;
         else process.env.MEDIA_ACCEL_PREFIX = previousAccel;
     }
-    const viewer = await server.server.inject({ url: '/' + prefix + '0', headers: { 'user-agent': 'Mozilla/5.0', accept: 'text/html' } });
-    assert.equal(viewer.statusCode, 200, viewer.body);
-    assert.match(viewer.body, /width="1600" height="1200"/);
-    assert.match(viewer.body, /data-src="\/raw\//);
+    // Even when previews exist, both viewer URL formats must display the original.
+    for (const url of ['/' + prefix + '0', '/fixture/' + prefix + '0']) {
+        const viewer = await server.server.inject({ url, headers: { 'user-agent': 'Mozilla/5.0', accept: 'text/html' } });
+        assert.equal(viewer.statusCode, 200, viewer.body);
+        const rawUrl = '/raw' + url;
+        assert.ok(viewer.body.includes(`class="file-viewer-media" src="${rawUrl}"`));
+        assert.ok(viewer.body.includes(`data-src="${rawUrl}"`));
+        assert.doesNotMatch(viewer.body, /\/preview\/|srcset=/);
+    }
 });

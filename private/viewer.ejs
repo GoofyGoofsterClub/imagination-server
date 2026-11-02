@@ -64,9 +64,7 @@
   <% } %>
   <main class="file-viewer-content" id="file-viewer-content">
     <% if (it.kind === "image") { %>
-      <img class="file-viewer-media" src="<%= it.previewUrl ? it.previewUrl + '/1280' : it.rawUrl %>"
-        <% if (it.preview) { %> width="<%= it.preview.width %>" height="<%= it.preview.height %>"
-          srcset="<%= it.previewUrl %>/640 640w, <%= it.previewUrl %>/1280 1280w" sizes="calc(100vw - 48px)" <% } %>
+      <img class="file-viewer-media" src="<%= it.rawUrl %>"
         decoding="async" fetchpriority="high" alt="<%= it.filename %>" />
     <% } else if (it.kind === "video") { %>
       <video class="file-viewer-media" src="<%= it.rawUrl %>" preload="metadata" controls playsinline></video>

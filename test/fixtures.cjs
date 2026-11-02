@@ -14,6 +14,8 @@ async function fixtureServer() {
         findUserByDisplayName: async name => name === 'fixture' ? user : null,
         query: async (sql, params) => {
             calls.push({ sql, params });
+            if (/WHERE filename = \$1/.test(sql) && params?.[0] === 'fixture-image.png')
+                return { rows: [{ id: '99', uploader_id: '1', filename: 'fixture-image.png', disk_filename: 'fixture-original', mimetype: 'image/png' }] };
             if (/COALESCE\(SUM\(views\)/.test(sql)) return { rows: [{ uploads: '2', views: '10' }] };
             if (/COUNT\(\*\)/.test(sql)) return { rows: [{ count: '2' }] };
             if (/FROM uwuso.uploads/.test(sql) && /ORDER BY/.test(sql)) return { rows: [

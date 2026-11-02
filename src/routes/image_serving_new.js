@@ -3,7 +3,6 @@ import { getAnnouncement } from "utilities/announcement";
 import { isBrowserPageRequest } from "utilities/browser";
 import { publicBaseUrl } from "utilities/links";
 import { getFileByFilename } from "utilities/filecache";
-import { getPreview } from 'utilities/previews';
 import serveUpload from 'utilities/serveupload';
 
 export default class NewImageServing extends Route {
@@ -43,17 +42,12 @@ export default class NewImageServing extends Route {
 
         const rawUrl = `/raw/${encodeURIComponent(file.filename)}`;
         const embedUrl = `${publicBaseUrl(request)}${rawUrl}`;
-        const [announcement, preview] = await Promise.all([
-            getAnnouncement(server.db).catch(() => null),
-            kind === 'image' ? getPreview(file) : null
-        ]);
+        const announcement = await getAnnouncement(server.db).catch(() => null);
         return reply.viewAsync("viewer.ejs", {
             filename: file.filename,
             mimetype: file.mimetype,
             kind,
             rawUrl,
-            preview,
-            previewUrl: preview ? `/preview/${encodeURIComponent(file.filename)}` : null,
             downloadUrl: `${rawUrl}?download=1`,
             embedUrl,
             announcement
