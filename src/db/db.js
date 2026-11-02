@@ -20,85 +20,9 @@ export default class NewDatabaseController {
         this.Output.Log("Database initialized.");
     }
 
-    async ensureIndexes() {
-        try {
-            await this.pool.query("CREATE INDEX IF NOT EXISTS idx_uploads_filename ON uwuso.uploads (filename)");
-            await this.pool.query("CREATE INDEX IF NOT EXISTS idx_uploads_filehash ON uwuso.uploads (filehash)");
-            await this.pool.query("CREATE INDEX IF NOT EXISTS idx_uploads_uploader_time ON uwuso.uploads (uploader_id, upload_time DESC)");
-            await this.pool.query("CREATE INDEX IF NOT EXISTS idx_users_access_key ON uwuso.users (access_key)");
-            await this.pool.query("CREATE INDEX IF NOT EXISTS idx_users_username ON uwuso.users (username)");
-            await this.pool.query("CREATE INDEX IF NOT EXISTS idx_invites_hash ON uwuso.invites (hash)");
-            await this.pool.query("CREATE INDEX IF NOT EXISTS idx_services_access_key ON uwuso.services (access_key)");
-            await this.pool.query(`
-                CREATE TABLE IF NOT EXISTS uwuso.service_announcements (
-                    id integer PRIMARY KEY,
-                    message text NOT NULL,
-                    severity text NOT NULL,
-                    button_text text,
-                    button_url text,
-                    image_url text,
-                    updated_at timestamptz NOT NULL DEFAULT NOW()
-                )`);
-            await this.pool.query("ALTER TABLE uwuso.service_announcements ADD COLUMN IF NOT EXISTS image_url text");
-            await this.pool.query("ALTER TABLE uwuso.uploads ALTER COLUMN uploader_id DROP NOT NULL");
-        } catch (e) {
-            this.Output.Warn(`Could not ensure indexes: ${e}`);
-        }
-
-        try {
-            await this.pool.query("CREATE UNIQUE INDEX IF NOT EXISTS uploads_uploader_filehash_uindex ON uwuso.uploads (uploader_id, filehash)");
-        } catch (e) {
-            this.Output.Warn(`Could not create unique upload hash index (duplicate uploads already exist?): ${e}`);
-        }
-
-        try {
-            await this.pool.query("CREATE UNIQUE INDEX IF NOT EXISTS uploads_filename_uindex ON uwuso.uploads (filename)");
-        } catch (e) {
-            this.Output.Warn(`Could not create unique upload filename index (duplicate filenames already exist?): ${e}`);
-        }
-    async transaction(callback) {
-        const client = await this.pool.connect();
-        try {
-            await client.query('BEGIN');
-            const result = await callback(client);
-            await client.query('COMMIT');
-            return result;
-        } catch (error) {
-            try { await client.query('ROLLBACK'); } catch (_) { }
-            throw error;
-        } finally { client.release(); }
-    }
-
-
-        try {
-            await this.pool.query("CREATE UNIQUE INDEX IF NOT EXISTS users_username_uindex ON uwuso.users (username)");
-        } catch (e) {
-            this.Output.Warn(`Could not create unique username index (duplicate usernames already exist?): ${e}`);
-        }
-        try {
-            for (const [table, column, constraint, deleteRule] of [
-                ["uploads", "uploader_id", "uploader_id_fk", "SET NULL"],
-                ["invites", "inviter", "inviter_fk", "CASCADE"],
-                ["services", "owner", "owner_fk", "CASCADE"],
-                ["events", "event_caller", "event_caller_fk", "CASCADE"]
-            ]) {
-                await this.pool.query(`ALTER TABLE uwuso.${table} DROP CONSTRAINT IF EXISTS ${constraint}`);
-                await this.pool.query(`ALTER TABLE uwuso.${table} ADD CONSTRAINT ${constraint} FOREIGN KEY (${column}) REFERENCES uwuso.users (id) ON DELETE ${deleteRule} ON UPDATE NO ACTION`);
-            }
-        } catch (e) {
-            this.Output.Warn(`Could not update foreign key constraints: ${e}`);
-        }
-    }
-
     async loadFileIdKey() {
-        await this.pool.query(`
-            CREATE TABLE IF NOT EXISTS uwuso.settings (
-                key text PRIMARY KEY,
-                value text NOT NULL
-            )`);
-        await this.pool.query(`INSERT INTO uwuso.settings (key, value) VALUES ('file_id_key', $1::text) ON CONFLICT (key) DO NOTHING`,
-            [crypto.randomBytes(32).toString("hex")]);
         const result = await this.pool.query(`SELECT value FROM uwuso.settings WHERE key = 'file_id_key'`);
+        if (!result.rows.length) throw new Error('Database migration required: run pnpm migrate before starting the server.');
         this.fileIdKey = Buffer.from(result.rows[0].value, "hex");
     }
 
@@ -130,6 +54,19 @@ export default class NewDatabaseController {
     async getAmountOfUsers() {
         let users = await this.query("SELECT COUNT(id) AS count FROM uwuso.users");
         return users.rows[0].count;
+    }
+
+    async transaction(callback) {
+        const client = await this.pool.connect();
+        try {
+            await client.query('BEGIN');
+            const result = await callback(client);
+            await client.query('COMMIT');
+            return result;
+        } catch (error) {
+            try { await client.query('ROLLBACK'); } catch (_) { }
+            throw error;
+        } finally { client.release(); }
     }
 
     async doesUserExistByAccessKey(accesskey) {

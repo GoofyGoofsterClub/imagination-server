@@ -29,7 +29,6 @@ const run = async () => {
             ).connect();
 
             ndb = await new NewDatabaseController();
-            await ndb.ensureIndexes();
             await ndb.loadFileIdKey();
 
             Output.Log("Connected to the database!");
@@ -39,6 +38,9 @@ const run = async () => {
             Output.Error("sys", `An error occurred while connecting to database: ${e}`);
             // Release the partially-established connections so retries do not
             // exhaust the databases' connection slots
+            await ndb.query(`SELECT version FROM uwuso.schema_migrations WHERE version = '002-online-indexes'`).then(result => {
+                if (!result.rows.length) throw new Error('Run pnpm migrate before starting the server.');
+            });
             try { if (db && db.client) await db.client.close(); } catch (_) { }
             try { if (ndb) await ndb.pool.end(); } catch (_) { }
             db = null;

@@ -78,8 +78,8 @@ export default class UploadsNewAPIRoute extends APIRoute {
         const quota = Number(process.env.USER_STORAGE_QUOTA) || 0;
         let usedStorage = 0;
         if (quota > 0) {
-            const usage = await server.db.query(`SELECT COALESCE(SUM(filesize), 0)::bigint AS used FROM uwuso.uploads WHERE uploader_id = $1::bigint`, [user.id]);
-            usedStorage = Number(usage.rows[0].used);
+            const usage = await server.db.query(`SELECT used_bytes AS used FROM uwuso.storage_usage WHERE uploader_id = $1::bigint`, [user.id]);
+            usedStorage = Number(usage.rows[0]?.used || 0);
             if (usedStorage >= quota) {
                 reply.status(413);
                 return reply.send({
@@ -202,6 +202,10 @@ export default class UploadsNewAPIRoute extends APIRoute {
             await fs.unlink(diskPath).catch(() => {});
             throw e;
         }
+            if (e.constraint === 'storage_quota_exceeded') {
+                reply.code(413);
+                return { success: false, error: 'Storage quota exceeded.' };
+            }
 
         if (!isNewUpload)
             await fs.unlink(diskPath).catch(() => {});
