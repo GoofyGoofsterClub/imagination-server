@@ -72,6 +72,7 @@ async function initializeLoggedDashboard() {
         await document.getElementById("__dashboard_logged_web_upload_hidden_selector").click();
     }
     document.getElementById("__dashboard_logged_web_upload_hidden_selector").onchange = async function () {
+        try {
         let file = document.getElementById("__dashboard_logged_web_upload_hidden_selector").files[0];
         if (file == undefined || file == null) {
             document.getElementById("__dashboard_logged_web_upload_error").innerText = "Please select a file.";
@@ -88,6 +89,7 @@ async function initializeLoggedDashboard() {
         let response = new Promise((resolve, reject) => {
             let xhr = new XMLHttpRequest();
             xhr.open("POST", "/api/private/uploads/new");
+            xhr.timeout = 120000;
             xhr.setRequestHeader("Authorization", key);
             xhr.upload.onprogress = function (e) {
                 if (e.lengthComputable) {
@@ -101,6 +103,7 @@ async function initializeLoggedDashboard() {
             xhr.onerror = function () {
                 reject(xhr.statusText);
             }
+            xhr.ontimeout = function () { reject(new Error('Upload timed out. Please retry.')); };
             xhr.send(formData);
         });
 
@@ -117,6 +120,14 @@ async function initializeLoggedDashboard() {
         document.getElementById("__dashboard_logged_web_upload_error").style.display = "block";
         document.getElementById("__dashboard_logged_web_upload_error").classList.remove("error-text");
         selectText('link-selector0');
+        } catch (error) {
+            const message = document.getElementById('__dashboard_logged_web_upload_error');
+            if (message) {
+                message.textContent = error.message || 'Upload failed. Please retry.';
+                message.style.display = 'block';
+                message.classList.add('error-text');
+            }
+        }
     }
 
     document.getElementById("__dashboard_logged_delete_all").onclick = async function () {
@@ -687,16 +698,20 @@ async function DownloadSharex() {
 }
 
 async function GetUsers() {
+    try {
+    const requestId = window.dashboardUsersRequestId = (window.dashboardUsersRequestId || 0) + 1;
     const page = window.dashboardUsersPage || 1;
     const search = document.getElementById("__dashboard_logged_users_search").value.trim();
     const key = localStorage.getItem("key");
     const cursor = window.dashboardUsersCursors?.[page - 1] || '';
     const response = await AppFetch(`/api/private/admin/sessions?key=${encodeURIComponent(key)}&page=${page}&pagination=cursor&cursor=${encodeURIComponent(cursor)}&search=${encodeURIComponent(search)}`);
     const data = await response.json();
-    if (!data.success) return;
+    if (requestId !== window.dashboardUsersRequestId) return;
+    if (!data.success) throw new Error(data.error || 'Could not load users.');
 
     window.dashboardUsersPage = data.page;
     const table = document.getElementById("__dashboard_logged_users_table");
+    if (!table) return;
     while (table.rows.length > 1) table.deleteRow(1);
     data.data.forEach((user, index) => {
         const row = table.insertRow();
@@ -728,6 +743,18 @@ async function GetUsers() {
         actions.innerText = user.superuser ? "Protected" : "";
     });
     updatePagination("users", data);
+    } catch (error) { showListError('users', error); }
+}
+
+function showListError(type, error) {
+    const label = document.getElementById(`__dashboard_logged_${type}_pagination`);
+    if (!label) return;
+    label.textContent = (error.message || 'Could not load results.') + ' ';
+    const retry = document.createElement('button');
+    retry.className = 'input-button';
+    retry.textContent = 'Try again';
+    retry.onclick = () => type === 'users' ? GetUsers() : GetUploads();
+    label.appendChild(retry);
 }
 
 async function modifyUserPermission(user, field, button) {
@@ -812,6 +839,8 @@ function updatePagination(type, data) {
 }
 
 async function GetUploads() {
+    try {
+    const requestId = window.dashboardUploadsRequestId = (window.dashboardUploadsRequestId || 0) + 1;
     const page = window.dashboardUploadsPage || 1;
     const params = new URLSearchParams({
         key: localStorage.getItem("key"),
@@ -827,9 +856,11 @@ async function GetUploads() {
     if (to) params.set("to", Math.floor(new Date(to).getTime() / 1000));
     const response = await AppFetch(`/api/private/session/uploads?${params}`);
     const data = await response.json();
+    if (requestId !== window.dashboardUploadsRequestId) return;
     const table = document.getElementById("__dashboard_logged_uploads_table");
+    if (!table) return;
     while (table.rows.length > 1) table.deleteRow(1);
-    if (!data.success) return;
+    if (!data.success) throw new Error(data.error || 'Could not load uploads.');
     window.dashboardUploadsPage = data.page;
     document.getElementById("__dashboard_logged_uploads_count").innerText = data.total;
     data.data.forEach((upload, index) => {
@@ -845,6 +876,7 @@ async function GetUploads() {
         action.appendChild(button);
     });
     updatePagination("uploads", data);
+    } catch (error) { showListError('uploads', error); }
 }
 
 function setupDashboardFilters() {
