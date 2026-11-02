@@ -9,6 +9,7 @@ import { Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import { clearListCounts } from 'utilities/pagination';
 import { enqueuePreview } from 'utilities/previews';
+import { invalidateFileByFilename } from 'utilities/filecache';
 
 /*--includedoc
 
@@ -202,18 +203,19 @@ export default class UploadsNewAPIRoute extends APIRoute {
         }
         catch (e) {
             await fs.unlink(diskPath).catch(() => {});
-            throw e;
-        }
             if (e.constraint === 'storage_quota_exceeded') {
                 reply.code(413);
                 return { success: false, error: 'Storage quota exceeded.' };
             }
+            throw e;
+        }
 
         if (!isNewUpload)
             await fs.unlink(diskPath).catch(() => {});
 
         if (isNewUpload) {
             clearListCounts();
+            invalidateFileByFilename(filename);
             enqueuePreview({ disk_filename: diskFilename, mimetype: data.mimetype });
 
             if (!isServiceUpload)
