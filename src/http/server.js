@@ -171,7 +171,7 @@ export default class HTTPServer {
             renderAsync: (file, data, config) => eta.renderFileAsync(file, data, config)
         };
 
-        await this.server.register(pointOfView, {
+        this.server.register(pointOfView, {
             engine: {
                 eta: etaEngine
             },
