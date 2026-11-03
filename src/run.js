@@ -8,7 +8,6 @@ import NewDatabaseController from "db/db";
 import RedisController from "db/redis";
 import ViewCounter from "utilities/viewcounter";
 import { getStatistics } from 'utilities/statistics';
-import { stopPreviews } from 'utilities/previews';
 import { startCacheBus, stopCacheBus } from 'utilities/cachebus';
 import { migrate } from './migrate';
 
@@ -116,7 +115,6 @@ async function gracefulShutdown(signal, exitCode = 0) {
     Output.Log("sys", `Received ${signal}, shutting down...`);
     clearInterval(statisticsTimer);
     await httpServer?.stop().catch(() => {});
-    await stopPreviews();
     await viewCounter?.stop().catch(() => {});
     await stopCacheBus();
     await redisConnection?.quit().catch(() => {});

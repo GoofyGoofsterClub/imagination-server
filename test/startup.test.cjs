@@ -122,11 +122,11 @@ for (const legacyDuplicates of [false, true]) test(`startup initializes automati
         await db.loadFileIdKey();
         server = new HTTPServer(null, db, null, { add() {} });
         await HTTPRouting.RegisterRoutes(server);
-        const upload = bytes => server.server.inject({
+        const upload = (bytes, mimetype = 'application/octet-stream') => server.server.inject({
             method: 'POST', url: '/api/private/uploads/new',
             headers: { authorization: 'fixture-upload-key', 'content-type': 'multipart/form-data; boundary=fixture-boundary' },
             payload: Buffer.concat([
-                Buffer.from('--fixture-boundary\r\nContent-Disposition: form-data; name="file"; filename="fixture.bin"\r\nContent-Type: application/octet-stream\r\n\r\n'),
+                Buffer.from(`--fixture-boundary\r\nContent-Disposition: form-data; name="file"; filename="fixture.bin"\r\nContent-Type: ${mimetype}\r\n\r\n`),
                 bytes, Buffer.from('\r\n--fixture-boundary--\r\n')
             ])
         });
@@ -143,5 +143,13 @@ for (const legacyDuplicates of [false, true]) test(`startup initializes automati
         const newHash = crypto.createHash('sha256').update(fresh).digest('hex');
         assert.equal((await database.query('SELECT COUNT(*) AS count FROM uwuso.uploads WHERE filehash=$1', [newHash])).rows[0].count, '1');
         assert.equal((await database.query('SELECT COUNT(*) AS count FROM uwuso.uploads WHERE filehash=$1', [fileHash])).rows[0].count, '2');
+        const image = await require('sharp')({ create: { width: 64, height: 64, channels: 3, background: '#7799aa' } }).png().toBuffer();
+        const imageResponse = await upload(image, 'image/png');
+        assert.equal(imageResponse.statusCode, 200, imageResponse.body);
+        const imageName = new URL(imageResponse.json().data.link).pathname.slice(1);
+        const stored = (await database.query('SELECT disk_filename FROM uwuso.uploads WHERE filename=$1', [imageName])).rows[0].disk_filename;
+        const storedFiles = await fs.readdir(path.resolve(__dirname, '../privateuploads'));
+        assert.deepEqual(storedFiles.filter(filename => filename === stored || filename.startsWith(stored + '.preview')), [stored]);
+        assert.deepEqual(await fs.readFile(path.resolve(__dirname, '../privateuploads', stored)), image);
     }
 });

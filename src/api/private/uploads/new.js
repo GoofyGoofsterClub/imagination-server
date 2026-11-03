@@ -8,7 +8,6 @@ import { promises as fs, createWriteStream } from 'fs';
 import { Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import { clearListCounts } from 'utilities/pagination';
-import { enqueuePreview } from 'utilities/previews';
 import { invalidateFileByFilename } from 'utilities/filecache';
 
 /*--includedoc
@@ -222,7 +221,6 @@ export default class UploadsNewAPIRoute extends APIRoute {
         if (isNewUpload) {
             clearListCounts();
             invalidateFileByFilename(filename);
-            enqueuePreview({ disk_filename: diskFilename, mimetype: data.mimetype });
 
             if (!isServiceUpload)
                 await server.db.query(`UPDATE uwuso.users SET uploads = uploads + 1 WHERE id = $1::bigint`, [user.id]);

@@ -8,7 +8,6 @@
     "start": "node ./lib/run.js",
     "dev": "pnpm build && node ./lib/run.js",
     "migrate": "node ./lib/migrate.js",
-    "previews:backfill": "node ./lib/backfill-previews.js",
     "test": "pnpm build && node --test test/*.test.cjs",
     "test:browser": "playwright test"
   },

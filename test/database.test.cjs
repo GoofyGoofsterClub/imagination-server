@@ -10,7 +10,7 @@ const HTTPRouting = require('../lib/http/routing').default;
 const hash = require('../lib/utilities/hash').default;
 const { clearListCounts } = require('../lib/utilities/pagination');
 const { invalidateAllFiles } = require('../lib/utilities/filecache');
-const { generatePreview, getPreview, deletePreviewFiles } = require('../lib/utilities/previews');
+const { getPreview, deletePreviewFiles } = require('../lib/utilities/previews');
 const sharp = require('sharp');
 const { migrate } = require('../lib/migrate');
 
@@ -65,7 +65,10 @@ test('isolated PostgreSQL: quotas, stable cursors, raw ranges and previews', { s
     await fs.mkdir(path.resolve(__dirname, '../privateuploads'), { recursive: true });
     await fs.writeFile(path.resolve(__dirname, '../privateuploads', diskFilename), image);
     const file = { disk_filename: diskFilename, mimetype: 'image/png' };
-    assert.equal(await generatePreview(file), true);
+    // Simulate previews left by an older deployment; production no longer generates them.
+    for (const width of [640, 1280]) await sharp(image).resize({ width }).webp().toFile(
+        path.resolve(__dirname, '../privateuploads', diskFilename + `.preview-${width}.webp`));
+    await fs.writeFile(path.resolve(__dirname, '../privateuploads', diskFilename + '.preview.json'), JSON.stringify({ width: 1600, height: 1200 }));
     assert.deepEqual(await getPreview(file), { width: 1600, height: 1200 });
     const preview = await server.server.inject(`/preview/${prefix}0/640`);
     assert.equal(preview.statusCode, 200);
