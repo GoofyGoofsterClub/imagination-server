@@ -22,6 +22,64 @@
   <% } %>
   <link rel="icon" type="image/webp" href="/public/img/favicon.webp" />
   <link rel="stylesheet" href="/public/css/new.css" />
+<% if (it.kind === "image" || it.kind === "video" ) { %>
+  <meta property="og:title" content="uwu.so" />
+<meta property="og:description" content="An uploaded file" />
+<meta property="og:image" content="<%= it.rawUrl %>" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#f67cbd" />
+
+<script id="discord:component-embed" type="application/json">
+{
+  "component": {
+    "type": 17,
+    "accent_color": 16153789,
+    "components": [
+      {
+        "type": 10,
+        "content": "[uwu.so](https://uwu.so/)\n-# <%= it.filename %>"
+      },
+      {
+        "type": 14,
+        "spacing": 1
+      },
+      {
+        "type": 12,
+        "items": [
+          {
+            "media": {
+              "url": "<%= it.rawUrl %>"
+            },
+            "description": "Uploaded file"
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "components": [
+          {
+            "type": 2,
+            "style": 5,
+            "url": "<%= it.rawUrl %>",
+            "label": "Open"
+          },
+          {
+            "type": 2,
+            "style": 5,
+            "url": "<%= it.downloadUrl %>",
+            "label": "Download",
+            "emoji": {
+              "name": "📁"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+</script>
+<% } %>
   <style>
     body.file-viewer { min-height: 100vh; display: flex; flex-direction: column; opacity: 1 !important; }
     .file-viewer-header { display: flex; align-items: center; justify-content: flex-end; gap: 16px; padding: 16px 24px; }
