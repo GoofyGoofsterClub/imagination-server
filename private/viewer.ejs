@@ -100,8 +100,11 @@
     .image-lightbox-hint { position: fixed; bottom: 16px; left: 16px; opacity: .7; }
     .file-viewer-media { display: block; flex: 0 1 auto; min-width: 0; min-height: 0; width: auto; height: auto; max-width: calc(100vw - 48px); max-height: calc(100vh - 180px); object-fit: contain; border-radius: 8px; }
     .file-viewer-content > img { cursor: zoom-in; }
-    video.file-viewer-media, audio.file-viewer-media { width: min(100%, 1000px); }
-    .file-viewer-frame { width: min(100%, 1200px); height: 75vh; border: 0; background: white; }
+    video.file-viewer-media { width: min(100%, 1000px); }
+    .file-viewer-audio { display: block; flex: none; width: min(100%, 1000px); height: 54px; }
+    .file-viewer-frame { display: block; flex: none; width: min(100%, 1200px); height: 75vh; min-height: 320px; border: 0; background: white; color: #2E272E; }
+    .file-viewer-frame p, .file-viewer-frame a { color: inherit; }
+    .file-viewer-frame a { text-decoration: underline; }
     .file-viewer-download { margin-top: 16px; }
     .file-viewer-footer { padding: 16px 24px; text-align: center; }
     @media (max-width: 600px) { .file-viewer-header { padding: 12px 16px; } .file-viewer-content { padding: 16px; } }
@@ -127,9 +130,12 @@
     <% } else if (it.kind === "video") { %>
       <video class="file-viewer-media" src="<%= it.rawUrl %>" preload="metadata" controls playsinline></video>
     <% } else if (it.kind === "audio") { %>
-      <audio class="file-viewer-media" src="<%= it.rawUrl %>" preload="metadata" controls></audio>
+      <audio class="file-viewer-audio" src="<%= it.rawUrl %>" preload="metadata" controls aria-label="<%= it.filename %>"></audio>
     <% } else if (it.kind === "pdf") { %>
-      <iframe class="file-viewer-frame" src="<%= it.rawUrl %>" title="<%= it.filename %>"></iframe>
+      <object class="file-viewer-frame" data="<%= it.rawUrl %>" type="application/pdf" aria-label="<%= it.filename %>">
+        <p>This browser cannot display an embedded PDF. <a href="<%= it.rawUrl %>" target="_blank" rel="noopener noreferrer">Open PDF</a> or download it below.</p>
+      </object>
+      <a class="input-button" href="<%= it.rawUrl %>" target="_blank" rel="noopener noreferrer">Open PDF</a>
     <% } else { %>
       <section class="dashboard-block">
         <h1><%= it.filename %></h1>
