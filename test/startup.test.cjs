@@ -100,7 +100,9 @@ for (const legacyDuplicates of [false, true]) test(`startup initializes automati
     for (const process of starters) process.child.kill('SIGTERM');
     for (const process of starters) assert.equal((await process.exited).code, 0);
     const before = (await database.query('SELECT version, applied_at FROM uwuso.schema_migrations ORDER BY version')).rows;
-    assert.deepEqual(before.map(row => row.version), ['001-runtime-schema', '002-online-indexes']);
+    const extensionColumns = (await database.query(`SELECT data_type, is_nullable FROM information_schema.columns
+        WHERE table_schema = 'uwuso' AND table_name = 'uploads' AND column_name = 'file_extension'`)).rows;
+    assert.deepEqual(extensionColumns, [{ data_type: 'text', is_nullable: 'YES' }]);
     assert.equal((await database.query(`SELECT indisvalid FROM pg_index WHERE indexrelid='uwuso.users_username_uindex'::regclass`)).rows[0].indisvalid, true);
     assert.equal((await database.query(`SELECT value FROM uwuso.settings WHERE key='file_id_key'`)).rows[0].value, key);
     const repeated = launch(env);
