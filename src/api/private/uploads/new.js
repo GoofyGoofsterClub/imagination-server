@@ -9,6 +9,7 @@ import { Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import { clearListCounts } from 'utilities/pagination';
 import { invalidateFileByFilename } from 'utilities/filecache';
+import path from 'path';
 
 /*--includedoc
 
@@ -156,6 +157,8 @@ export default class UploadsNewAPIRoute extends APIRoute {
         }
 
         const datahash = fileHash.digest('hex');
+        const uploadedExtension = path.extname(data.filename || '');
+        const fileExtension = /^\.[a-z0-9_+-]+$/i.test(uploadedExtension) ? uploadedExtension : null;
         let filename;
         let isNewUpload;
 
@@ -177,12 +180,12 @@ export default class UploadsNewAPIRoute extends APIRoute {
                     filename = EncodeUploadID(uploadId, server.db.fileIdKey);
 
                     const inserted = await client.query(`INSERT INTO uwuso.uploads (id, uploader_id, filename, disk_filename,
-                        mimetype, filehash, views, filesize, service_upload, upload_time, upload_domain)
+                        mimetype, filehash, views, filesize, service_upload, upload_time, upload_domain, file_extension)
                         OVERRIDING SYSTEM VALUE VALUES (
                         $11::bigint, $1::bigint, $2::text, $3::text,
                         $4::text, $5::text, $6::integer,
                         $7::bigint, $8::boolean,
-                        $9::bigint, $10::text)
+                        $9::bigint, $10::text, $12::text)
                         ON CONFLICT DO NOTHING
                         RETURNING filename`, [
                         user.id,
@@ -195,7 +198,8 @@ export default class UploadsNewAPIRoute extends APIRoute {
                         isServiceUpload,
                         Math.floor(+Date.now() / 1000),
                         publicHost(request),
-                        uploadId
+                        uploadId,
+                        fileExtension
                     ]);
 
                     isNewUpload = inserted.rows.length > 0;
@@ -203,6 +207,10 @@ export default class UploadsNewAPIRoute extends APIRoute {
                         const winner = await client.query(`SELECT filename FROM uwuso.uploads WHERE uploader_id = $1::bigint AND filehash = $2::text ORDER BY id ASC LIMIT 1`, [user.id, datahash]);
                         filename = winner.rows[0].filename;
                     }
+                }
+                if (!isNewUpload && fileExtension) {
+                    await client.query(`UPDATE uwuso.uploads SET file_extension = $1::text
+                        WHERE filename = $2::text AND file_extension IS NULL`, [fileExtension, filename]);
                 }
             });
         }
@@ -217,10 +225,10 @@ export default class UploadsNewAPIRoute extends APIRoute {
 
         if (!isNewUpload)
             await fs.unlink(diskPath).catch(() => {});
+        invalidateFileByFilename(filename);
 
         if (isNewUpload) {
             clearListCounts();
-            invalidateFileByFilename(filename);
 
             if (!isServiceUpload)
                 await server.db.query(`UPDATE uwuso.users SET uploads = uploads + 1 WHERE id = $1::bigint`, [user.id]);

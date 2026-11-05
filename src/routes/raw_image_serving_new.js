@@ -1,6 +1,7 @@
 import { Route } from "http/routing";
 import { getFileByFilename } from "utilities/filecache";
 import serveUpload from 'utilities/serveupload';
+import downloadFilename from 'utilities/downloadfilename';
 
 const DOCUMENT_MIMETYPES = new Set([
     "text/html", "application/xhtml+xml", "text/xhtml", "text/xml", "application/xml",
@@ -24,7 +25,7 @@ export default class RawNewImageServing extends Route {
 
         reply.header("X-Content-Type-Options", "nosniff");
         if (request.query.download === "1" || isDocumentMimetype(file.mimetype))
-            reply.header("Content-Disposition", `attachment; filename="${file.filename}"`);
+            reply.header("Content-Disposition", `attachment; filename="${downloadFilename(file)}"`);
         reply.type(file.mimetype);
         return serveUpload(reply, file.disk_filename);
     }

@@ -77,6 +77,14 @@ export async function migrate({ connectionString } = {}) {
             await client.query('CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_users_username_trgm ON uwuso.users USING gin (username gin_trgm_ops)');
             await client.query(`INSERT INTO uwuso.schema_migrations (version) VALUES ('003-substring-search')`);
         }
+        if (!applied.has('004-upload-extensions')) {
+            await client.query('BEGIN');
+            try {
+                await client.query('ALTER TABLE uwuso.uploads ADD COLUMN IF NOT EXISTS file_extension text');
+                await client.query(`INSERT INTO uwuso.schema_migrations (version) VALUES ('004-upload-extensions')`);
+                await client.query('COMMIT');
+            } catch (error) { await client.query('ROLLBACK'); throw error; }
+        }
         console.log('Database migrations complete.');
     } catch (error) {
         if (connected) error.migrationFailure = true;

@@ -4,6 +4,7 @@ import { isBrowserPageRequest } from "utilities/browser";
 import { publicBaseUrl } from "utilities/links";
 import { getFileByFilename } from "utilities/filecache";
 import serveUpload from 'utilities/serveupload';
+import downloadFilename from 'utilities/downloadfilename';
 
 export default class NewImageServing extends Route {
     constructor() {
@@ -35,7 +36,7 @@ export default class NewImageServing extends Route {
                     : file.mimetype === "application/pdf" ? "pdf" : "other";
         if (!isBrowserPageRequest(request) || kind === "other") {
             if (kind === "other")
-                reply.header("Content-Disposition", `attachment; filename="${file.filename}"`);
+                reply.header("Content-Disposition", `attachment; filename="${downloadFilename(file)}"`);
             reply.type(file.mimetype);
             return serveUpload(reply, file.disk_filename);
         }
