@@ -79,7 +79,7 @@ export default class DatabaseController
 
     async updateDocument(collection, query, update, upsert = false)
     {
-        let _collection = await this.getCollection(collection, query);
+        let _collection = await this.getCollection(collection);
         let result = await _collection.updateOne(query, update, { upsert: upsert });
         return result;
     }
