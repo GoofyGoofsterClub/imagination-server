@@ -1,1 +1,1 @@
-export default function clamp (num, min, max) { return Math.min(Math.max(num, min), max); }
+export default function clamp (num, min, max) { if (!Number.isFinite(num) || !Number.isFinite(min) || !Number.isFinite(max)) return num; return Math.min(Math.max(num, min), max); }
