@@ -1,6 +1,8 @@
 import { isValidDomain } from "utilities/experiments";
 
 export function publicProtocol(request) {
+    if (process.env.PUBLIC_PROTOCOL)
+        return process.env.PUBLIC_PROTOCOL;
     const forwarded = request.headers["x-forwarded-proto"];
     if (forwarded) {
         const proto = forwarded.split(",")[0].trim().toLowerCase();
