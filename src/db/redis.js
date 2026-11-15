@@ -17,7 +17,13 @@ export default class RedisController {
             socket: { connectTimeout: 5000, reconnectStrategy: (retries) => Math.min(retries * 500, 5000) }
         });
         this.redis.on("error", (e) => this.Output.Warn(`Redis error: ${e.message}`));
-        await this.redis.connect();
+        try {
+            await this.redis.connect();
+        } catch (error) {
+            this.redis = null;
+            this.Output.Error(`Failed to connect to Redis at ${this.host}: ${error.message}`);
+            throw error;
+        }
         this.Output.Log("Redis connected.");
     }
 
