@@ -33,6 +33,10 @@ export default class AsyncCache {
             entry = { hasValue: false, expiresAt: 0 };
             this.entries.set(key, entry);
             while (this.entries.size > this.max) this.entries.delete(this.entries.keys().next().value);
+        } else {
+            // Refresh the LRU position so a reloaded entry is evicted last.
+            this.entries.delete(key);
+            this.entries.set(key, entry);
         }
         const pending = Promise.resolve().then(load).then((value) => {
             if (this.entries.get(key) === entry) {
