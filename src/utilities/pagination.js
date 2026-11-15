@@ -6,7 +6,11 @@ onInvalidation('list-counts', () => counts.clear());
 
 export function cachedCount(key, load) { return counts.get(key, load); }
 export function clearListCounts() { invalidate('list-counts'); }
-export function encodeCursor(values) { return Buffer.from(JSON.stringify(values)).toString('base64url'); }
+export function encodeCursor(values) {
+    if (!Array.isArray(values) || values.length !== 2 || values.some(item => typeof item !== 'string'))
+        throw new Error('Invalid cursor values.');
+    return Buffer.from(JSON.stringify(values)).toString('base64url');
+}
 export function decodeCursor(value) {
     if (!value) return null;
     if (typeof value !== 'string' || value.length > 1000) throw new Error('Invalid cursor.');
