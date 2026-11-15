@@ -17,15 +17,15 @@ export async function removeUploadFiles(upload) {
 export async function deleteUserUploads(db, userId) {
     let deleted = 0;
     while (true) {
-        const result = await db.query(`DELETE FROM uwuso.uploads WHERE id IN (
-            SELECT id FROM uwuso.uploads WHERE uploader_id = $1::bigint ORDER BY id LIMIT 100
-        ) RETURNING filename, disk_filename`, [userId]);
+        const result = await db.query(`SELECT id, filename, disk_filename FROM uwuso.uploads
+            WHERE uploader_id = $1::bigint ORDER BY id LIMIT 100`, [userId]);
         if (!result.rows.length) break;
-        // Bounded filesystem fan-out, rather than thousands of unlinks at once.
+        // Unlink the files before deleting the rows so a failed request can be retried.
         let index = 0;
         await Promise.all(Array.from({ length: Math.min(4, result.rows.length) }, async () => {
             while (index < result.rows.length) await removeUploadFiles(result.rows[index++]);
         }));
+        await db.query(`DELETE FROM uwuso.uploads WHERE id = ANY($1::bigint[])`, [result.rows.map(row => row.id)]);
         deleted += result.rows.length;
         clearListCounts();
         invalidateStatistics();
