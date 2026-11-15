@@ -33,6 +33,9 @@ function uploadIdRound(key, round, value)
 
 export function EncodeUploadID(id, key)
 {
+    if (id === null || id === undefined)
+        throw new TypeError("Upload id must not be null or undefined.");
+
     if (BigInt(id) < BigInt(0) || BigInt(id) >> (UPLOAD_ID_HALF_BITS * BigInt(2)) !== BigInt(0))
         throw new RangeError(`Upload id ${id} is outside of the encodable range.`);
 
