@@ -38,7 +38,8 @@ export async function getRandomCustomUrlExperiment(db) {
             const parsed = JSON.parse(result.rows[0].value);
             value = { enabled: !!parsed.enabled, domains: normalizeDomains(parsed.domains) ?? [] };
         }
-        catch (e) {
+        catch (error) {
+            console.error(`Invalid random custom URL experiment value for ${RANDOM_CUSTOM_URL_KEY}`, error);
             value = { enabled: false, domains: [] };
         }
     }
