@@ -17,14 +17,16 @@ export default class DatabaseController
     async connect()
     {
         if (this.username === null || this.password === null)
-        {
             this.client = new MongoClient(`mongodb://${this.host}:${this.port}`);
+        else
+            this.client = new MongoClient(`mongodb://${encodeURIComponent(this.username)}:${encodeURIComponent(this.password)}@${this.host}:${this.port}`);
+        try {
             await this.client.connect();
-            this.database = this.client.db(this.databaseName);
-            return this;
+        } catch (error) {
+            await this.client.close().catch(() => {});
+            this.client = null;
+            throw new Error(`Failed to connect to MongoDB at ${this.host}:${this.port}: ${error.message}`);
         }
-        this.client = new MongoClient(`mongodb://${encodeURIComponent(this.username)}:${encodeURIComponent(this.password)}@${this.host}:${this.port}`);
-        await this.client.connect();
         this.database = this.client.db(this.databaseName);
 
         return this;
