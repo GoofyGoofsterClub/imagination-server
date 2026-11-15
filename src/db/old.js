@@ -59,7 +59,7 @@ export default class DatabaseController
     async checkDocumentExists(collection, query)
     {
         let result = await this.database.collection(collection).findOne(query, { projection: { _id: 1 } });
-        return result != null;
+        return result !== null;
     }
 
     async insertDocument(collection, document)
