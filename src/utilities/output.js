@@ -1,12 +1,15 @@
 import 'colors';
+import pkg from '../../package.json';
 import { logs, SeverityNumber } from '@opentelemetry/api-logs';
 import { LoggerProvider, BatchLogRecordProcessor } from '@opentelemetry/sdk-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
+const SERVICE_NAME = 'imagination-server';
+const DEFAULT_SERVICE_VERSION = pkg.version;
 const OTLP_ENDPOINT = process.env.OTLP_LOG_ENDPOINT;
-const OTLP_SERVICE_NAME = process.env.OTLP_SERVICE_NAME || 'imagination-server';
+const OTLP_SERVICE_NAME = process.env.OTLP_SERVICE_NAME || SERVICE_NAME;
 
 let logger = null;
 let loggerProvider = null;
@@ -16,7 +19,7 @@ if (OTLP_ENDPOINT) {
     try {
         const resource = resourceFromAttributes({
             [SemanticResourceAttributes.SERVICE_NAME]: OTLP_SERVICE_NAME,
-            [SemanticResourceAttributes.SERVICE_VERSION]: process.env.npm_package_version || '1.0.0'
+            [SemanticResourceAttributes.SERVICE_VERSION]: process.env.npm_package_version || DEFAULT_SERVICE_VERSION
         });
 
         const exporter = new OTLPLogExporter({
