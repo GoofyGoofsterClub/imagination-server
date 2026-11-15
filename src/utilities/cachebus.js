@@ -13,8 +13,14 @@ export function onInvalidation(topic, listener) {
     listeners.get(topic).add(listener);
 }
 
+function dispatch(topic, payload) {
+    for (const listener of listeners.get(topic) || []) {
+        try { listener(payload); } catch (_) { }
+    }
+}
+
 export function invalidate(topic, payload = '') {
-    for (const listener of listeners.get(topic) || []) listener(payload);
+    dispatch(topic, payload);
     if (publisher?.isReady) {
         withDeadline(() => publisher.publish(channel, JSON.stringify({ origin, topic, payload })), 500, 'Cache invalidation').catch(() => {});
     }
@@ -34,7 +40,7 @@ export function startCacheBus(redis) {
                 try {
                     const event = JSON.parse(message);
                     if (event.origin === origin || typeof event.payload !== 'string' || event.payload.length > 256) return;
-                    for (const listener of listeners.get(event.topic) || []) listener(event.payload);
+                    dispatch(event.topic, event.payload);
                 } catch (_) { }
             });
         } catch (_) { }
