@@ -23,7 +23,7 @@ export default class DatabaseController
             this.database = this.client.db(this.databaseName);
             return this;
         }
-        this.client = new MongoClient(`mongodb://${this.username}:${this.password}@${this.host}:${this.port}`);
+        this.client = new MongoClient(`mongodb://${encodeURIComponent(this.username)}:${encodeURIComponent(this.password)}@${this.host}:${this.port}`);
         await this.client.connect();
         this.database = this.client.db(this.databaseName);
 
