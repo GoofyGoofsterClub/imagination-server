@@ -18,7 +18,7 @@ export function publicHost(request) {
             const allowed = process.env.PUBLIC_HOSTS;
             if (allowed) {
                 const host = normalized.split(":")[0];
-                const list = allowed.split(",").map((entry) => entry.trim().toLowerCase()).filter(Boolean);
+                const list = allowed.split(",").map((entry) => entry.trim().toLowerCase().split(":")[0]).filter(Boolean);
                 if (!list.includes(host))
                     return process.env.PUBLIC_HOST || "localhost";
             }
