@@ -35,13 +35,11 @@ export default class RedisController {
     }
 
     async set(key, value) {
-        if (!this.redis) throw Error("RedisController: You are not connected.");
-        return await this.redis.set(key, value);
+        return this.rawSet(key, value);
     }
 
     async get(key) {
-        if (!this.redis) throw Error("RedisController: You are not connected.");
-        return await this.redis.get(key);
+        return this.rawGet(key);
     }
 
     async rawSet(...params) {
