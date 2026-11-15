@@ -21,9 +21,7 @@ export default class HeartbeatManager
         if (this._interval != null || !this.heartbeatUrl)
             return false;
 
-        this._interval = setInterval(this.heartbeat, this.interval,
-                                    this.Output, this.heartbeatUrl,
-                                    this.secret);
+        this._interval = setInterval(this.heartbeat.bind(this, this.Output, this.heartbeatUrl, this.secret), this.interval);
         this.Output.Log("Heartbeat worker has been started.");
         return true;
     }
