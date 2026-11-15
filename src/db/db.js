@@ -74,9 +74,14 @@ export default class NewDatabaseController {
         return users.rows[0].present;
     }
 
+    /**
+     * @param {string} displayname
+     * @returns {Promise<object|null>}
+     * @description Resolves with the matching user row, or null when no user has the display name.
+    */
     async findUserByDisplayName(displayname) {
         let users = await this.query("SELECT * FROM uwuso.users WHERE username = $1 LIMIT 1", [displayname]);
-        return users.rows[0];
+        return users.rows[0] ?? null;
     }
 
     async findUserByAccessKey(accesskey) {
