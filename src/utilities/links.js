@@ -1,5 +1,7 @@
 import { isValidDomain } from "utilities/experiments";
 
+export const DOWNLOAD_QUERY = "1";
+
 export function publicProtocol(request) {
     if (process.env.PUBLIC_PROTOCOL)
         return process.env.PUBLIC_PROTOCOL;
