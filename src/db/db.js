@@ -86,7 +86,7 @@ export default class NewDatabaseController {
 
     async addEventListing(eventString, eventCaller)
     {
-        eventType = (+Date.now()/1000).toFixed(0).toString();
+        const eventType = (+Date.now() / 1000).toFixed(0).toString();
         if(!eventString) eventString = "Unknown";
         if(!eventCaller) eventCaller = 1;
 
