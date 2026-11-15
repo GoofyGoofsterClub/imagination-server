@@ -7,6 +7,8 @@ const buckets = [10, 50, 100, 250, 500, 1000, 5000, Infinity];
 const VITAL_LIMITS = { CLS: [0.1, 0.25, 1, Infinity], INP: [200, 500, 1000, Infinity], LCP: [2500, 4000, 10000, Infinity] };
 const eventLoop = monitorEventLoopDelay({ resolution: 20 });
 eventLoop.enable();
+const MAX_REQUEST_METRICS = 1000;
+let warnedAboutRequestCap = false;
 
 function formatBound(value) {
     return Number.isFinite(value) ? value : '+Inf';
@@ -20,7 +22,13 @@ export function recordRequest(route, status, duration) {
     const key = `${route}:${Math.floor(status / 100)}xx`;
     let metric = requests.get(key);
     if (!metric) {
-        if (requests.size >= 1000) return;
+        if (requests.size >= MAX_REQUEST_METRICS) {
+            if (!warnedAboutRequestCap) {
+                warnedAboutRequestCap = true;
+                console.warn(`[wrn][metrics] Request metrics cap of ${MAX_REQUEST_METRICS} routes reached; new routes are dropped.`);
+            }
+            return;
+        }
         metric = { route, statusClass: Math.floor(status / 100), count: 0, totalMs: 0, maxMs: 0, buckets: buckets.map(() => 0) };
         requests.set(key, metric);
     }
