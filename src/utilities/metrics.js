@@ -43,7 +43,7 @@ export function getMetrics(db) {
         uptimeSeconds: process.uptime(),
         memory: process.memoryUsage(),
         caches: getCacheMetrics(),
-        eventLoopMs: { mean: eventLoop.mean / 1e6 || 0, p99: eventLoop.percentile(99) / 1e6, max: eventLoop.max / 1e6 },
+        eventLoopMs: { mean: eventLoop.mean / 1e6 || 0, p99: eventLoop.count ? eventLoop.percentile(99) / 1e6 : 0, max: eventLoop.max / 1e6 },
         database: { total: db.pool.totalCount, idle: db.pool.idleCount, waiting: db.pool.waitingCount, ...db.metrics },
         bucketUpperBoundsMs: buckets.map(formatBound),
         requests: [...requests.values()],
