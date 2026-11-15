@@ -11,20 +11,19 @@ export function clearExperimentCache() {
     invalidate('experiments');
 }
 
-export function isValidDomain(domain) {
-    if (typeof domain !== "string") return false;
+function normalizeDomain(domain) {
+    if (typeof domain !== "string") return null;
     const normalized = domain.trim().toLowerCase();
-    return normalized.length > 0 && DOMAIN_PATTERN.test(normalized);
+    return normalized.length > 0 && DOMAIN_PATTERN.test(normalized) ? normalized : null;
+}
+
+export function isValidDomain(domain) {
+    return normalizeDomain(domain) !== null;
 }
 
 export function normalizeDomains(domains) {
     if (!Array.isArray(domains)) return null;
-    const normalized = [...new Set(domains
-        .filter((domain) => typeof domain === "string")
-        .map((domain) => domain.trim().toLowerCase())
-        .filter((domain) => domain.length > 0))];
-    if (normalized.some((domain) => !DOMAIN_PATTERN.test(domain))) return null;
-    return normalized;
+    return [...new Set(domains.map(normalizeDomain).filter(Boolean))];
 }
 
 export async function getRandomCustomUrlExperiment(db) {
