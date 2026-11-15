@@ -1,5 +1,7 @@
 import { PresetOutput } from 'utilities/output';
 
+const FLUSH_BATCH_SIZE = 1000;
+
 export default class ViewCounter {
     constructor(db, flushIntervalMs = 5000) {
         this.db = db;
@@ -19,7 +21,7 @@ export default class ViewCounter {
     async flush() {
         if (this.flushing) return this.flushing;
         if (!this.uploads.size) return true;
-        const batch = new Map([...this.uploads.entries()].slice(0, 1000));
+        const batch = new Map([...this.uploads.entries()].slice(0, FLUSH_BATCH_SIZE));
         const users = new Map();
         for (const [id, entry] of batch) {
             this.uploads.delete(id);
