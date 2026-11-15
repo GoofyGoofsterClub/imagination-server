@@ -1,5 +1,8 @@
 import { withDeadline } from "utilities/deadline";
 
+const REDIS_RETRY_AFTER_MS = 5000;
+const LOCAL_CLEANUP_THRESHOLD = 10000;
+
 export default class RateLimiter {
     constructor(redis, prefix, limit, windowSeconds) {
         this.redis = redis;
@@ -27,7 +30,7 @@ export default class RateLimiter {
                 return { allowed: count <= this.limit, count, retryAfter };
             }
             catch (error) {
-                this.redisRetryAt = Date.now() + 5000;
+                this.redisRetryAt = Date.now() + REDIS_RETRY_AFTER_MS;
                 console.warn(`[wrn][ratelimit] Redis rate limiting unavailable, using the local fallback: ${error.message}`);
             }
         }
@@ -40,7 +43,7 @@ export default class RateLimiter {
         }
         entry.count++;
 
-        if (this.local.size > 10000)
+        if (this.local.size > LOCAL_CLEANUP_THRESHOLD)
             for (const [k, v] of this.local)
                 if (v.resetAt <= now) this.local.delete(k);
 
