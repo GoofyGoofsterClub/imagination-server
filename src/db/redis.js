@@ -30,6 +30,7 @@ export default class RedisController {
     async disconnect() {
         if (!this.redis) return false;
         await this.redis.disconnect();
+        this.redis = null;
         this.Output.Log("Redis disconnected.");
     }
 
