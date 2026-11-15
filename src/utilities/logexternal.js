@@ -1,5 +1,9 @@
 import axios from "axios";
 
+const AUTHOR_ICON_URL = "https://uwu.so/mishashto/milpp3GDP7";
+const FOOTER_ICON_URL = "https://uwu.so/mishashto/miJMzHBsVG";
+const REQUEST_TIMEOUT_MS = 10000;
+
 export class ExternalLogging
 {
     constructor(webhook_url, maxPerMinute)
@@ -96,13 +100,13 @@ export function buildMessage(server_name, type, title, message, image = null, ..
                 "author": {
                     "url": `https://${server_name}`,
                     "name": server_name,
-                    "icon_url": "https://uwu.so/mishashto/milpp3GDP7"
+                    "icon_url": AUTHOR_ICON_URL
                 },
                 "image": {
                     "url": image
                 },
                 "footer": {
-                    "icon_url": "https://uwu.so/mishashto/miJMzHBsVG",
+                    "icon_url": FOOTER_ICON_URL,
                     "text": "logged"
                 },
                 "fields": fields,
