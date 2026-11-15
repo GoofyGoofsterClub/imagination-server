@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-export function GeneratePrivateID(length = 32, prefix = "")
+function generateID(length, prefix)
 {
     let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -10,14 +10,14 @@ export function GeneratePrivateID(length = 32, prefix = "")
     return prefix;
 }
 
+export function GeneratePrivateID(length = 32, prefix = "")
+{
+    return generateID(length, prefix);
+}
+
 export function GeneratePublicID(length = 16, prefix = ".~")
 {
-    let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    for (let i = 0; i < length; i++)
-        prefix += possible.charAt(crypto.randomInt(possible.length));
-
-    return prefix;
+    return generateID(length, prefix);
 }
 
 const UPLOAD_ID_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
