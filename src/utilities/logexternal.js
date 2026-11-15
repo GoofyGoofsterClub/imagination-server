@@ -34,7 +34,6 @@ export class ExternalLogging
             this.dropped++;
             return;
         }
-        this.sentInWindow++;
 
         if (this.dropped > 0)
         {
@@ -44,7 +43,9 @@ export class ExternalLogging
 
         try
         {
-            return await axios.post(this.webhook_url, message, { timeout: 10000 });
+            const result = await axios.post(this.webhook_url, message, { timeout: 10000 });
+            this.sentInWindow++;
+            return result;
         }
         catch (e)
         {
