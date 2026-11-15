@@ -30,6 +30,14 @@ export default class DatabaseController
         return this;
     }
 
+    async close()
+    {
+        if (!this.client)
+            return;
+        await this.client.close();
+        this.client = null;
+    }
+
     async getCollection(collection)
     {
         return this.database.collection(collection);
