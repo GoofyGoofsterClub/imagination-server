@@ -12,7 +12,7 @@ const mappedExtensions = new Map([
 export default function downloadFilename(file) {
     if (path.extname(file.filename)) return file.filename;
     if (file.file_extension) return `${file.filename}${file.file_extension}`;
-    const mimetype = file.mimetype.split(';', 1)[0].trim().toLowerCase();
+    const mimetype = (file.mimetype ?? '').split(';', 1)[0].trim().toLowerCase();
     const extension = mappedExtensions.get(mimetype) || mime.extension(mimetype) || 'bin';
     return `${file.filename}.${extension}`;
 }
