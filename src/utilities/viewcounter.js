@@ -23,7 +23,7 @@ export default class ViewCounter {
         const users = new Map();
         for (const [id, entry] of batch) {
             this.uploads.delete(id);
-            if (entry.uploaderId != null) users.set(entry.uploaderId, (users.get(entry.uploaderId) || 0) + entry.n);
+            if (entry.uploaderId !== null && entry.uploaderId !== undefined) users.set(entry.uploaderId, (users.get(entry.uploaderId) || 0) + entry.n);
         }
         this.flushing = (async () => {
             try {
