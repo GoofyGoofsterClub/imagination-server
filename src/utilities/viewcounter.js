@@ -52,6 +52,15 @@ export default class ViewCounter {
     async stop() {
         clearInterval(this.timer);
         if (this.flushing) await this.flushing;
-        while (this.uploads.size) { if (!await this.flush()) break; }
+        let attempts = 0;
+        while (this.uploads.size) {
+            if (await this.flush()) break;
+            // A transient failure at shutdown must not drop the remaining counts.
+            if (++attempts >= 3) {
+                this.Output.Warn(`Dropped ${this.uploads.size} pending view upload(s) after 3 failed flushes.`);
+                break;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 500));
+        }
     }
 }
