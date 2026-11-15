@@ -11,7 +11,7 @@ export function getFileByFilename(db, filename) {
             FROM uwuso.uploads WHERE filename = $1::text LIMIT 1`, [filename]);
         // Cache misses too, so repeated nonexistent URLs cannot hammer PostgreSQL.
         const file = result.rows[0] ?? null;
-        if (file?.file_extension) file.mimetype = mime.lookup(file.file_extension) || file.mimetype;
+        if (file?.file_extension) file.mimetype = mime.lookup(`x${file.file_extension}`) || file.mimetype;
         return file;
     });
 }
