@@ -8,6 +8,7 @@ const metadata = new AsyncCache({ max: 10000, name: 'previews' });
 onInvalidation('previews', filename => metadata.delete(filename));
 
 export async function getPreview(file) {
+    if (!file?.disk_filename) return null;
     return metadata.get(file.disk_filename, async () => {
         try { return JSON.parse(await fs.readFile(path.join(directory, file.disk_filename + '.preview.json'), 'utf8')); }
         catch (_) { return null; }
