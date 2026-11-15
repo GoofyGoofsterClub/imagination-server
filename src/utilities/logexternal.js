@@ -2,8 +2,13 @@ import axios from "axios";
 
 export class ExternalLogging
 {
-    constructor(webhook_url, maxPerMinute = Number(process.env.LOG_WEBHOOK_MAX_PER_MINUTE) || 20)
+    constructor(webhook_url, maxPerMinute)
     {
+        if (maxPerMinute === undefined)
+        {
+            const envValue = Number(process.env.LOG_WEBHOOK_MAX_PER_MINUTE);
+            maxPerMinute = Number.isFinite(envValue) && envValue > 0 ? envValue : 20;
+        }
         this.webhook_url = webhook_url;
         this.enabled = this.webhook_url ? true : false;
         this.maxPerMinute = maxPerMinute;
