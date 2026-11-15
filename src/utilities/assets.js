@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 
 const root = path.resolve(__dirname, "../..");
+export const DEFAULT_LANGUAGE = "en";
 
 function readJsonFile(file) {
     try {
@@ -14,7 +15,7 @@ function readJsonFile(file) {
 }
 
 export const assetManifest = readJsonFile("public/asset-manifest.json");
-export const defaultTranslations = readJsonFile("public/translations/en.json");
+export const defaultTranslations = readJsonFile(`public/translations/${DEFAULT_LANGUAGE}.json`);
 export const languages = readJsonFile("public/languages.json");
 
 export function jsonForScript(value) { return JSON.stringify(value).replace(/</g, "\\u003c"); }
