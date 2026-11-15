@@ -1,10 +1,10 @@
 export default async function Authenticate(db, key)
 {
-    let existance = await db.checkDocumentExists("users", {
+    let existence = await db.checkDocumentExists("users", {
         "key": key
     });
 
-    if (!existance)
+    if (!existence)
         return false;
 
     let user = await db.getDocument("users", {
