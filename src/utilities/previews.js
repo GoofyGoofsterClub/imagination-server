@@ -23,7 +23,8 @@ export async function getPreview(file) {
 }
 
 export async function deletePreviewFiles(diskFilename) {
-    invalidate('previews', diskFilename);
+    // Unlink the files before invalidating so a concurrent reload resolves to null.
     await Promise.all(PREVIEW_SUFFIXES.map(suffix =>
         fs.unlink(path.join(directory, diskFilename + suffix)).catch(error => { if (error.code !== 'ENOENT') throw error; })));
+    invalidate('previews', diskFilename);
 }
