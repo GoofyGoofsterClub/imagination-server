@@ -4,6 +4,7 @@ import { getCacheMetrics } from 'utilities/cache';
 const requests = new Map();
 const webVitals = new Map();
 const buckets = [10, 50, 100, 250, 500, 1000, 5000, Infinity];
+const VITAL_LIMITS = { CLS: [0.1, 0.25, 1, Infinity], INP: [200, 500, 1000, Infinity], LCP: [2500, 4000, 10000, Infinity] };
 const eventLoop = monitorEventLoopDelay({ resolution: 20 });
 eventLoop.enable();
 
@@ -35,8 +36,7 @@ export function getMetrics(db) {
 }
 
 export function recordWebVital(name, pageType, value) {
-    const limits = name === 'CLS' ? [0.1, 0.25, 1, Infinity]
-        : name === 'INP' ? [200, 500, 1000, Infinity] : [2500, 4000, 10000, Infinity];
+    const limits = VITAL_LIMITS[name];
     const key = `${name}:${pageType}`;
     const metric = webVitals.get(key) || { name, pageType, count: 0, total: 0, max: 0, limits: limits.map(n => n === Infinity ? '+Inf' : n), buckets: limits.map(() => 0) };
     metric.count++;
