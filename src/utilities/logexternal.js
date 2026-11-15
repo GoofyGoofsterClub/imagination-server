@@ -89,30 +89,28 @@ export class Field
 
 export function buildMessage(server_name, type, title, message, image = null, ...fields)
 {
+    const embed = {
+        "title": title,
+        "color": type_to_color(type),
+        "timestamp": new Date().toISOString(),
+        "url": `https://${server_name}`,
+        "author": {
+            "url": `https://${server_name}`,
+            "name": server_name,
+            "icon_url": AUTHOR_ICON_URL
+        },
+        "footer": {
+            "icon_url": FOOTER_ICON_URL,
+            "text": "logged"
+        },
+        "fields": fields,
+        "description": message
+    };
+    if (image)
+        embed["image"] = { "url": image };
     return {
         "content": `A log has been received from \`${server_name}\`.`,
-        "embeds": [
-            {
-                "title": title,
-                "color": type_to_color(type),
-                "timestamp": new Date().toISOString(),
-                "url": `https://${server_name}`,
-                "author": {
-                    "url": `https://${server_name}`,
-                    "name": server_name,
-                    "icon_url": AUTHOR_ICON_URL
-                },
-                "image": {
-                    "url": image
-                },
-                "footer": {
-                    "icon_url": FOOTER_ICON_URL,
-                    "text": "logged"
-                },
-                "fields": fields,
-                "description": message
-            }
-        ]
+        "embeds": [embed]
     }
 }
 
