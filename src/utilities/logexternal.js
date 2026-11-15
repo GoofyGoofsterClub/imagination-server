@@ -19,7 +19,7 @@ export class ExternalLogging
 
     async Log(message)
     {
-        if(!this.enabled)
+        if (!this.enabled || !message)
             return;
 
         const now = Date.now();
