@@ -2,8 +2,19 @@ import fs from "fs";
 import path from "path";
 
 const root = path.resolve(__dirname, "../..");
-export const assetManifest = JSON.parse(fs.readFileSync(path.join(root, "public/asset-manifest.json"), "utf8"));
-export const defaultTranslations = JSON.parse(fs.readFileSync(path.join(root, "public/translations/en.json"), "utf8"));
-export const languages = JSON.parse(fs.readFileSync(path.join(root, "public/languages.json"), "utf8"));
+
+function readJsonFile(file) {
+    try {
+        return JSON.parse(fs.readFileSync(path.join(root, file), "utf8"));
+    } catch (error) {
+        if (error.code === "ENOENT")
+            throw new Error(`${file} not found - run a build first.`);
+        throw new Error(`Failed to read ${file}: ${error.message}`);
+    }
+}
+
+export const assetManifest = readJsonFile("public/asset-manifest.json");
+export const defaultTranslations = readJsonFile("public/translations/en.json");
+export const languages = readJsonFile("public/languages.json");
 
 export function jsonForScript(value) { return JSON.stringify(value).replace(/</g, "\\u003c"); }
