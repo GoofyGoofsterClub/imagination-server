@@ -9,10 +9,15 @@ export function clearAnnouncementCache() {
 
 export async function getAnnouncement(db) {
     return announcementCache.get("announcement", async () => {
-    const result = await db.query(`
-        SELECT message, severity, button_text, button_url, image_url
-        FROM uwuso.service_announcements
-        WHERE id = 1`);
+    try {
+        const result = await db.query(`
+            SELECT message, severity, button_text, button_url, image_url
+            FROM uwuso.service_announcements
+            WHERE id = 1`);
         return result.rows[0] ?? null;
+    } catch (error) {
+        console.error(`[err][announcement] Failed to load the announcement: ${error.message}`);
+        return null;
+    }
     });
 }
