@@ -26,7 +26,10 @@ export default class RateLimiter {
                 const retryAfter = ttl === -1 ? this.windowSeconds : Math.max(ttl, 1);
                 return { allowed: count <= this.limit, count, retryAfter };
             }
-            catch (e) { this.redisRetryAt = Date.now() + 5000; }
+            catch (error) {
+                this.redisRetryAt = Date.now() + 5000;
+                console.warn(`[wrn][ratelimit] Redis rate limiting unavailable, using the local fallback: ${error.message}`);
+            }
         }
 
         const now = Date.now();
