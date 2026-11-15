@@ -31,7 +31,7 @@ export async function hashStream(stream) {
     return hash.digest('hex');
 }
 
-export async function hashBuffer(buffer) {
+export function hashBuffer(buffer) {
     let hash = crypto.createHash('sha256');
     hash.update(buffer);
     return hash.digest('hex');
