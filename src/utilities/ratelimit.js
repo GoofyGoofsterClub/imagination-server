@@ -14,12 +14,17 @@ export default class RateLimiter {
         if (this.redis && this.redis.isReady && Date.now() >= this.redisRetryAt) {
             try {
                 const redisKey = `${this.prefix}:${key}`;
-                const [, count, ttl] = await withDeadline(() => this.redis.multi()
+                const results = await withDeadline(() => this.redis.multi()
                     .set(redisKey, "0", { EX: this.windowSeconds, NX: true })
                     .incr(redisKey)
                     .ttl(redisKey)
                     .exec(), Number(process.env.REDIS_COMMAND_TIMEOUT_MS) || 500, "Redis rate limit");
-                return { allowed: count <= this.limit, count, retryAfter: Math.max(ttl, 1) };
+                if (results === null || results.some(([error]) => error !== null))
+                    throw new Error("Redis rate limit pipeline failed.");
+                const count = results[1][1];
+                const ttl = results[2][1];
+                const retryAfter = ttl === -1 ? this.windowSeconds : Math.max(ttl, 1);
+                return { allowed: count <= this.limit, count, retryAfter };
             }
             catch (e) { this.redisRetryAt = Date.now() + 5000; }
         }
