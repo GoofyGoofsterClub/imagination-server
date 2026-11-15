@@ -55,7 +55,13 @@ export async function setRandomCustomUrlExperiment(db, enabled, domains) {
 }
 
 export async function pickRandomCustomUrl(db) {
-    const experiment = await getRandomCustomUrlExperiment(db);
+    let experiment;
+    try {
+        experiment = await getRandomCustomUrlExperiment(db);
+    } catch (error) {
+        console.error(`[err][experiments] Failed to load the random custom URL experiment: ${error.message}`);
+        return null;
+    }
     if (!experiment.enabled || experiment.domains.length < 1) return null;
     return experiment.domains[Math.floor(Math.random() * experiment.domains.length)];
 }
