@@ -9,6 +9,7 @@ const DELETE_BATCH_SIZE = 100;
 const UNLINK_WORKERS = 4;
 
 export async function removeUploadFiles(upload) {
+    if (!upload?.disk_filename) return;
     invalidateFileByFilename(upload.filename);
     // Remove the original before previews so an active transform detects deletion.
     await fs.unlink(path.resolve(__dirname, '../../privateuploads', upload.disk_filename)).catch(error => {
