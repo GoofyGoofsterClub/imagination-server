@@ -1,6 +1,6 @@
 import fs from "fs";
 
-export default function GetRoutesResursively(path)
+export default function GetRoutesRecursively(path)
 {
     let paths = [];
 
@@ -9,7 +9,7 @@ export default function GetRoutesResursively(path)
     {
         if(fs.lstatSync(`${path}/${file}`).isDirectory())
         {
-            paths.push(...GetRoutesResursively(`${path}/${file}`));
+            paths.push(...GetRoutesRecursively(`${path}/${file}`));
         }
         else if(file.endsWith(".js"))
         {

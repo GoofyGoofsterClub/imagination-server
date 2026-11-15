@@ -1,11 +1,11 @@
 import fs from "fs";
 import Output from "utilities/output";
-import GetRoutesResursively from "utilities/recursive";
+import GetRoutesRecursively from "utilities/recursive";
 
 export default class HTTPRouting {
     static async RegisterRoutes(server) {
         const routes = fs.readdirSync(`${__dirname}/../routes`);
-        const api_routes = GetRoutesResursively(`${__dirname}/../api`);
+        const api_routes = GetRoutesRecursively(`${__dirname}/../api`);
         for (const route of api_routes) {
             let routeName = route.replace(`${__dirname}/../api`, "");
             routeName = routeName.replace(".js", "");
