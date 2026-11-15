@@ -18,7 +18,7 @@ export default class HeartbeatManager
 
     start()
     {
-        if (this._interval != null || !this.heartbeatUrl)
+        if (this._interval !== null || !this.heartbeatUrl)
             return false;
 
         this._interval = setInterval(this.heartbeat.bind(this, this.Output, this.heartbeatUrl, this.secret), this.interval);
@@ -28,7 +28,7 @@ export default class HeartbeatManager
 
     stop(reason)
     {
-        if (this._interval == null)
+        if (this._interval === null)
             return false;
 
         clearInterval(this._interval);
@@ -43,7 +43,7 @@ export default class HeartbeatManager
 
         try
         {
-            let result = await axios.get(heartbeatUrl, {
+            const result = await axios.get(heartbeatUrl, {
                 headers: {
                     "X-Requested-With": "imagination-server",
                     "User-Agent": "Agent/imagination-server (heartbeat)",
@@ -51,7 +51,7 @@ export default class HeartbeatManager
                 }
             });
     
-            if (result.status != 200)
+            if (result.status !== 200)
                 Output.Warn(`Heartbeat response status code was ${result.status}. Might be dead?`);
         }
         catch (e)
