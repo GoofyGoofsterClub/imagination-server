@@ -54,57 +54,19 @@ function emitOtlLog(severityNumber, severityText, sender, message) {
 
 export default class Output
 {
-    static Log(sender="worker", ...message)
+    static _emit(severityNumber, severityText, tag, sender, ...message)
     {
-        if (message.length < 1) {
-            if (otlpEnabled) {
-                emitOtlLog(SeverityNumber.INFO, 'INFO', 'sys', sender);
-            } else {
-                console.log(`${"[log]".cyan}[sys] ${sender}`);
-            }
+        const isEmpty = message.length < 1;
+        const body = isEmpty ? sender : message.join(" ");
+        if (otlpEnabled) {
+            emitOtlLog(severityNumber, severityText, isEmpty ? 'sys' : sender, body);
         } else {
-            const text = message.join(" ");
-            if (otlpEnabled) {
-                emitOtlLog(SeverityNumber.INFO, 'INFO', sender, text);
-            } else {
-                console.log(`${"[log]".cyan}[${sender}] ${text}`);
-            }
+            console.log(`${tag}[${isEmpty ? 'sys' : sender}] ${body}`);
         }
     }
-    static Warn(sender="worker", ...message)
-    {
-        if (message.length < 1) {
-            if (otlpEnabled) {
-                emitOtlLog(SeverityNumber.WARN, 'WARN', 'sys', sender);
-            } else {
-                console.log(`${"[wrn]".yellow}[sys] ${sender}`);
-            }
-        } else {
-            const text = message.join(" ");
-            if (otlpEnabled) {
-                emitOtlLog(SeverityNumber.WARN, 'WARN', sender, text);
-            } else {
-                console.log(`${"[wrn]".yellow}[${sender}] ${text}`);
-            }
-        }
-    }
-    static Error(sender="worker", ...message)
-    {
-        if (message.length < 1) {
-            if (otlpEnabled) {
-                emitOtlLog(SeverityNumber.ERROR, 'ERROR', 'sys', sender);
-            } else {
-                console.log(`${"[err]".red}[sys] ${sender}`);
-            }
-        } else {
-            const text = message.join(" ");
-            if (otlpEnabled) {
-                emitOtlLog(SeverityNumber.ERROR, 'ERROR', sender, text);
-            } else {
-                console.log(`${"[err]".red}[${sender}] ${text}`);
-            }
-        }
-    }
+    static Log(sender="worker", ...message) { this._emit(SeverityNumber.INFO, 'INFO', '[log]'.cyan, sender, ...message); }
+    static Warn(sender="worker", ...message) { this._emit(SeverityNumber.WARN, 'WARN', '[wrn]'.yellow, sender, ...message); }
+    static Error(sender="worker", ...message) { this._emit(SeverityNumber.ERROR, 'ERROR', '[err]'.red, sender, ...message); }
     static Unformatted(...message)
     {
         console.log(...message);
