@@ -3,12 +3,12 @@ import axios from "axios";
 
 export default class HeartbeatManager
 {
-    constructor(heartbeatUrl, secret)
+    constructor(heartbeatUrl, secret, interval = 3000)
     {
         this.Output = new PresetOutput("hbt");
         this.heartbeatUrl = heartbeatUrl;
         this.secret = secret;
-        this.interval = 3000;
+        this.interval = interval;
 
         this._interval = null;
 
