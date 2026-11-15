@@ -8,6 +8,14 @@ const VITAL_LIMITS = { CLS: [0.1, 0.25, 1, Infinity], INP: [200, 500, 1000, Infi
 const eventLoop = monitorEventLoopDelay({ resolution: 20 });
 eventLoop.enable();
 
+function formatBound(value) {
+    return Number.isFinite(value) ? value : '+Inf';
+}
+
+function countBuckets(bounds, metric, value) {
+    bounds.forEach((upper, index) => { if (value <= upper) metric.buckets[index]++; });
+}
+
 export function recordRequest(route, status, duration) {
     const key = `${route}:${Math.floor(status / 100)}xx`;
     let metric = requests.get(key);
@@ -19,7 +27,7 @@ export function recordRequest(route, status, duration) {
     metric.count++;
     metric.totalMs += duration;
     metric.maxMs = Math.max(metric.maxMs, duration);
-    buckets.forEach((upper, index) => { if (duration <= upper) metric.buckets[index]++; });
+    countBuckets(buckets, metric, duration);
 }
 
 export function getMetrics(db) {
@@ -29,7 +37,7 @@ export function getMetrics(db) {
         caches: getCacheMetrics(),
         eventLoopMs: { mean: eventLoop.mean / 1e6 || 0, p99: eventLoop.percentile(99) / 1e6, max: eventLoop.max / 1e6 },
         database: { total: db.pool.totalCount, idle: db.pool.idleCount, waiting: db.pool.waitingCount, ...db.metrics },
-        bucketUpperBoundsMs: buckets.map(value => Number.isFinite(value) ? value : '+Inf'),
+        bucketUpperBoundsMs: buckets.map(formatBound),
         requests: [...requests.values()],
         webVitals: [...webVitals.values()]
     };
@@ -38,10 +46,10 @@ export function getMetrics(db) {
 export function recordWebVital(name, pageType, value) {
     const limits = VITAL_LIMITS[name];
     const key = `${name}:${pageType}`;
-    const metric = webVitals.get(key) || { name, pageType, count: 0, total: 0, max: 0, limits: limits.map(n => n === Infinity ? '+Inf' : n), buckets: limits.map(() => 0) };
+    const metric = webVitals.get(key) || { name, pageType, count: 0, total: 0, max: 0, limits: limits.map(formatBound), buckets: limits.map(() => 0) };
     metric.count++;
     metric.total += value;
     metric.max = Math.max(metric.max, value);
-    limits.forEach((upper, index) => { if (value <= upper) metric.buckets[index]++; });
+    countBuckets(limits, metric, value);
     webVitals.set(key, metric);
 }
