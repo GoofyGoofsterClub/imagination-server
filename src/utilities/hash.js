@@ -26,8 +26,7 @@ export async function hashFile(path) {
 */
 export async function hashStream(stream) {
     let hash = crypto.createHash('sha256');
-    let chunk;
-    while ((chunk = await stream.read()) !== null) hash.update(chunk);
+    for await (const chunk of stream) hash.update(chunk);
     return hash.digest('hex');
 }
 
