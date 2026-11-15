@@ -19,5 +19,5 @@ export function decodeCursor(value) {
         if (!Array.isArray(values) || values.length !== 2 || values.some(item => typeof item !== 'string') || !/^\d+$/.test(values[1]))
             throw new Error();
         return values;
-    } catch (_) { throw new Error('Invalid cursor.'); }
+    } catch (error) { throw new Error('Invalid cursor.', { cause: error }); }
 }
