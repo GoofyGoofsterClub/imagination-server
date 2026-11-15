@@ -4,17 +4,24 @@ export default function GetRoutesRecursively(path)
 {
     let paths = [];
 
-    let files = fs.readdirSync(path);
-    for(const file of files)
+    try
     {
-        if(fs.lstatSync(`${path}/${file}`).isDirectory())
+        let files = fs.readdirSync(path);
+        for(const file of files)
         {
-            paths.push(...GetRoutesRecursively(`${path}/${file}`));
+            if(fs.lstatSync(`${path}/${file}`).isDirectory())
+            {
+                const subPaths = GetRoutesRecursively(`${path}/${file}`);
+                for (const subPath of subPaths) paths.push(subPath);
+            }
+            else if(file.endsWith(".js"))
+            {
+                paths.push(`${path}/${file}`);
+            }
         }
-        else if(file.endsWith(".js"))
-        {
-            paths.push(`${path}/${file}`);
-        }
+    }
+    catch (error) {
+        console.error(`[err][recursive] Could not read route directory "${path}": ${error.message}`);
     }
 
     return paths;
