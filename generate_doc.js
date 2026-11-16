@@ -17,14 +17,14 @@ function getFiles(dir, files_) {
             files_.push(name.replace(__dirname_regex, ''));
         }
     }
-    return files_.map((file) => file.replace(/^\/src\//, ''));
+    return files_.map((file) => file.split(path.sep).join('/').replace(/^\/src\//, ''));
 }
 
 const files = getFiles(srcPath);
 
 let apiResult = [];
 
-for (var i = 0; i < files.length; i++)
+for (let i = 0; i < files.length; i++)
 {
     console.log(`${i+1}/${files.length} :: ${files[i]}`);
     
@@ -33,16 +33,16 @@ for (var i = 0; i < files.length; i++)
     
     let methodRe = /super\("(\w+)"\)/g;
     let method = fileContents.match(methodRe);
-    if (method == null)
+    if (method === null)
         continue;
     method = method[0].replace(methodRe, '$1');
     const regex = /\/\*--includedoc([\s\S]*?)\*\//g;
     const matches = fileContents.match(regex);
 
-    if (matches == null)
+    if (matches === null)
     {
         apiResult.push({
-            "path": file.replace('.js', ''),
+            "path": file.replace(/\.js$/, ''),
             "method": method,
             "description": "There is not a lot we know about this API route.",
             "params": {}
@@ -52,11 +52,11 @@ for (var i = 0; i < files.length; i++)
 
     const doc = matches[0].replace(/\/\*--includedoc/g, '').replace(/\*\//g, '').trim();
     const docParamRegex = /@(\w+)\s+(.*?)\n/g;
-    const docParams = doc.match(docParamRegex);
+    const docParams = doc.match(docParamRegex) || [];
 
     let docParamsObject = {};
 
-    for (var j = 0; j < docParams.length; j++)
+    for (let j = 0; j < docParams.length; j++)
     {
         const docParam = docParams[j];
         const docParamKey = docParam.replace(docParamRegex, '$1');
@@ -67,11 +67,11 @@ for (var i = 0; i < files.length; i++)
 
     const docDescription = doc.replace(docParamRegex, '');
 
-    if (docParamsObject.private == 'true')
+    if (docParamsObject.private === 'true')
         continue;
 
 
-    apiPath = file.replace('.js', '');
+    const apiPath = file.replace(/\.js$/, '');
 
     if ('params' in docParamsObject)
     {
@@ -82,13 +82,13 @@ for (var i = 0; i < files.length; i++)
 
         const paramsGroups = params.match(paramsRegex);
 
-        if (paramsGroups == null)
+        if (paramsGroups === null)
             docParamsObject.params = {};
         else
         {
             let _params = [];
 
-            let paramRe = /\((\w+)\) (\w+)/g;
+            let paramRe = /\(([^)]+)\) (\w+)/g;
             for (let j = 0; j < paramsGroups.length; j++)
             {
                 const param = paramsGroups[j];
@@ -105,12 +105,19 @@ for (var i = 0; i < files.length; i++)
         }
     }
 
-    for (param in docParamsObject)
-        if (param != 'params' && param != 'returnexample')
+    for (const param in docParamsObject)
+        if (param !== 'params' && param !== 'returnexample')
             try
             {
                 docParamsObject[param] = JSON.parse(docParamsObject[param]);
             } catch {}
+
+    // Emit the example under a camelCase key, matching the other two-word keys of the document.
+    if ('returnexample' in docParamsObject)
+    {
+        docParamsObject.returnExample = docParamsObject.returnexample;
+        delete docParamsObject.returnexample;
+    }
 
     apiResult.push({
         "path": apiPath,
@@ -128,6 +135,7 @@ apiResult = {
     "routes": apiResult
 }
 
+fs.mkdirSync(path.join(__dirname, 'public'), { recursive: true });
 fs.writeFileSync(path.join(__dirname, 'public', 'api.json'), JSON.stringify(apiResult, null, 4));
 
 console.log("Done!");
