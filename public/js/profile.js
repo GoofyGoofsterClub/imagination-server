@@ -15,15 +15,15 @@ async function initializeProfile() {
 
     if (!profileInfo.success) {
         document.querySelector("#_profile_not_found").style.display = "block";
-        document.querySelector("#_profile_error_text").innerText = profileInfo.error;
+        document.querySelector("#_profile_error_text").innerText = profileInfo.error ?? 'Unknown error';
         return;
     }
 
     profileInfo = profileInfo.data;
     document.querySelector("#profile-user-name").innerText = profileInfo.displayName;
     document.querySelector("#profile-user-name").style = sanitizePaintStyle(profileInfo.paint);
-    document.querySelector("#profile-block-uploads > .profile-info-block-value").innerText = profileInfo.uploads.toLocaleString();
-    document.querySelector("#profile-block-views > .profile-info-block-value").innerText = profileInfo.views.toLocaleString();
+    document.querySelector("#profile-block-uploads > .profile-info-block-value").innerText = profileInfo.uploads?.toLocaleString() ?? 0;
+    document.querySelector("#profile-block-views > .profile-info-block-value").innerText = profileInfo.views?.toLocaleString() ?? 0;
 
     if (profileInfo.invitedBy) {
         document.querySelector("#profile-invited-by").innerText = profileInfo.invitedBy;
@@ -40,9 +40,9 @@ async function initializeProfile() {
         let image = typeof badge.image === "string" ? badge.image : "";
         if (image && !/^[A-Za-z0-9._~:/?#@!$-]+$/.test(image) || image.includes(".."))
             image = "";
-        if (image.startsWith("http"))
+        if (/^https?:\/\//.test(image))
             badgeElement.style.setProperty("--badge-icon", "url('" + image + "')");
-        else
+        else if (image)
             badgeElement.style.setProperty("--badge-icon", "url('/public/img/badges/" + image + "')");
         badgeElement.title = badge.name;
         badgeElement.className = "profile-badge";
