@@ -8,9 +8,9 @@ import hash from "utilities/hash";
 @needsauth true
 @adminonly false
 @params [(string) key]
-@returns Returns publically available information about a user.
-@returnexample { "success": true, "data": { "displayName": "username", "can_invite": true, "administrator": false, "isBanned": false } }
-Gets publically available information about a user. (Internal use)
+@returns Returns publicly available information about a user.
+@returnexample { "success": true, "data": { "displayName": "username", "can_invite": true, "administrator": false, "isBanned": false, "superuser": false } }
+Gets publicly available information about a user. (Internal use)
 
 */
 export default class CheckSessionInfoAPIRoute extends APIRoute {
