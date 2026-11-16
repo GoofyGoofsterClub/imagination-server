@@ -47,6 +47,12 @@ export default class InvitesInfoAPIRoute extends APIRoute {
                 "error": "Invalid code."
             };
 
+        if (target.rows[0].valid_until * 1000 < Date.now())
+            return {
+                "success": false,
+                "error": "Code expired."
+            };
+
         return {
             "success": true,
             "data": target.rows
