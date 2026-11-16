@@ -9,11 +9,12 @@ export default class IndexRoute extends Route
         super("/", "GET");
     }
 
-    async call(request, reply)
+    async call(request, reply, server)
     {
         return reply.viewAsync("index.ejs", {
             "domain": publicHost(request),
-            "bootstrap": jsonForScript({ assets: assetManifest, translations: defaultTranslations, languages })
+            "bootstrap": jsonForScript({ assets: assetManifest, translations: defaultTranslations, languages }),
+            "maintenanceReason": server?.server?._public?.Maintenance?.value?.message ?? null
         });
     }
 }

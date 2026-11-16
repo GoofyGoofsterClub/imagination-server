@@ -17,6 +17,7 @@
   />
   <link rel="stylesheet" href="/public/css/new.css" />
   <script>window.__APP = <%~ it.bootstrap %>;
+    window.maintenanceReason = <%~ JSON.stringify(it.maintenanceReason) %>;
     if (location.hash && location.hash !== '#welcome') document.documentElement.classList.add('inner-page');
   </script>
   <style>.inner-page .big-showoff { display: none; }</style>
