@@ -43,34 +43,30 @@ export default class PublicSessionGetAPIRoute extends APIRoute {
                 "error": "User does not exist"
             };
 
-        if (user.private_profile)
-            return {
-                "success": true,
-                "data": {
-                    "displayName": user.username,
-
-                    "uploads": 0,
-                    "invitedBy": null,
-                    "administrator": false,
-                    "views": 0,
-                    "badges": [],
-                    "paint": null,
-                    "isBanned": false
-                }
-            };
+        const data = {
+            // Reserved field: no writer exists yet, so it is always null.
+            "invitedBy": null,
+            "uploads": 0,
+            "administrator": false,
+            "views": 0,
+            "badges": [],
+            "paint": null,
+            "isBanned": false
+        };
+        if (!user.private_profile) {
+            data.uploads = user.uploads ?? 0;
+            data.administrator = hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR);
+            data.views = user.views ?? 0;
+            data.badges = user.badges ?? [];
+            data.paint = user.paint ?? null;
+            data.isBanned = user.banned ?? false;
+        }
 
         return {
             "success": true,
             "data": {
                 "displayName": user.username,
-
-                "uploads": user.uploads ?? 0,
-                "invitedBy": null,
-                "administrator": hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR),
-                "views": user.views ?? 0,
-                "badges": user.badges ?? [],
-                "paint": user.paint ?? null,
-                "isBanned": user.banned ?? false
+                ...data
             }
         };
     }
