@@ -3,10 +3,6 @@ import { GeneratePrivateID, GeneratePublicID } from "utilities/id";
 import { USER_PERMISSIONS, hasPermission, permissions } from "utilities/permissions";
 import hash from "utilities/hash";
 
-const restrictedFields = [
-    // for future use
-];
-
 /*--includedoc
 
 @private false
