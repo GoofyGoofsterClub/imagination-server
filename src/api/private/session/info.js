@@ -19,7 +19,10 @@ export default class CheckSessionInfoAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let user = await server.db.findUserByAccessKey(hash(request.headers.authorization || request.query.key));
+        let rawKey = request.headers.authorization || request.query.key;
+        if (typeof rawKey === 'string')
+            rawKey = rawKey.replace(/^Bearer /, '');
+        let user = await server.db.findUserByAccessKey(hash(rawKey));
 
         if (!user) {
             reply.code(401);
