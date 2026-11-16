@@ -27,11 +27,23 @@ export default class HTTPRouting {
     }
 }
 
-export class Route {
+class BaseRoute {
+    constructor() {
+        this.handler = this.call;
+    }
+
+    async register(server, path = this.path) {
+        await server.registerRoute(path, this.method, async (request, reply) => {
+            return await this.callWrapper(request, reply, server, this.handler);
+        });
+    }
+}
+
+export class Route extends BaseRoute {
     constructor(path, method) {
+        super();
         this.path = path;
         this.method = method;
-        this.handler = this.call;
     }
 
     async call(request, reply) { }
@@ -54,17 +66,12 @@ export class Route {
         return await handler(request, reply, server);
     }
 
-    async register(server, routeName) {
-        await server.registerRoute(this.path, this.method, async (request, reply) => {
-            return await this.callWrapper(request, reply, server, this.handler);
-        });
-    }
 }
 
-export class APIRoute {
+export class APIRoute extends BaseRoute {
     constructor(method, excludeFromMaintenance) {
+        super();
         this.method = method;
-        this.handler = this.call;
         this.excludeFromMaintenance = excludeFromMaintenance ?? false;
     }
 
@@ -77,11 +84,5 @@ export class APIRoute {
             return reply.send({ success: false, error: `503 - Maintenance: ${maintenance.value.message}` });
         }
         return await handler(request, reply, server);
-    }
-
-    async register(server, path) {
-        await server.registerRoute(path, this.method, async (request, reply) => {
-            return await this.callWrapper(request, reply, server, this.handler);
-        });
     }
 }
