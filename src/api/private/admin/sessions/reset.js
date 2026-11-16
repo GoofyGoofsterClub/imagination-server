@@ -23,62 +23,67 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
+        try {
+            let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
-        if (!user)
-            return {
+            if (!user)
+                return {
+                    "success": false,
+                    "error": "Invalid key."
+                };
+
+            if (user.banned) return {
                 "success": false,
-                "error": "Invalid key."
+                "error": "You are banned."
             };
 
-        if (user.banned) return {
-            "success": false,
-            "error": "You are banned."
-        };
+            if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
+                return {
+                    "success": false,
+                    "error": "You are not an administrator."
+                };
 
-        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
+            if (!request.query.target)
+                return {
+                    "success": false,
+                    "error": "Missing parameters."
+                };
+
+            let target = await server.db.findUserByDisplayName(request.query.target);
+
+            if (!target)
+                return {
+                    "success": false,
+                    "error": "Invalid target."
+                };
+
+            if (target.superuser)
+                return {
+                    "success": false,
+                    "error": "You cannot reset a superuser's key."
+                };
+
+
+            let accessKey = ACCESS_KEY_PREFIX + uuidv4();
+
+            let result = await server.db.query(`UPDATE uwuso.users SET access_key = $2 WHERE username = $1`, [
+                request.query.target,
+                hash(accessKey)
+            ]);
+
+            if (result.rowCount === 0)
+                return {
+                    "success": false,
+                    "error": "Failed to update the user's key."
+                };
+
             return {
-                "success": false,
-                "error": "You are not an administrator."
+                "success": true,
+                "value": accessKey
             };
-
-        if (!request.query.target)
-            return {
-                "success": false,
-                "error": "Missing parameters."
-            };
-
-        let target = await server.db.findUserByDisplayName(request.query.target);
-
-        if (!target)
-            return {
-                "success": false,
-                "error": "Invalid target."
-            };
-
-        if (target.superuser)
-            return {
-                "success": false,
-                "error": "You cannot reset a superuser's key."
-            };
-
-
-        let accessKey = ACCESS_KEY_PREFIX + uuidv4();
-
-        let result = await server.db.query(`UPDATE uwuso.users SET access_key = $2 WHERE username = $1`, [
-            request.query.target,
-            hash(accessKey)
-        ]);
-
-        if (result.rowCount === 0)
-            return {
-                "success": false,
-                "error": "Failed to update the user's key."
-            };
-
-        return {
-            "success": true,
-            "value": accessKey
-        };
+        } catch (error) {
+            reply.code(500);
+            return { "success": false, "error": "Failed to reset the user's key." };
+        }
     }
 }
