@@ -33,7 +33,7 @@ export default class HTTPServer {
         this.redis = redis;
         this.viewCounter = viewCounter;
         this.server = fastify({
-            logger: (process.env.ENV && process.env.ENV == 'DEV'),
+            logger: (process.env.ENV && process.env.ENV === 'DEV'),
             trustProxy: process.env.TRUST_PROXY ? process.env.TRUST_PROXY.split(',').map(value => value.trim()) : false,
             requestTimeout: Number(process.env.HTTP_REQUEST_TIMEOUT_MS) || 120000
         });
