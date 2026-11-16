@@ -60,14 +60,11 @@ services:
       redis:
         condition: service_started
         restart: true
-#    image: nekopavel/imagination-server:latest   #Uncomment this if you want to use prebuilt image
     ports:
       - $HTTP_EXPOSE_PORT:$HTTP_PORT
     volumes:
       - uploads:/usr/src/boobspics/privateuploads
     container_name: boobspics-web
-    # run.js retries the database connection on startup, so early connection
-    # failures recover inside the process; restart only covers real failures.
     restart: on-failure
     deploy:
       resources:
@@ -77,8 +74,7 @@ services:
         reservations:
           cpus: '0.25'
           memory: 128M
-    # The container no longer loads ./.env directly; the values below are
-    # substituted from the project .env file by compose.
+
     environment:
       - HTTP_PORT=$HTTP_PORT
       - MONGO_HOST=mongo
@@ -92,8 +88,7 @@ services:
       - REDISHOST=redis://redis:6379
       - LOG_WEBHOOK=$LOG_WEBHOOK
       - SHORTENER_URI=$SHORTENER_URI
-    build: .                                      #Comment this line if using prebuilt image
-
+    build: .
 volumes:
   db:
   pdb:
