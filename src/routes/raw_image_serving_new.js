@@ -23,10 +23,13 @@ export default class RawNewImageServing extends Route {
             return reply.viewAsync("error.ejs", { error_title: "Not Found", error_message: "<p>This file does not exist.</p>" });
         }
 
+        // Uploads without a recognizable extension can be stored with a null
+        // mimetype; fall back to a neutral binary type so the header is always set.
+        const mimetype = file.mimetype || "application/octet-stream";
         reply.header("X-Content-Type-Options", "nosniff");
-        if (request.query.download === "1" || isDocumentMimetype(file.mimetype))
+        if (request.query.download === "1" || isDocumentMimetype(mimetype))
             reply.header("Content-Disposition", `attachment; filename="${downloadFilename(file)}"`);
-        reply.type(file.mimetype);
+        reply.type(mimetype);
         return serveUpload(reply, file.disk_filename);
     }
 }
