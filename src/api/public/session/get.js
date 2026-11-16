@@ -7,9 +7,9 @@ import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 @needsauth false
 @adminonly false
 @params [(string) target]
-@returns Publically available information about a user.
+@returns Publicly available information about a user.
 @returnexample { "success": true, "data": { "displayName": "test", "uploads": 0, "invitedBy": null, "administrator": false, "views": 0, "badges": [], "paint": null, "isBanned": false } }
-Gets publically available information about a user.
+Gets publicly available information about a user.
 
 */
 export default class PublicSessionGetAPIRoute extends APIRoute {
