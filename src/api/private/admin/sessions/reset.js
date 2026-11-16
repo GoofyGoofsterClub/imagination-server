@@ -3,6 +3,8 @@ import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 import { v4 as uuidv4 } from "uuid";
 import hash from "utilities/hash";
 
+const ACCESS_KEY_PREFIX = "vX2~!";
+
 
 /*--includedoc
 
@@ -61,7 +63,7 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
             };
 
 
-        let accessKey = "vX2~!" + uuidv4();
+        let accessKey = ACCESS_KEY_PREFIX + uuidv4();
 
         let result = await server.db.query(`UPDATE uwuso.users SET access_key = $2 WHERE username = $1`, [
             request.query.target,
