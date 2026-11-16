@@ -96,7 +96,7 @@ const run = async () => {
 
     server.server._public['initialSetup'] = amountOfUsers < 1;
 
-    const port = Number(process.env.HTTP_PORT) || 3443;
+    const port = process.env.HTTP_PORT ? Number(process.env.HTTP_PORT) : 3443;
     await server.start(port);
     Output.Log(`Server started on port ${port}!`);
     const refreshStatistics = () => getStatistics(ndb).catch(error => Output.Warn('statistics', error.message));

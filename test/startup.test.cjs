@@ -20,14 +20,14 @@ function launch(env) {
         const timer = setTimeout(() => reject(new Error('Startup timed out:\n' + output)), 20000);
         const receive = chunk => {
             output += chunk.toString();
-            if (output.includes('Server started!')) { clearTimeout(timer); resolve(); }
+            if (output.includes('Server started')) { clearTimeout(timer); resolve(); }
         };
         child.stdout.on('data', receive);
         child.stderr.on('data', receive);
         child.once('error', error => { clearTimeout(timer); reject(error); });
         exited.then(({ code }) => {
             clearTimeout(timer);
-            if (!output.includes('Server started!')) reject(new Error(`Startup exited (${code}):\n${output}`));
+            if (!output.includes('Server started')) reject(new Error(`Startup exited (${code}):\n${output}`));
         });
     });
     return { child, ready, exited };
