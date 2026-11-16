@@ -8,8 +8,12 @@ const DOCUMENT_MIMETYPES = new Set([
     "text/xsl", "application/xslt+xml", "text/xslt", "image/svg+xml", "application/rss+xml", "application/atom+xml"
 ]);
 const INLINE_TEXT_MIMETYPES = new Set(["text/plain", "text/csv", "text/css"]);
-const isDocumentMimetype = (mimetype) =>
-    DOCUMENT_MIMETYPES.has(mimetype) || (/^text\//.test(mimetype) && !INLINE_TEXT_MIMETYPES.has(mimetype));
+const isDocumentMimetype = (mimetype) => {
+    // Stored part Content-Types can carry parameters (text/plain; charset=utf-8),
+    // which exact Set lookups would miss.
+    const normalized = (mimetype || "").split(";")[0].trim().toLowerCase();
+    return DOCUMENT_MIMETYPES.has(normalized) || (/^text\//.test(normalized) && !INLINE_TEXT_MIMETYPES.has(normalized));
+};
 
 export default class RawNewImageServing extends Route {
     constructor() {
