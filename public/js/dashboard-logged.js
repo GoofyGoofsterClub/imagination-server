@@ -177,24 +177,24 @@ async function initializeLoggedDashboard() {
         let key = localStorage.getItem("key");
         let username = document.querySelector("#__dashboard_logged_invite_displayname").value;
         if (username == undefined || username == null || username == "") {
-            document.getElementById("__dashboard_loggen_invite_result").innerText = "Please enter a valid username.";
-            document.getElementById("__dashboard_loggen_invite_result").style.display = "block";
-            document.getElementById("__dashboard_loggen_invite_result").classList.add("error-text");
+            document.getElementById("__dashboard_logged_invite_result").innerText = "Please enter a valid username.";
+            document.getElementById("__dashboard_logged_invite_result").style.display = "block";
+            document.getElementById("__dashboard_logged_invite_result").classList.add("error-text");
             return;
         }
 
         let response = await fetch("/api/private/invites/new?key=" + key + "&target=" + username);
         let data = await response.json();
         if (!data.success) {
-            document.getElementById("__dashboard_loggen_invite_result").innerText = data.error;
-            document.getElementById("__dashboard_loggen_invite_result").style.display = "block";
-            document.getElementById("__dashboard_loggen_invite_result").classList.add("error-text");
+            document.getElementById("__dashboard_logged_invite_result").innerText = data.error;
+            document.getElementById("__dashboard_logged_invite_result").style.display = "block";
+            document.getElementById("__dashboard_logged_invite_result").classList.add("error-text");
             return;
         }
 
-        document.getElementById("__dashboard_loggen_invite_result").innerText = "Invite link: " + window.location.origin + "/invite/" + data.data.inviteCode;
-        document.getElementById("__dashboard_loggen_invite_result").style.display = "block";
-        document.getElementById("__dashboard_loggen_invite_result").classList.remove("error-text");
+        document.getElementById("__dashboard_logged_invite_result").innerText = "Invite link: " + window.location.origin + "/invite/" + data.data.inviteCode;
+        document.getElementById("__dashboard_logged_invite_result").style.display = "block";
+        document.getElementById("__dashboard_logged_invite_result").classList.remove("error-text");
     }
 
     let dangerZonePressed = false;
