@@ -1,7 +1,7 @@
-var CurrentLanguage = "en";
-var availableLanguages = [];
-var globalTranslationObject = {};
-var defaultLanguage = {};
+let CurrentLanguage = "en";
+let availableLanguages = [];
+let globalTranslationObject = {};
+const defaultLanguage = window.__APP?.translations || {};
 
 class Translatable
 {
@@ -36,7 +36,7 @@ class Translatable
 
     static setLanguage(language)
     {
-        if (!availableLanguages.find(x => x.code == language)) return false;
+        if (!availableLanguages.find(x => x.code === language)) return false;
         CurrentLanguage = language;
         return true;
     }
@@ -44,6 +44,7 @@ class Translatable
     static find(query)
     {
         let el = document.querySelector(query);
+        if (!el) return [];
         let translatables = el.querySelectorAll("[translatable-id]");
         
 
@@ -52,22 +53,25 @@ class Translatable
 
     static getTranslationKey(key)
     {
-        if (!globalTranslationObject[key])
-            return defaultLanguage[key] ? defaultLanguage[key] : key;
-        return globalTranslationObject[key];
+        if (globalTranslationObject[key] !== undefined && globalTranslationObject[key] !== null)
+            return globalTranslationObject[key];
+        return defaultLanguage[key] !== undefined && defaultLanguage[key] !== null ? defaultLanguage[key] : key;
     }
 
     static translate(translatableElement)
     {
-        translatableElement.element.innerHTML = this.getTranslationKey(translatableElement.translatableId);
+        const translation = this.getTranslationKey(translatableElement.translatableId);
+        translatableElement.element.textContent = translation;
+        // Keep <input> placeholders translated alongside their visible text.
+        if (translatableElement.element instanceof HTMLInputElement)
+            translatableElement.element.placeholder = translation;
     }
 
     static translateGroup(translationElements)
     {
-        for (var i = 0; i < translationElements.length; i++)
-        {
-            this.translate(translationElements[i]);
-        }
+        translationElements.forEach(translatableElement => {
+            this.translate(translatableElement);
+        });
     }
 }
 
