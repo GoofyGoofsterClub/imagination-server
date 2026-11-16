@@ -1,6 +1,9 @@
 import { APIRoute } from 'http/routing';
 import { recordWebVital } from 'utilities/metrics';
 
+const MAX_CLS_SCORE = 10;
+const MAX_DURATION_MS = 600000;
+
 export default class PerformanceRoute extends APIRoute {
     constructor() { super('POST'); }
     async call(request, reply, server) {
@@ -8,7 +11,7 @@ export default class PerformanceRoute extends APIRoute {
         if (process.env.ENABLE_RUM !== 'true') { reply.code(404); return {}; }
         const { name, pageType, value } = request.body || {};
         if (!['LCP', 'INP', 'CLS'].includes(name) || !['home', 'dashboard', 'profile', 'viewer'].includes(pageType)
-            || typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > (name === 'CLS' ? 100 : 600000)) {
+            || !Number.isFinite(value) || value < 0 || value > (name === 'CLS' ? MAX_CLS_SCORE : MAX_DURATION_MS)) {
             reply.code(400);
             return { success: false, error: 'Invalid performance metric.' };
         }
