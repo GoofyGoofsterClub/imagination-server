@@ -30,11 +30,14 @@ const run = async () => {
 
     while (!databaseConnectionSuccess) {
         try {
-            db = process.env.LEGACY_MONGO_ENABLED === 'true' ? await new DatabaseController(
-                process.env.MONGO_HOST,
-                process.env.MONGO_PORT,
-                'boobspics'
-            ).connect() : null;
+            const mongoController = process.env.LEGACY_MONGO_ENABLED === 'true'
+                ? new DatabaseController(
+                    process.env.MONGO_HOST,
+                    process.env.MONGO_PORT,
+                    'boobspics'
+                )
+                : null;
+            db = mongoController ? await mongoController.connect() : null;
 
             ndb = await new NewDatabaseController();
             Output.Log('Preparing database schema...');
@@ -48,7 +51,7 @@ const run = async () => {
             Output.Error("sys", `An error occurred while connecting to database: ${e}`);
             // Release the partially-established connections so retries do not
             // exhaust the databases' connection slots
-            try { if (db && db.client) await db.client.close(); } catch (_) { }
+            try { if (mongoController?.client) await mongoController.client.close(); } catch (_) { }
             try { if (ndb) await ndb.pool.end(); } catch (_) { }
             db = null;
             ndb = null;
