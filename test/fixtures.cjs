@@ -14,6 +14,9 @@ async function fixtureServer() {
         findUserByDisplayName: async name => name === 'fixture' ? user : null,
         query: async (sql, params) => {
             calls.push({ sql, params });
+            // Patterns below must stay in sync with the queries the tests exercise:
+            // any new query a test hits needs its own pattern, otherwise the mock
+            // silently answers it with an empty result set.
             if (/WHERE filename = \$1/.test(sql) && params?.[0] === 'fixture-image.png')
                 return { rows: [{ id: '99', uploader_id: '1', filename: 'fixture-image.png', disk_filename: 'fixture-original', mimetype: 'image/png' }] };
             if (/COALESCE\(SUM\(views\)/.test(sql)) return { rows: [{ uploads: '2', views: '10' }] };
