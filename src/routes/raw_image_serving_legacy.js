@@ -24,10 +24,13 @@ export default class RawLegacyImageServing extends Route {
                 return reply.viewAsync("error.ejs", { error_title: "Not Found", error_message: "<p>This file does not exist.</p>" });
             }
 
+            // The file cache falls back to the raw database value when the
+            // extension is unknown, which may carry parameters like a charset.
+            const mimetype = (file.mimetype || "").split(";")[0].trim().toLowerCase();
             reply.header("X-Content-Type-Options", "nosniff");
-            if (request.query.download === "1" || isDocumentMimetype(file.mimetype))
+            if (request.query.download === "1" || isDocumentMimetype(mimetype))
                 reply.header("Content-Disposition", `attachment; filename="${downloadFilename(file)}"`);
-            reply.type(file.mimetype);
+            reply.type(mimetype);
             return serveUpload(reply, file.disk_filename);
         } catch {
             // A database failure or a file missing from disk both mean this
