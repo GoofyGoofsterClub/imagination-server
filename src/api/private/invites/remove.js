@@ -41,9 +41,9 @@ export default class InvitesRemoveAPIRoute extends APIRoute {
                 "error": "Missing parameters."
             };
 
-        let target = await server.db.query(`DELETE FROM uwuso.invites WHERE hash = $1::text RETURNING *`, [request.query.code]);
+        let target = await server.db.query(`SELECT * FROM uwuso.invites WHERE hash = $1::text`, [request.query.code]);
 
-        if (target.rowCount < 1)
+        if (target.rows.length < 1)
             return {
                 "success": false,
                 "error": "Invalid code."
@@ -53,6 +53,14 @@ export default class InvitesRemoveAPIRoute extends APIRoute {
             return {
                 "success": false,
                 "error": "This invite does not belong to you."
+            };
+
+        let deleted = await server.db.query(`DELETE FROM uwuso.invites WHERE hash = $1::text`, [request.query.code]);
+
+        if (deleted.rowCount < 1)
+            return {
+                "success": false,
+                "error": "Invalid code."
             };
 
         return {
