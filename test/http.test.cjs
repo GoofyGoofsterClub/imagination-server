@@ -97,3 +97,18 @@ test('routes render the maintenance view instead when maintenance mode is on', a
     assert.match(home.body, /Updating the website/);
     assert.doesNotMatch(home.body, /window.__APP/);
 });
+
+test('routes marked excludeFromMaintenance are not replaced by the maintenance view', async t => {
+    const { server } = await fixtureServer();
+    t.after(async () => { await server.stop(); });
+    const { Route } = require('../lib/http/routing');
+    class PingRoute extends Route {
+        constructor() { super('/maintenance-ping', 'GET', true); }
+        async call() { return 'pong'; }
+    }
+    await new PingRoute().register(server);
+    server.server._public.Maintenance = { value: { enabled: true, mode: 2, message: 'Updating the website' } };
+    const response = await server.server.inject('/maintenance-ping');
+    assert.equal(response.statusCode, 200, response.body);
+    assert.equal(response.body, 'pong');
+});
