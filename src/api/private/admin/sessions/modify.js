@@ -118,14 +118,24 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
                 "error": "Permission value must be boolean."
             };
 
-        if (requestData.field in permissionFields) {
-            const permission = permissionFields[requestData.field];
-            const permissions = requestData.value
-                ? (target.permissions | permission)
-                : (target.permissions & ~permission);
-            await server.db.query(`UPDATE uwuso.users SET permissions = $1::bigint WHERE username = $2`, [permissions, target.username]);
-        } else {
-            await server.db.query(`UPDATE uwuso.users SET ` + escapeIdentifier(requestData.field) + ` = $1 WHERE username = $2`, [requestData.value, target.username]);
+        if ((requestData.field === "views" || requestData.field === "uploads") && !Number.isInteger(requestData.value))
+            return { "success": false, "error": "Value must be a number." };
+        if ((requestData.field === "banned" || requestData.field === "superuser") && typeof requestData.value !== "boolean")
+            return { "success": false, "error": "Value must be a boolean." };
+
+        try {
+            if (requestData.field in permissionFields) {
+                const permission = permissionFields[requestData.field];
+                const permissions = requestData.value
+                    ? (target.permissions | permission)
+                    : (target.permissions & ~permission);
+                await server.db.query(`UPDATE uwuso.users SET permissions = $1::bigint WHERE username = $2`, [permissions, target.username]);
+            } else {
+                await server.db.query(`UPDATE uwuso.users SET ` + escapeIdentifier(requestData.field) + ` = $1 WHERE username = $2`, [requestData.value, target.username]);
+            }
+        } catch (error) {
+            reply.code(500);
+            return { "success": false, "error": "Failed to modify the user." };
         }
 
         // External logging
