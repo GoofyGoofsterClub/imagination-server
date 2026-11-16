@@ -22,21 +22,27 @@ export default class SessionUploadsAPIRoute extends APIRoute {
         try {
             let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
-            if (!user)
+            if (!user) {
+                reply.code(400);
                 return {
                     "success": false,
                     "error": "Invalid key."
                 };
+            }
 
-            if (user.banned)
+            if (user.banned) {
+                reply.code(400);
                 return { "success": false, "error": "You are banned." };
+            }
 
             const page = Math.max(1, parseInt(request.query.page, 10) || 1);
             if (page > 1000000) return { success: false, error: 'Page is too large. Use cursor pagination.' };
             const pageSize = 50;
             const sort = (request.query.sort || "DESC").toUpperCase();
-            if (sort !== "ASC" && sort !== "DESC")
+            if (sort !== "ASC" && sort !== "DESC") {
+                reply.code(400);
                 return { "success": false, "error": "Invalid upload time sort order." };
+            }
             const offset = (page - 1) * pageSize;
             const search = (request.query.search || "").trim();
             const from = request.query.from ? parseInt(request.query.from, 10) : null;
@@ -55,8 +61,10 @@ export default class SessionUploadsAPIRoute extends APIRoute {
                 filters.push(to);
                 extraClause += ` AND upload_time <= $${filters.length}::bigint`;
             }
-            if (Number.isFinite(from) && Number.isFinite(to) && from > to)
+            if (Number.isFinite(from) && Number.isFinite(to) && from > to) {
+                reply.code(400);
                 return { "success": false, "error": "The start date must be before the end date." };
+            }
             const cursorMode = request.query.pagination === 'cursor';
             const countFilters = [...filters];
             const countClause = extraClause;
