@@ -17,11 +17,11 @@ Modifies the value of maintenance global variable. Parameter mode can be: 0 - Da
 */
 export default class ModifyGlobalsMaintenanceAPIRoute extends APIRoute {
     constructor() {
-        super("GET", true);
+        super("POST", true);
     }
 
     async call(request, reply, server) {
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
+        let user = await server.db.findUserByAccessKey(hash(request.body?.key));
 
         if (!user)
             return {
@@ -40,9 +40,9 @@ export default class ModifyGlobalsMaintenanceAPIRoute extends APIRoute {
                 "error": "You are not an administrator."
             };
 
-        const enabled = request.query.enabled === "true";
-        const mode = parseInt(request.query.mode, 10);
-        const message = (request.query.reason || "").trim().slice(0, 500);
+        const enabled = request.body?.enabled === true;
+        const mode = Number.parseInt(request.body?.mode, 10);
+        const message = (typeof request.body?.reason === "string" ? request.body.reason : "").trim().slice(0, 500);
 
         if (!Number.isInteger(mode) || mode < 0 || mode > 2)
             return {
