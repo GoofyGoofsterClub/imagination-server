@@ -1,7 +1,7 @@
 import { Route } from "http/routing";
 import { publicHost } from "utilities/links";
 
-export default class EnableJSRoute extends Route
+export default class DocsRoute extends Route
 {
     constructor()
     {
