@@ -37,6 +37,12 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
+        if (!request.query.key)
+            return {
+                "success": false,
+                "error": "Missing parameters."
+            };
+
         let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
         if (!user)
