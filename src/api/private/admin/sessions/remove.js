@@ -1,6 +1,5 @@
 import { APIRoute } from "http/routing";
 import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
-import fs from "fs";
 import hash from "utilities/hash";
 
 /*--includedoc
