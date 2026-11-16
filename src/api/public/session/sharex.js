@@ -29,6 +29,11 @@ export default class PublicSessionShareXAPIRoute extends APIRoute {
             };
         }
 
+        if (user.banned) {
+            reply.code(403);
+            return { "success": false, "error": "You are banned." };
+        }
+
         let safeName = (user.username || "").replace(/[^A-Za-z0-9._-]/g, "");
         if (!safeName || safeName === "." || safeName === "..")
             safeName = "sharex-config";
