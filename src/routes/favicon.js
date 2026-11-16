@@ -1,5 +1,5 @@
 import { Route } from "http/routing";
-import { createReadStream } from 'fs';
+import { createReadStream, existsSync } from 'fs';
 
 export default class FaviconRoute extends Route
 {
@@ -10,6 +10,9 @@ export default class FaviconRoute extends Route
 
     async call(request, reply)
     {
-        reply.status(200).type('image/x-icon').send(createReadStream(`${__dirname}/../../public/img/favicon.ico`));
+        const faviconPath = `${__dirname}/../../public/img/favicon.ico`;
+        if (!existsSync(faviconPath))
+            return reply.status(404).send("Favicon not found");
+        reply.type('image/x-icon').header('Cache-Control', 'public, max-age=86400').send(createReadStream(faviconPath));
     }
 }
