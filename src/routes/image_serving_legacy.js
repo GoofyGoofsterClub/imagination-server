@@ -30,10 +30,18 @@ export default class ImageServing extends Route {
             "image/avif", "image/bmp", "image/gif", "image/jpeg", "image/png",
             "image/svg+xml", "image/webp", "image/x-icon"
         ];
-        const kind = browserImageTypes.includes(file.mimetype) ? "image"
-            : file.mimetype.startsWith("video/") ? "video"
-                : file.mimetype.startsWith("audio/") ? "audio"
-                    : file.mimetype === "application/pdf" ? "pdf" : "other";
+        const mimetype = file.mimetype ?? "";
+        let kind;
+        if (browserImageTypes.includes(mimetype))
+            kind = "image";
+        else if (mimetype.startsWith("video/"))
+            kind = "video";
+        else if (mimetype.startsWith("audio/"))
+            kind = "audio";
+        else if (mimetype === "application/pdf")
+            kind = "pdf";
+        else
+            kind = "other";
         if (!isBrowserPageRequest(request) || kind === "other") {
             if (kind === "other")
                 reply.header("Content-Disposition", `attachment; filename="${downloadFilename(file)}"`);
