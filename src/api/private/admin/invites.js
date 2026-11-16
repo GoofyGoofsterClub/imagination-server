@@ -21,22 +21,20 @@ export default class AdminGetInvitesAPIRoute extends APIRoute {
     async call(request, reply, server) {
         let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
-        if (!user)
-            return {
-                "success": false,
-                "error": "Invalid key."
-            };
+        if (!user) {
+            reply.code(401);
+            return { "success": false, "error": "Invalid key." };
+        }
 
-        if (user.banned) return {
-            "success": false,
-            "error": "You are banned."
-        };
+        if (user.banned) {
+            reply.code(403);
+            return { "success": false, "error": "You are banned." };
+        }
 
-        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
-            return {
-                "success": false,
-                "error": "You are not an administrator."
-            };
+        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR)) {
+            reply.code(403);
+            return { "success": false, "error": "You are not an administrator." };
+        }
 
         let invites = await server.db.query(`SELECT * FROM uwuso.invites`);
 
