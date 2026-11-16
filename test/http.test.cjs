@@ -13,6 +13,9 @@ test('serves visible initial content, fingerprinted assets, compression and priv
     assert.match(home.body, /window.__APP/);
     assert.doesNotMatch(home.body, /style="opacity: 0"/);
     assert.doesNotMatch(home.body, /<script src="\/public\/js/);
+    // Intentionally the full manifest URL rather than a plain source path:
+    // asserting the fingerprinted asset URL keeps the asset build step honest,
+    // so a broken or stale manifest fails this test.
     const asset = await server.server.inject({ url: manifest['/public/js/new.js'], headers: { 'accept-encoding': 'gzip' } });
     assert.equal(asset.statusCode, 200);
     assert.match(asset.headers['cache-control'], /immutable/);
