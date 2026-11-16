@@ -12,18 +12,24 @@ export default class PreviewRoute extends Route {
             reply.code(400);
             return { success: false, error: 'Invalid preview width.' };
         }
-        const file = await getFileByFilename(server.db, request.params.filename);
-        if (!file) { reply.code(404); return { success: false, error: 'File not found.' }; }
-        if (!await getPreview(file)) return reply.redirect(`/raw/${encodeURIComponent(file.filename)}`);
-        const previewFilename = file.disk_filename + `.preview-${request.params.width}.webp`;
         try {
-            await stat(path.resolve(__dirname, '../../privateuploads', previewFilename));
-        } catch {
-            // The metadata exists but this width was never generated (or was lost);
-            // fall back to the original file instead of failing to serve.
-            return reply.redirect(`/raw/${encodeURIComponent(file.filename)}`);
+            const file = await getFileByFilename(server.db, request.params.filename);
+            if (!file) { reply.code(404); return { success: false, error: 'File not found.' }; }
+            if (!await getPreview(file)) return reply.redirect(`/raw/${encodeURIComponent(file.filename)}`);
+            const previewFilename = file.disk_filename + `.preview-${request.params.width}.webp`;
+            try {
+                await stat(path.resolve(__dirname, '../../privateuploads', previewFilename));
+            } catch {
+                // The metadata exists but this width was never generated (or was lost);
+                // fall back to the original file instead of failing to serve.
+                return reply.redirect(`/raw/${encodeURIComponent(file.filename)}`);
+            }
+            reply.type('image/webp').header('X-Content-Type-Options', 'nosniff');
+            return serveUpload(reply, previewFilename);
+        } catch (error) {
+            // Keep the route's JSON contract instead of leaking raw driver messages.
+            reply.code(500);
+            return { success: false, error: 'Something went wrong while loading this preview.' };
         }
-        reply.type('image/webp').header('X-Content-Type-Options', 'nosniff');
-        return serveUpload(reply, previewFilename);
     }
 }
