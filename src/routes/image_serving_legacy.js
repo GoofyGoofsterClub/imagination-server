@@ -19,7 +19,7 @@ export default class ImageServing extends Route {
     async call(request, reply, server) {
         reply.header('Vary', 'Accept, User-Agent');
         reply.header('Cache-Control', 'private, no-cache');
-        let file = await getFileByFilename(server.db, request.params.filename);
+        const file = await getFileByFilename(server.db, request.params.filename);
 
         if (!file) {
             reply.status(404);
