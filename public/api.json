@@ -1,5 +1,5 @@
 {
-    "generationTimestamp": "2026-10-26T17:45:18.720Z",
+    "generationTimestamp": "2026-11-16T00:36:30.606Z",
     "routes": [
         {
             "path": "api/initial",
@@ -11,7 +11,7 @@
                 "adminonly": false,
                 "params": {},
                 "returns": "Key of an initial user",
-                "returnexample": "{ \"key\": \"XXXX-XXXX-XXXX-XXXX\" }"
+                "returnExample": "{ \"key\": \"vX2~!550e8400-e29b-41d4-a716-446655440000\" }"
             }
         },
         {
@@ -29,7 +29,7 @@
                     }
                 ],
                 "returns": "Nothing.",
-                "returnexample": "{ \"success\": true }"
+                "returnExample": "{ \"success\": true }"
             }
         },
         {
@@ -60,10 +60,14 @@
                     {
                         "type": "string",
                         "name": "buttonUrl"
+                    },
+                    {
+                        "type": "string",
+                        "name": "imageUrl"
                     }
                 ],
                 "returns": "The saved announcement.",
-                "returnexample": "{ \"success\": true, \"data\": { \"message\": \"Maintenance soon\", \"severity\": \"warning\" } }"
+                "returnExample": "{ \"success\": true, \"data\": { \"message\": \"Maintenance soon\", \"severity\": \"warning\" } }"
             }
         },
         {
@@ -89,7 +93,7 @@
                     }
                 ],
                 "returns": "The saved experiment state.",
-                "returnexample": "{ \"success\": true, \"data\": { \"enabled\": true, \"domains\": [\"uwu.so\", \"mirror.example\"] } }"
+                "returnExample": "{ \"success\": true, \"data\": { \"enabled\": true, \"domains\": [\"uwu.so\", \"mirror.example\"] } }"
             }
         },
         {
@@ -107,7 +111,7 @@
                     }
                 ],
                 "returns": "Current state of experiment options.",
-                "returnexample": "{ \"success\": true, \"data\": { \"randomCustomUrl\": { \"enabled\": true, \"domains\": [\"uwu.so\", \"mirror.example\"] } } }"
+                "returnExample": "{ \"success\": true, \"data\": { \"randomCustomUrl\": { \"enabled\": true, \"domains\": [\"uwu.so\", \"mirror.example\"] } } }"
             }
         },
         {
@@ -125,7 +129,7 @@
                     }
                 ],
                 "returns": "All invites",
-                "returnexample": "{ \"success\": true, \"data\": [...] }"
+                "returnExample": "{ \"success\": true, \"data\": [...] }"
             }
         },
         {
@@ -151,7 +155,7 @@
                     }
                 ],
                 "returns": "Requested data",
-                "returnexample": "{ \"success\": true, \"data\": \"\" }"
+                "returnExample": "{ \"success\": true, \"data\": \"\" }"
             }
         },
         {
@@ -181,7 +185,7 @@
                     }
                 ],
                 "returns": "New value",
-                "returnexample": "{ \"success\": true, \"value\": \"\" }"
+                "returnExample": "{ \"success\": true, \"value\": \"\" }"
             }
         },
         {
@@ -202,8 +206,10 @@
                         "name": "target"
                     }
                 ],
-                "returns": "Nothing",
-                "returnexample": "{ \"success\": true }"
+                "returns": {
+                    "success": true
+                },
+                "returnExample": "{ \"success\": true }"
             }
         },
         {
@@ -225,13 +231,13 @@
                     }
                 ],
                 "returns": "A key",
-                "returnexample": "{ \"success\": true, \"value\": \"\" }"
+                "returnExample": "{ \"success\": true, \"value\": \"\" }"
             }
         },
         {
             "path": "api/private/admin/sessions/service/new",
-            "method": "GET",
-            "description": "Returns specific field from a user's profile.",
+            "method": "POST",
+            "description": "Creates a new service account and returns its one-time access key and internal key.",
             "params": {
                 "private": false,
                 "needsauth": true,
@@ -247,13 +253,13 @@
                     }
                 ],
                 "returns": "New service account authentication information or an error",
-                "returnexample": "{ \"success\": true, \"data\": { \"access_key\": \"\", \"internal_key\": \"\" } }"
+                "returnExample": "{ \"success\": true, \"data\": { \"access_key\": \"\", \"internal_key\": \"\" } }"
             }
         },
         {
             "path": "api/private/admin/sessions",
             "method": "GET",
-            "description": "Returns all user's public and private profile data.",
+            "description": "Returns a paginated list of users. Supports offset pagination (default) and cursor pagination (?pagination=cursor), optional username search, and a page number.",
             "params": {
                 "private": false,
                 "needsauth": true,
@@ -262,10 +268,26 @@
                     {
                         "type": "string",
                         "name": "key"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page"
+                    },
+                    {
+                        "type": "string",
+                        "name": "search"
+                    },
+                    {
+                        "type": "string",
+                        "name": "pagination"
+                    },
+                    {
+                        "type": "string",
+                        "name": "cursor"
                     }
                 ],
-                "returns": "Returns if key is valid",
-                "returnexample": "{ \"success\": true, \"data\": [...] }"
+                "returns": "Returns a paginated list of users.",
+                "returnExample": "{ \"success\": true, \"data\": [...], \"pagination\": \"cursor\", \"hasNext\": true }"
             }
         },
         {
@@ -287,7 +309,7 @@
                     }
                 ],
                 "returns": "Information about the invite",
-                "returnexample": "{ \"success\": true, \"data\": [...] }"
+                "returnExample": "{ \"success\": true, \"data\": [...] }"
             }
         },
         {
@@ -309,17 +331,17 @@
                     }
                 ],
                 "returns": "Invite code",
-                "returnexample": "{ \"success\": true, \"data\": { \"inviteCode\": \"00000000-2f6b-4f8b-8d5b-9b8f6b7c4d0a\", \"displayName\": \"test\", \"validUntil\": 1600000000000 } }"
+                "returnExample": "{ \"success\": true, \"data\": { \"inviteCode\": \"00000000-2f6b-4f8b-8d5b-9b8f6b7c4d0a\", \"displayName\": \"test\", \"validUntil\": 1600000000000 } }"
             }
         },
         {
             "path": "api/private/invites/remove",
             "method": "GET",
-            "description": "Removes the already existing invite code.",
+            "description": "Removes the already existing invite code. The code itself authorizes removal (used by the public invite page's decline button); a valid key may also be provided.",
             "params": {
                 "private": false,
-                "needsauth": true,
-                "adminonly": true,
+                "needsauth": false,
+                "adminonly": false,
                 "params": [
                     {
                         "type": "string",
@@ -331,7 +353,7 @@
                     }
                 ],
                 "returns": "Nothing",
-                "returnexample": "{ \"success\": true }"
+                "returnExample": "{ \"success\": true }"
             }
         },
         {
@@ -349,7 +371,7 @@
                     }
                 ],
                 "returns": "Returns a private user data",
-                "returnexample": "{ \"success\": true, \"data\": { \"displayName\": \"test\", \"accessKey\": \"vX2~!00000000-2f6b-4f8b-8d5b-9b8f6b7c4d0a\" }"
+                "returnExample": "{ \"success\": true, \"data\": { \"displayName\": \"test\", \"accessKey\": \"vX2~!00000000-2f6b-4f8b-8d5b-9b8f6b7c4d0a\" }"
             }
         },
         {
@@ -371,7 +393,7 @@
                     }
                 ],
                 "returns": "Returns true in success if request was processed.",
-                "returnexample": "{ \"success\": true }"
+                "returnExample": "{ \"success\": true }"
             }
         },
         {
@@ -389,7 +411,7 @@
                     }
                 ],
                 "returns": "Returns if key is valid",
-                "returnexample": "{ \"success\": true }"
+                "returnExample": "{ \"success\": true }"
             }
         },
         {
@@ -411,13 +433,13 @@
                     }
                 ],
                 "returns": "Deletes key owner's account completely. Extremely dangerous API call.",
-                "returnexample": "{ \"success\": true }"
+                "returnExample": "{ \"success\": true }"
             }
         },
         {
             "path": "api/private/session/info",
             "method": "GET",
-            "description": "Gets publically available information about a user. (Internal use)",
+            "description": "Gets publicly available information about a user. (Internal use)",
             "params": {
                 "private": false,
                 "needsauth": true,
@@ -428,8 +450,8 @@
                         "name": "key"
                     }
                 ],
-                "returns": "Returns publically available information about a user.",
-                "returnexample": "{ \"success\": true, \"data\": { \"displayName\": \"username\", \"can_invite\": true, \"administrator\": false, \"isBanned\": false } }"
+                "returns": "Returns publicly available information about a user.",
+                "returnExample": "{ \"success\": true, \"data\": { \"displayName\": \"username\", \"can_invite\": true, \"administrator\": false, \"isBanned\": false, \"superuser\": false } }"
             }
         },
         {
@@ -467,7 +489,7 @@
                     }
                 ],
                 "returns": "Returns all user's uploads",
-                "returnexample": "{ \"success\": true, \"data\": [...] }"
+                "returnExample": "{ \"success\": true, \"data\": [...] }"
             }
         },
         {
@@ -485,7 +507,7 @@
                     }
                 ],
                 "returns": "New upload's link",
-                "returnexample": "{ }"
+                "returnExample": "{ }"
             }
         },
         {
@@ -507,7 +529,7 @@
                     }
                 ],
                 "returns": "Nothing",
-                "returnexample": "{ \"success\": true }"
+                "returnExample": "{ \"success\": true }"
             }
         },
         {
@@ -525,7 +547,7 @@
                     }
                 ],
                 "returns": "New upload's link",
-                "returnexample": "{ \"success\": true, \"data\": { \"link\": \"https://.../username/usIUSisdbQ\" } }"
+                "returnExample": "{ \"success\": true, \"data\": { \"link\": \"https://.../username/usIUSisdbQ\" } }"
             }
         },
         {
@@ -538,13 +560,13 @@
                 "adminonly": false,
                 "params": {},
                 "returns": "The active service announcement.",
-                "returnexample": "{ \"success\": true, \"data\": null }"
+                "returnExample": "{ \"success\": true, \"data\": null }"
             }
         },
         {
             "path": "api/public/session/get",
             "method": "GET",
-            "description": "Gets publically available information about a user.",
+            "description": "Gets publicly available information about a user.",
             "params": {
                 "private": false,
                 "needsauth": false,
@@ -555,8 +577,8 @@
                         "name": "target"
                     }
                 ],
-                "returns": "Publically available information about a user.",
-                "returnexample": "{ \"success\": true, \"data\": { \"displayName\": \"test\", \"uploads\": 0, \"invitedBy\": null, \"administrator\": false, \"views\": 0, \"badges\": [], \"paint\": null, \"isBanned\": false } }"
+                "returns": "Publicly available information about a user.",
+                "returnExample": "{ \"success\": true, \"data\": { \"displayName\": \"test\", \"uploads\": 0, \"invitedBy\": null, \"administrator\": false, \"views\": 0, \"badges\": [], \"paint\": null, \"isBanned\": false } }"
             }
         },
         {
@@ -574,7 +596,7 @@
                     }
                 ],
                 "returns": "Returns a ShareX config file for the user.",
-                "returnexample": "ShareX file"
+                "returnExample": "ShareX file"
             }
         },
         {
@@ -587,7 +609,7 @@
                 "adminonly": false,
                 "params": {},
                 "returns": "Total uploads and views.",
-                "returnexample": "{ \"count\": 123, \"uploads\": 123, \"views\": 456 }"
+                "returnExample": "{ \"count\": 123, \"uploads\": 123, \"views\": 456 }"
             }
         }
     ]
