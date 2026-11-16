@@ -10,7 +10,7 @@ import hash from "utilities/hash";
 @adminonly false
 @params []
 @returns Key of an initial user
-@returnexample { "key": "XXXX-XXXX-XXXX-XXXX" }
+@returnexample { "key": "vX2~!550e8400-e29b-41d4-a716-446655440000" }
 Creates the initial root user and gives it full access.
 
 */
