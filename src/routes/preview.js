@@ -1,12 +1,12 @@
 import { Route } from 'http/routing';
 import { getFileByFilename } from 'utilities/filecache';
-import { getPreview } from 'utilities/previews';
+import { getPreview, PREVIEW_WIDTHS } from 'utilities/previews';
 import serveUpload from 'utilities/serveupload';
 
 export default class PreviewRoute extends Route {
     constructor() { super('/preview/:filename/:width', 'GET'); }
     async call(request, reply, server) {
-        if (!['640', '1280'].includes(request.params.width)) {
+        if (!PREVIEW_WIDTHS.includes(Number(request.params.width))) {
             reply.code(400);
             return { success: false, error: 'Invalid preview width.' };
         }
