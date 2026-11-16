@@ -47,13 +47,13 @@ export async function migrate({ connectionString } = {}) {
                 await client.query('COMMIT');
             } catch (error) { await client.query('ROLLBACK'); throw error; }
         }
+        const createIndex = async (name, definition, unique = false) => {
+            const existing = await client.query('SELECT indisvalid FROM pg_index WHERE indexrelid = to_regclass($1)', [`uwuso.${name}`]);
+            if (existing.rows[0] && !existing.rows[0].indisvalid)
+                await client.query(`DROP INDEX CONCURRENTLY IF EXISTS uwuso.${name}`);
+            await client.query(`CREATE ${unique ? 'UNIQUE ' : ''}INDEX CONCURRENTLY IF NOT EXISTS ${name} ON ${definition}`);
+        };
         if (!applied.has('002-online-indexes')) {
-            const createIndex = async (name, definition, unique = false) => {
-                const existing = await client.query('SELECT indisvalid FROM pg_index WHERE indexrelid = to_regclass($1)', [`uwuso.${name}`]);
-                if (existing.rows[0] && !existing.rows[0].indisvalid)
-                    await client.query(`DROP INDEX CONCURRENTLY IF EXISTS uwuso.${name}`);
-                await client.query(`CREATE ${unique ? 'UNIQUE ' : ''}INDEX CONCURRENTLY IF NOT EXISTS ${name} ON ${definition}`);
-            };
             for (const [name, definition, unique] of indexes) {
                 try {
                     await createIndex(name, definition, unique);
@@ -73,8 +73,14 @@ export async function migrate({ connectionString } = {}) {
         }
         if (process.env.ENABLE_TRIGRAM_INDEXES === 'true' && !applied.has('003-substring-search')) {
             await client.query('CREATE EXTENSION IF NOT EXISTS pg_trgm');
-            await client.query('CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_uploads_filename_trgm ON uwuso.uploads USING gin (filename gin_trgm_ops)');
-            await client.query('CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_users_username_trgm ON uwuso.users USING gin (username gin_trgm_ops)');
+            // An interrupted concurrent build leaves indisvalid = false rows that
+            // IF NOT EXISTS would skip forever, so recover them like migration 002.
+            const trigramIndexes = [
+                ['idx_uploads_filename_trgm', 'uwuso.uploads USING gin (filename gin_trgm_ops)'],
+                ['idx_users_username_trgm', 'uwuso.users USING gin (username gin_trgm_ops)']
+            ];
+            for (const [name, definition] of trigramIndexes)
+                await createIndex(name, definition);
             await client.query(`INSERT INTO uwuso.schema_migrations (version) VALUES ('003-substring-search')`);
         }
         if (!applied.has('004-upload-extensions')) {
