@@ -1,6 +1,6 @@
 import { Route } from "http/routing";
 
-export default class ImageServing extends Route
+export default class DeprecatedUpload extends Route
 {
     constructor()
     {
