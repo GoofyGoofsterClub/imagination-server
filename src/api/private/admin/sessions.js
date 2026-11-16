@@ -49,8 +49,9 @@ export default class AdminGetSessionsAPIRoute extends APIRoute {
         const filters = [];
         let whereClause = "";
         if (search) {
-            filters.push(`%${search}%`);
-            whereClause = `WHERE username ILIKE $1::text`;
+            const escaped = search.replace(/[\%_]/g, (character) => `\${character}`);
+            filters.push(`%${escaped}%`);
+            whereClause = `WHERE username ILIKE $1::text ESCAPE '\'`;
         }
         const countFilters = [...filters];
         const countClause = whereClause;
