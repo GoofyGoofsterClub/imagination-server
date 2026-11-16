@@ -85,6 +85,7 @@ export default class AdminGetSessionsFieldAPIRoute extends APIRoute {
             let value = target[field];
             if (value !== undefined
                 && field in redactedFields
+                && user.id !== target.id
                 && hasPermission(target.permissions, USER_PERMISSIONS.ADMINISTRATOR)
                 && !hasPermission(user.permissions, USER_PERMISSIONS.GET_OTHERS_KEYS))
                 value = redactedFields[field];
