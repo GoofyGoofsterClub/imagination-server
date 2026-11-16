@@ -39,7 +39,7 @@ export default class DeleteSessionAPIRoute extends APIRoute {
         await server.server._public.ExternalLogging.Log(buildMessage(
             publicHost(request),
             "info",
-            "User changed deleted their profile.",
+            "User has deleted their profile.",
             ` \`${user.username}\` has deleted their account forever. Goodbye.`,
             publicBaseUrl(request)
         ));
