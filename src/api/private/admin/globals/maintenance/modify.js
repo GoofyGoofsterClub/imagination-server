@@ -4,6 +4,7 @@ import hash from "utilities/hash";
 
 const MAINTENANCE_KEY = "maintenance";
 const MAX_REASON_LENGTH = 500;
+let maintenanceModifications = Promise.resolve();
 
 /*--includedoc
 
@@ -58,13 +59,19 @@ export default class ModifyGlobalsMaintenanceAPIRoute extends APIRoute {
 
         const state = { enabled, mode, message };
 
-        if (enabled)
-            await server.db.query(`INSERT INTO uwuso.settings (key, value) VALUES ($1::text, $2::text)
-                ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [MAINTENANCE_KEY, JSON.stringify(state)]);
-        else
-            await server.db.query(`DELETE FROM uwuso.settings WHERE key = $1::text`, [MAINTENANCE_KEY]);
+        // Serialize the DB write and the in-memory publish so concurrent
+        // modifications cannot leave the two out of sync.
+        const modification = maintenanceModifications.then(async () => {
+            if (enabled)
+                await server.db.query(`INSERT INTO uwuso.settings (key, value) VALUES ($1::text, $2::text)
+                    ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [MAINTENANCE_KEY, JSON.stringify(state)]);
+            else
+                await server.db.query(`DELETE FROM uwuso.settings WHERE key = $1::text`, [MAINTENANCE_KEY]);
 
-        server.server._public.Maintenance = enabled ? { value: state } : false;
+            server.server._public.Maintenance = enabled ? { value: state } : false;
+        });
+        maintenanceModifications = modification.catch(() => {});
+        await modification;
 
         return {
             "success": true,
