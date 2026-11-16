@@ -18,8 +18,10 @@ export default class InvitesRemoveAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
+        let user = null;
+
         if (request.query.key) {
-            let user = await server.db.findUserByAccessKey(hash(request.query.key));
+            user = await server.db.findUserByAccessKey(hash(request.query.key));
 
             if (!user)
                 return {
@@ -39,15 +41,19 @@ export default class InvitesRemoveAPIRoute extends APIRoute {
                 "error": "Missing parameters."
             };
 
-        let target = await server.db.query(`SELECT * FROM uwuso.invites WHERE hash = $1::text`, [request.query.code]);
+        let target = await server.db.query(`DELETE FROM uwuso.invites WHERE hash = $1::text RETURNING *`, [request.query.code]);
 
-        if (target.rows.length < 1)
+        if (target.rowCount < 1)
             return {
                 "success": false,
                 "error": "Invalid code."
             };
 
-        await server.db.query(`DELETE FROM uwuso.invites WHERE hash = $1::text`, [request.query.code])
+        if (user && target.rows[0].inviter !== user.id)
+            return {
+                "success": false,
+                "error": "This invite does not belong to you."
+            };
 
         return {
             "success": true
