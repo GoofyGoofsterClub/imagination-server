@@ -20,7 +20,7 @@ async function AppFetch(url, options = {}) {
 
 async function FetchJSON(url, options) {
     const response = await AppFetch(url, options);
-    const data = await response.json();
+    const data = response.status === 204 || response.status === 304 ? undefined : await response.json();
     if (!response.ok) {
         const error = new Error(data.error || `Request failed (${response.status}).`);
         error.status = response.status;
