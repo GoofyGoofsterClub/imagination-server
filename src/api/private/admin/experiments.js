@@ -19,16 +19,23 @@ export default class AdminExperimentsAPIRoute extends APIRoute {
         super("GET");
     }
 
-    async call(request, reply, server) {
-        const user = await server.db.findUserByAccessKey(hash(request.query.key));
-        if (!user || user.banned || !hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
-            return { "success": false, "error": "You are not an administrator." };
+    async call(request, server) {
+        try {
+            if (!request.query.key)
+                return { "success": false, "error": "Missing key." };
 
-        return {
-            "success": true,
-            "data": {
-                "randomCustomUrl": await getRandomCustomUrlExperiment(server.db)
-            }
-        };
+            const user = await server.db.findUserByAccessKey(hash(request.query.key));
+            if (!user || user.banned || !hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
+                return { "success": false, "error": "You are not an administrator." };
+
+            return {
+                "success": true,
+                "data": {
+                    "randomCustomUrl": await getRandomCustomUrlExperiment(server.db)
+                }
+            };
+        } catch (e) {
+            return { "success": false, "error": "An internal error occurred." };
+        }
     }
 }
