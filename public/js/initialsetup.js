@@ -1,11 +1,13 @@
 
 
+
 window.onload = async () => {
     const ERROR_ELEMENT = document.querySelector("#initialsetup-error-text");
     const INITIALSETUP_FIELDS = {
         "ROOT_USERNAME": document.querySelector("#initialsetup-username"),
     }
     const SUBMIT_BUTTON = document.querySelector("button.input-button");
+    const INITIAL_API_URL = '/api/initial';
 
     const AFTER_ROOT_BLOCK = document.querySelector("#initialsetup-rootblock");
     const AFTER_ROOT_USERNAME = document.querySelector("#initialsetup-rootusername");
@@ -24,34 +26,39 @@ window.onload = async () => {
             return;
         }
 
-        // All fields are filled in 
+        // All fields are filled in — disable the button immediately so double-clicks don't fire two POSTs.
+        SUBMIT_BUTTON.disabled = true;
+        try {
+            const initialSetupAPIRequest = await fetch(INITIAL_API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "rootUsername": INITIALSETUP_FIELDS.ROOT_USERNAME.value
+                })
+            });
 
-        let initialSetupAPIRequest = await fetch('/api/initial', {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                "rootUsername": INITIALSETUP_FIELDS.ROOT_USERNAME.value
-            })
-        });
+            const initialSetupAPIRequestJSON = await initialSetupAPIRequest.json();
 
-        let initialSetupAPIRequestJSON = await initialSetupAPIRequest.json();
+            if (initialSetupAPIRequest.status !== 200) // There was an error with saving settings
+            {
+                ERROR_ELEMENT.innerText = `ERROR: ${initialSetupAPIRequestJSON.error ?? initialSetupAPIRequest.statusText}`;
+                return;
+            }
 
-        if (initialSetupAPIRequest.status != 200) // There was en error with saving settings
-        {
-            ERROR_ELEMENT.innerText = `ERROR: ${initialSetupAPIRequestJSON.error}`;
-            return;
+            // Everything went smoothly, need to display the key.
+
+            Object.values(INITIALSETUP_FIELDS).forEach(x => x.disabled = true); // Disable all the fields, so no input changed or created, not like it will affect anything.
+            SUBMIT_BUTTON.disabled = true; // Same for the button.
+            document.querySelector("body > .content").style.opacity = 0.3; // Make the key box more visible
+
+            AFTER_ROOT_USERNAME.innerText = INITIALSETUP_FIELDS.ROOT_USERNAME.value;
+            AFTER_ROOT_USERKEY.value = initialSetupAPIRequestJSON.key;
+            AFTER_ROOT_BLOCK.style.display = 'block';
+        } catch {
+            ERROR_ELEMENT.innerText = "ERROR: Could not reach the server. Please try again.";
+            SUBMIT_BUTTON.disabled = false; // Re-enable the button so the user can retry.
         }
-
-        // Everything went smoothly, need to display the key.
-
-        Object.values(INITIALSETUP_FIELDS).map(x => x.disabled = true); // Disable all the fields, so no input changed or created, not like it will affect anything.
-        SUBMIT_BUTTON.disabled = true; // Same for the button.
-        document.querySelector("body > .content").style.opacity = 0.3; // Make the key box more visible
-
-        AFTER_ROOT_USERNAME.innerText = INITIALSETUP_FIELDS.ROOT_USERNAME.value;
-        AFTER_ROOT_USERKEY.value = initialSetupAPIRequestJSON.key;
-        AFTER_ROOT_BLOCK.style.display = 'block';
     };
 };
