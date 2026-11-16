@@ -1,7 +1,7 @@
 import { Route } from "http/routing";
 import { getAnnouncement } from "utilities/announcement";
 import { isBrowserPageRequest } from "utilities/browser";
-import { publicBaseUrl } from "utilities/links";
+import { publicBaseUrl, DOWNLOAD_QUERY } from "utilities/links";
 import { getFileByFilename } from "utilities/filecache";
 import serveUpload from 'utilities/serveupload';
 import downloadFilename from 'utilities/downloadfilename';
@@ -57,7 +57,7 @@ export default class ImageServing extends Route {
             mimetype: file.mimetype,
             kind,
             rawUrl,
-            downloadUrl: `${rawUrl}?download=1`,
+            downloadUrl: `${rawUrl}?download=${DOWNLOAD_QUERY}`,
             embedUrl,
             announcement
         });
