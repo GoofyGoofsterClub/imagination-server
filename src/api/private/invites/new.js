@@ -15,6 +15,9 @@ class TooManyPendingInvitesError extends Error {
     }
 }
 
+const INVITE_LIFETIME_SECONDS = 60 * 60 * 24 * 7;
+const MAX_USERNAME_LENGTH = 32;
+
 /*--includedoc
 
 @private false
@@ -53,7 +56,7 @@ export default class InvitesNewAPIRoute extends APIRoute {
                     "error": "Missing parameters."
                 };
 
-            if (request.query.target.length > 32 || !/^[a-zA-Z0-9_]+$/.test(request.query.target))
+            if (request.query.target.length > MAX_USERNAME_LENGTH || !/^[a-zA-Z0-9_]+$/.test(request.query.target))
                 return {
                     "success": false,
                     "error": "Invalid username."
@@ -89,7 +92,7 @@ export default class InvitesNewAPIRoute extends APIRoute {
                             request.query.target,
                             inviteCode,
                             user.id,
-                            parseInt(Math.floor(+Date.now() / 1000) + 604800)
+                            Math.floor(+Date.now() / 1000) + INVITE_LIFETIME_SECONDS
                         ]
                     );
                 });
@@ -104,7 +107,7 @@ export default class InvitesNewAPIRoute extends APIRoute {
                 "data": {
                     "inviteCode": inviteCode,
                     "displayName": request.query.target,
-                    "validUntil": Date.now() + 604800000 // 7 days
+                    "validUntil": Date.now() + INVITE_LIFETIME_SECONDS * 1000
                 }
             };
         } catch (error) {
