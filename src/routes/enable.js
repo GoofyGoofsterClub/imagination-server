@@ -5,7 +5,7 @@ export default class EnableJSRoute extends Route
 {
     constructor()
     {
-        super("/please/enable.js", "GET");
+        super("/please/enable.js", "GET", true);
     }
 
     async call(request, reply)

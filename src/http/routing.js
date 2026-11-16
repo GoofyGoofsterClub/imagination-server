@@ -40,10 +40,11 @@ class BaseRoute {
 }
 
 export class Route extends BaseRoute {
-    constructor(path, method) {
+    constructor(path, method, excludeFromMaintenance = false) {
         super();
         this.path = path;
         this.method = method;
+        this.excludeFromMaintenance = excludeFromMaintenance;
     }
 
     async call(request, reply) { }
@@ -55,7 +56,7 @@ export class Route extends BaseRoute {
             return reply.viewAsync('initial-setup.ejs');
         }
         const maintenance = server.server?._public?.Maintenance;
-        if (maintenance && maintenance.value) {
+        if (maintenance && maintenance.value && !this.excludeFromMaintenance) {
             const mode = Number(maintenance.value.mode) || 0;
             const isDashboard = new URL(request.url, "http://localhost").pathname === "/";
             if (mode === 2 || isDashboard) {
