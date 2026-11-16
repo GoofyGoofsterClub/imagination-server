@@ -86,3 +86,14 @@ test('the APIRoute wrapper honors handler status, errors and the maintenance exc
     assert.equal(excluded.statusCode, 200, excluded.body);
     assert.deepEqual(excluded.json(), { success: true, excluded: true });
 });
+
+test('routes render the maintenance view instead when maintenance mode is on', async t => {
+    const { server } = await fixtureServer();
+    t.after(async () => { await server.stop(); });
+    server.server._public.Maintenance = { value: { enabled: true, mode: 2, message: 'Updating the website' } };
+    const home = await server.server.inject('/');
+    assert.equal(home.statusCode, 503, home.body);
+    assert.match(home.body, /Cute Image Uploader - Maintenance/);
+    assert.match(home.body, /Updating the website/);
+    assert.doesNotMatch(home.body, /window.__APP/);
+});
