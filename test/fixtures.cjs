@@ -9,6 +9,9 @@ async function fixtureServer() {
         calls,
         pool: { totalCount: 0, idleCount: 0, waitingCount: 0 },
         metrics: {},
+        // One lookup mock is enough: the server is wired with the new PostgreSQL
+        // controller only (the legacy controller slot stays null), so both lookup
+        // paths resolve through the same db object.
         findUserByAccessKey: async key => key === hash('fixture-key') ? user : null,
         doesUserExistByAccessKey: async key => key === hash('fixture-key'),
         findUserByDisplayName: async name => name === 'fixture' ? user : null,
