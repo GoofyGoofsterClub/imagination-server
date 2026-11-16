@@ -13,6 +13,18 @@ import { publicHost } from "utilities/links";
 import { recordRequest } from "utilities/metrics";
 
 const SENSITIVE_HEADERS = ["authorization", "cookie", "x-api-key"];
+const SENSITIVE_BODY_FIELDS = ["key", "code", "token"];
+
+function redactBody(value) {
+    if (Array.isArray(value)) return value.map(redactBody);
+    if (value && typeof value === "object") {
+        const redacted = {};
+        for (const [name, entry] of Object.entries(value))
+            redacted[name] = SENSITIVE_BODY_FIELDS.includes(name) ? "<redacted>" : redactBody(entry);
+        return redacted;
+    }
+    return value;
+}
 
 export default class HTTPServer {
     constructor(db, _db, redis = null, viewCounter = null) {
@@ -71,11 +83,9 @@ export default class HTTPServer {
             let headersJson = headers ? JSON.stringify(headers) : null;
             let bodyJson = null;
             if (request.body) {
-                let redactedBody = request.body;
-                if (typeof redactedBody === "object" && !Array.isArray(redactedBody) && "key" in redactedBody)
-                    redactedBody = { ...redactedBody, key: "<redacted>" };
-                else if (typeof redactedBody === "string")
-                    redactedBody = redactedBody.replace(/("key"\s*:\s*")[^"]*(")/g, "$1<redacted>$2");
+                const redactedBody = typeof request.body === "string"
+                    ? request.body.replace(/("key"\s*:\s*")[^"]*(")/g, "$1<redacted>$2")
+                    : redactBody(request.body);
                 bodyJson = JSON.stringify(redactedBody);
             }
             this.externalLogging.Log(buildMessage(
