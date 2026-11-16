@@ -21,11 +21,13 @@ export default class PublicSessionShareXAPIRoute extends APIRoute {
     async call(request, reply, server) {
         let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
-        if (!user)
+        if (!user) {
+            reply.code(401);
             return {
                 "success": false,
                 "error": "Invalid key."
             };
+        }
 
         let safeName = (user.username || "").replace(/[^A-Za-z0-9._-]/g, "");
         if (!safeName || safeName === "." || safeName === "..")
