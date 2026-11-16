@@ -13,7 +13,7 @@ import hash from "utilities/hash";
 Returns all unused invites.
 
 */
-export default class AdminGetSessionsAPIRoute extends APIRoute {
+export default class AdminGetInvitesAPIRoute extends APIRoute {
     constructor() {
         super("GET");
     }
