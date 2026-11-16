@@ -1,5 +1,12 @@
 import { Route } from "http/routing";
 
+function invalidInviteView(reply) {
+    return reply.viewAsync("error.ejs", {
+        "error_title": "Invalid invite",
+        "error_message": "The invite you have provided is invalid."
+    });
+}
+
 export default class InviteRoute extends Route {
     constructor() {
         super("/invite/:key", "GET");
@@ -12,26 +19,17 @@ export default class InviteRoute extends Route {
                                                 WHERE uwuso.invites.hash = $1::text;`, [request.params.key]);
 
         if (inviteInfo.rows.length < 1)
-            return reply.viewAsync("error.ejs", {
-                "error_title": "Invalid invite",
-                "error_message": "The invite you have provided is invalid."
-            });
+            return invalidInviteView(reply);
 
         let invite = inviteInfo.rows[0];
 
         if (invite.valid_until * 1000 < Date.now())
-            return reply.viewAsync("error.ejs", {
-                "error_title": "Invalid invite",
-                "error_message": "The invite you have provided is invalid."
-            });
+            return invalidInviteView(reply);
 
         let doesUserExist = await server.db.findUserByDisplayName(invite.username);
 
         if (doesUserExist)
-            return reply.viewAsync("error.ejs", {
-                "error_title": "Invalid invite",
-                "error_message": "The invite you have provided is invalid."
-            });
+            return invalidInviteView(reply);
 
         return reply.viewAsync("invite.ejs", {
             "invite": invite
