@@ -45,7 +45,7 @@ export default class InitialSetupAPIRoute extends APIRoute {
             // Serialize concurrent initial setups so only one root user can be created
             await client.query("SELECT pg_advisory_xact_lock(735389102)");
 
-            let isInitialSetup = (await client.query("SELECT COUNT(*)::int AS count FROM uwuso.users")).rows[0].count < 1;
+            let isInitialSetup = (await client.query("SELECT COUNT(*)::int AS count FROM uwuso.users")).rows[0].count === 0;
 
             if (!isInitialSetup) {
                 await client.query("ROLLBACK");
