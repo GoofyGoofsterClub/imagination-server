@@ -13,7 +13,7 @@ import { publicBaseUrl } from "utilities/links";
 Generate a ShareX config file for the user.
 
 */
-export default class CheckSessionInfoAPIRoute extends APIRoute {
+export default class PublicSessionShareXAPIRoute extends APIRoute {
     constructor() {
         super("GET");
     }
