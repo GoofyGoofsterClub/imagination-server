@@ -20,22 +20,26 @@ export default class AdminExperimentsRandomCustomUrlAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        const body = request.body ?? {};
-        const user = await server.db.findUserByAccessKey(hash(body.key));
-        if (!user || user.banned || !hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
-            return { "success": false, "error": "You are not an administrator." };
+        try {
+            const body = request.body ?? {};
+            const user = await server.db.findUserByAccessKey(hash(body.key));
+            if (!user || user.banned || !hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
+                return { "success": false, "error": "You are not an administrator." };
 
-        if (typeof body.enabled !== "boolean")
-            return { "success": false, "error": "Enabled must be a boolean." };
+            if (typeof body.enabled !== "boolean")
+                return { "success": false, "error": "Enabled must be a boolean." };
 
-        const domains = normalizeDomains(body.domains ?? []);
-        if (!domains)
-            return { "success": false, "error": "Domains must be a list of valid hostnames." };
-        if (domains.length > MAX_RANDOM_CUSTOM_URL_DOMAINS)
-            return { "success": false, "error": `At most ${MAX_RANDOM_CUSTOM_URL_DOMAINS} domains are allowed.` };
-        if (body.enabled && domains.length < 1)
-            return { "success": false, "error": "At least one domain is required to enable the experiment." };
+            const domains = normalizeDomains(body.domains ?? []);
+            if (!domains)
+                return { "success": false, "error": "Domains must be a list of valid hostnames." };
+            if (domains.length > MAX_RANDOM_CUSTOM_URL_DOMAINS)
+                return { "success": false, "error": `At most ${MAX_RANDOM_CUSTOM_URL_DOMAINS} domains are allowed.` };
+            if (body.enabled && domains.length < 1)
+                return { "success": false, "error": "At least one domain is required to enable the experiment." };
 
-        return { "success": true, "data": await setRandomCustomUrlExperiment(server.db, body.enabled, domains) };
+            return { "success": true, "data": await setRandomCustomUrlExperiment(server.db, body.enabled, domains) };
+        } catch (e) {
+            return { "success": false, "error": "An internal error occurred." };
+        }
     }
 }
