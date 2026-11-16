@@ -13,7 +13,9 @@ const allowedFields = [
     "uploads",
     "superuser",
     "badges",
-    "paint"
+    "paint",
+    "administrator",
+    "can_invite"
 ];
 
 const permissionFields = {
