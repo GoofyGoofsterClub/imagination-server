@@ -31,6 +31,7 @@ export default class NewImageServing extends Route {
 
         if (!file) {
             reply.status(404);
+            if (!isBrowserPageRequest(request)) return reply.send();
             return reply.viewAsync("error.ejs", {
                 "error_title": "Not Found",
                 "error_message": "<p>This page doesn't exist.</p><img src='/public/img/uhhh.jpg'>"
