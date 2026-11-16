@@ -10,11 +10,12 @@ export default class DeprecatedUpload extends Route
     async call(request, reply)
     {
         reply.status(301);
+        const message = "This route has been deprecated. Please use /api/private/uploads/new instead or download a new ShareX file through dashboard.";
         reply.send({
             "success": false,
             "data": {
-                "message": "This route has been deprecated. Please use /api/private/uploads/new instead or download a new ShareX file through dashboard.",
-                "link": "This route has been deprecated. Please use /api/private/uploads/new instead or download a new ShareX file through dashboard."
+                "message": message,
+                "link": "/api/private/uploads/new"
             }
         });
     }
