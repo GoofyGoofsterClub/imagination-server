@@ -16,11 +16,11 @@ Creates a new service account and returns its one-time access key and internal k
 */
 export default class AdminCreateServiceAccount extends APIRoute {
     constructor() {
-        super("GET");
+        super("POST");
     }
 
     async call(request, reply, server) {
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
+        let user = await server.db.findUserByAccessKey(hash(request.body?.key));
 
         if (!user)
             return {
@@ -39,7 +39,7 @@ export default class AdminCreateServiceAccount extends APIRoute {
                 "error": "You are not an administrator."
             };
 
-        if (!request.query.internal_name)
+        if (!request.body?.internal_name)
             return {
                 "success": false,
                 "error": "Missing parameters."
@@ -55,7 +55,7 @@ export default class AdminCreateServiceAccount extends APIRoute {
             [
                 hash(accessKey),
                 internalKey,
-                request.query.internal_name,
+                request.body.internal_name,
                 user.id,
                 permissions(USER_PERMISSIONS.UPLOAD, USER_PERMISSIONS.VIEW_OWN_FILES),
                 false
