@@ -83,5 +83,6 @@
     "setup-enjoy": "After these steps you should be all done and ready to upload files on here!",
     "setup-chatterino": "If you want to use with Chatterino, just copy fields from ShareX.",
     "banned-title": "Oops!",
-    "banned-paragraph": "Your account has been banned from accessing this service by one of the administrators."
+    "banned-paragraph": "Your account has been banned from accessing this service by one of the administrators.",
+    "dangerzone-placeholder": "This page is still in the making."
 }
