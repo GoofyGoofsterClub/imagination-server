@@ -49,7 +49,7 @@ export default class DeleteUploadAPIRoute extends APIRoute {
             };
         }
 
-        let fileInfo = await server.db.query(`SELECT uploader_id, disk_filename, views FROM uwuso.uploads WHERE filename = $1::text`, [request.query.filename]);
+        let fileInfo = await server.db.query(`SELECT uploader_id, disk_filename FROM uwuso.uploads WHERE filename = $1::text`, [request.query.filename]);
 
         if (fileInfo.rows.length < 1)
             return {
