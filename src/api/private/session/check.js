@@ -29,7 +29,8 @@ export default class CheckSessionAPIRoute extends APIRoute {
             };
         }
 
-        let doesExist = await server.db.doesUserExistByAccessKey(hash(request.query.key));
+        const key = typeof request.query.key === 'string' ? request.query.key : '';
+        const doesExist = await server.db.doesUserExistByAccessKey(hash(key));
 
         return {
             "success": doesExist,
