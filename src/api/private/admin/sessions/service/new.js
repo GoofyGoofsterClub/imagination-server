@@ -3,6 +3,8 @@ import { GeneratePrivateID, GeneratePublicID } from "utilities/id";
 import { USER_PERMISSIONS, hasPermission, permissions } from "utilities/permissions";
 import hash from "utilities/hash";
 
+const MAX_INTERNAL_NAME_LENGTH = 255;
+
 /*--includedoc
 
 @private false
@@ -20,7 +22,13 @@ export default class AdminCreateServiceAccount extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let user = await server.db.findUserByAccessKey(hash(request.body?.key));
+        if (!request.body?.key || !request.body?.internal_name)
+            return {
+                "success": false,
+                "error": "Missing parameters."
+            };
+
+        let user = await server.db.findUserByAccessKey(hash(request.body.key));
 
         if (!user)
             return {
@@ -39,12 +47,6 @@ export default class AdminCreateServiceAccount extends APIRoute {
                 "error": "You are not an administrator."
             };
 
-        if (!request.body?.internal_name)
-            return {
-                "success": false,
-                "error": "Missing parameters."
-            };
-
         let accessKey = GeneratePrivateID();
         let internalKey = GeneratePublicID(16, "v2S.~");
 
@@ -55,7 +57,7 @@ export default class AdminCreateServiceAccount extends APIRoute {
             [
                 hash(accessKey),
                 internalKey,
-                request.body.internal_name,
+                request.body.internal_name.slice(0, MAX_INTERNAL_NAME_LENGTH),
                 user.id,
                 permissions(USER_PERMISSIONS.UPLOAD, USER_PERMISSIONS.VIEW_OWN_FILES),
                 false
