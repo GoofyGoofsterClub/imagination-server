@@ -26,7 +26,7 @@
             <div class="dashboard-block">
                 <p>
                     <input readonly disabled value="●●●●●●●●●●●●●●●●●●●" id="__invite_key_field" style="transition: 0.3s;"> <button class="input-button" id="__invite_accept_button">I accept</button> <button class="input-button" id="__invite__decline_button">I decline</button>
-                    <p class="small-text error-text" id="__invite_result_message"></p>
+                    <p class="small-text" id="__invite_result_message"></p>
                     <p class="small-text" style="display: none;" id="__invite_result_after_acceptance">Welcome, <%= it.invite.username %>! Please copy the <span class="error-text">code above before closing this page</span>, this is your key to access everything here. Please look at <a href="/#setup">[Setup Guide]</a> on the main page for instructions on hwo to set this up.</p>
                 </p>
             </div>
@@ -66,6 +66,7 @@ window.onload = async function ()
                 document.getElementById("__invite_accept_button").innerText = "I accept";
                 document.getElementById("__invite__decline_button").disabled = false;
                 document.getElementById("__invite_key_field").disabled = false;
+                document.getElementById("__invite_result_message").classList.add("error-text");
                 document.getElementById("__invite_result_message").innerText = json.error;
             }
         }
@@ -75,6 +76,7 @@ window.onload = async function ()
             document.getElementById("__invite_accept_button").innerText = "I accept";
             document.getElementById("__invite__decline_button").disabled = false;
             document.getElementById("__invite_key_field").disabled = false;
+            document.getElementById("__invite_result_message").classList.add("error-text");
             document.getElementById("__invite_result_message").innerText = "Something went wrong. Please try again.";
         }
     });
@@ -94,12 +96,14 @@ window.onload = async function ()
                 document.getElementById("__invite_accept_button").remove();
                 document.getElementById("__invite__decline_button").remove();
                 document.getElementById("__invite_key_field").remove();
+                document.getElementById("__invite_result_message").classList.remove("error-text");
                 document.getElementById("__invite_result_message").innerText = "You've declined the invitation. You can close this page now.";
             }
             else
             {
                 document.getElementById("__invite_accept_button").disabled = false;
                 document.getElementById("__invite__decline_button").disabled = false;
+                document.getElementById("__invite_result_message").classList.add("error-text");
                 document.getElementById("__invite_result_message").innerText = json.error;
             }
         }
@@ -108,6 +112,7 @@ window.onload = async function ()
             document.getElementById("__invite_accept_button").disabled = false;
             document.getElementById("__invite__decline_button").disabled = false;
             document.getElementById("__invite_key_field").disabled = false;
+            document.getElementById("__invite_result_message").classList.add("error-text");
             document.getElementById("__invite_result_message").innerText = "Something went wrong. Please try again.";
         }
     });
