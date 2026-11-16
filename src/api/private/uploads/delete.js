@@ -40,7 +40,7 @@ export default class DeleteUploadAPIRoute extends APIRoute {
                 "error": "No filename was provided."
             };
 
-        if (request.query.filename == "*") {
+        if (request.query.filename === "*") {
             // delete all of theirs
             await deleteUserUploads(server.db, user.id);
 
