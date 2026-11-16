@@ -39,7 +39,7 @@ const run = async () => {
             ndb = await new NewDatabaseController();
             Output.Log('Preparing database schema...');
             await migrate();
-            await ndb.loadFileIdKey();
+            await ndb.loadFileIdKey().catch((err) => { err.migrationFailure = true; throw err; });
 
             Output.Log("Connected to the database!");
             databaseConnectionSuccess = true;
