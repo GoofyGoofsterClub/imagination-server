@@ -8,7 +8,7 @@ import hash from "utilities/hash";
 @needsauth true
 @adminonly true
 @params [(string) key, (string) target]
-@returns Nothing
+@returns { "success": true }
 @returnexample { "success": true }
 Deletes a user.
 
