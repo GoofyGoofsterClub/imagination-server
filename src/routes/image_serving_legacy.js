@@ -6,6 +6,11 @@ import { getFileByFilename } from "utilities/filecache";
 import serveUpload from 'utilities/serveupload';
 import downloadFilename from 'utilities/downloadfilename';
 
+const browserImageTypes = new Set([
+    "image/avif", "image/bmp", "image/gif", "image/jpeg", "image/png",
+    "image/svg+xml", "image/webp", "image/x-icon"
+]);
+
 export default class ImageServing extends Route {
     constructor() {
         super("/:uploader/:filename", "GET");
@@ -26,13 +31,9 @@ export default class ImageServing extends Route {
 
         server.server._public.ViewCounter.add(file.id, file.uploader_id);
 
-        const browserImageTypes = [
-            "image/avif", "image/bmp", "image/gif", "image/jpeg", "image/png",
-            "image/svg+xml", "image/webp", "image/x-icon"
-        ];
         const mimetype = file.mimetype ?? "";
         let kind;
-        if (browserImageTypes.includes(mimetype))
+        if (browserImageTypes.has(mimetype))
             kind = "image";
         else if (mimetype.startsWith("video/"))
             kind = "video";
