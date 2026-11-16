@@ -95,7 +95,7 @@ export async function migrate({ connectionString } = {}) {
     } catch (error) {
         if (connected) error.migrationFailure = true;
         throw error;
-    } finally { await client.end(); }
+    } finally { try { await client.end(); } catch { } }
 }
 
 if (require.main === module) {
