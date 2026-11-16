@@ -102,5 +102,5 @@ export async function migrate({ connectionString } = {}) {
 }
 
 if (require.main === module) {
-    migrate().catch(error => { console.error(error.message); process.exitCode = 1; });
+    migrate().catch(error => { console.error(error); process.exitCode = 1; });
 }
