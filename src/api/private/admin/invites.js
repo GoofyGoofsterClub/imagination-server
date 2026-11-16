@@ -36,7 +36,13 @@ export default class AdminGetInvitesAPIRoute extends APIRoute {
             return { "success": false, "error": "You are not an administrator." };
         }
 
-        let invites = await server.db.query(`SELECT * FROM uwuso.invites`);
+        let invites;
+        try {
+            invites = await server.db.query(`SELECT * FROM uwuso.invites WHERE valid_until > EXTRACT(epoch FROM NOW())::bigint`);
+        } catch (error) {
+            reply.code(500);
+            return { "success": false, "error": error.message };
+        }
 
         return {
             "success": true,
