@@ -3,6 +3,18 @@ import { v4 as uuidv4 } from "uuid";
 import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 import hash from "utilities/hash";
 
+class InviteAlreadyActiveError extends Error {
+    constructor() {
+        super("An active invite for this name already exists.");
+    }
+}
+
+class TooManyPendingInvitesError extends Error {
+    constructor() {
+        super("You have too many pending invites.");
+    }
+}
+
 /*--includedoc
 
 @private false
@@ -53,33 +65,38 @@ export default class InvitesNewAPIRoute extends APIRoute {
                 "error": "Specified name is taken."
             };
 
-        let pendingInvites = await server.db.query(`SELECT COUNT(*)::int AS n FROM uwuso.invites
-            WHERE inviter = $1::bigint AND valid_until > EXTRACT(epoch FROM NOW())::bigint`, [user.id]);
-        if (pendingInvites.rows[0].n >= 100)
-            return {
-                "success": false,
-                "error": "You have too many pending invites."
-            };
-
-        let activeInvite = await server.db.query(`SELECT id FROM uwuso.invites
-            WHERE username = $1::text AND valid_until > EXTRACT(epoch FROM NOW())::bigint`, [request.query.target]);
-        if (activeInvite.rows.length > 0)
-            return {
-                "success": false,
-                "error": "An active invite for this name already exists."
-            };
-
         let inviteCode = hash(uuidv4());
 
-        await server.db.query(`INSERT INTO uwuso.invites (username, hash, inviter, valid_until)
-            VALUES ($1::text, $2::text, $3::bigint, $4::bigint)`,
-            [
-                request.query.target,
-                inviteCode,
-                user.id,
-                parseInt(Math.floor(+Date.now() / 1000) + 604800)
-            ]
-        );
+        // The cap and duplicate checks and the insert run in one transaction
+        // so concurrent requests for the same name cannot both create an
+        // active invite.
+        try {
+            await server.db.transaction(async (client) => {
+                let pendingInvites = await client.query(`SELECT COUNT(*)::int AS n FROM uwuso.invites
+                    WHERE inviter = $1::bigint AND valid_until > EXTRACT(epoch FROM NOW())::bigint`, [user.id]);
+                if (pendingInvites.rows[0].n >= 100)
+                    throw new TooManyPendingInvitesError();
+
+                let activeInvite = await client.query(`SELECT id FROM uwuso.invites
+                    WHERE username = $1::text AND valid_until > EXTRACT(epoch FROM NOW())::bigint`, [request.query.target]);
+                if (activeInvite.rows.length > 0)
+                    throw new InviteAlreadyActiveError();
+
+                await client.query(`INSERT INTO uwuso.invites (username, hash, inviter, valid_until)
+                    VALUES ($1::text, $2::text, $3::bigint, $4::bigint)`,
+                    [
+                        request.query.target,
+                        inviteCode,
+                        user.id,
+                        parseInt(Math.floor(+Date.now() / 1000) + 604800)
+                    ]
+                );
+            });
+        } catch (error) {
+            if (error instanceof InviteAlreadyActiveError || error instanceof TooManyPendingInvitesError)
+                return { "success": false, "error": error.message };
+            throw error;
+        }
 
         return {
             "success": true,
