@@ -1,4 +1,4 @@
-var keystrokes = '';
+let keystrokes = '';
 const pageLoads = new Map();
 const scriptLoads = new Map();
 let navigationId = 0;
@@ -60,6 +60,7 @@ document.addEventListener('keydown', (event) => {
 function showHero(show, animate = false) {
     const id = ++heroMotionId;
     const hero = document.querySelector('.big-showoff');
+    if (!hero) return;
     const from = hero.getBoundingClientRect().height;
     if (typeof anime === 'function') anime.remove(hero);
     const finish = () => {
@@ -120,11 +121,13 @@ function loadScript(src) {
 
 async function ApplyPageContent(html, page, id, animate = false) {
     const template = document.createElement('template');
+    // Popover content is trusted server-rendered markup — an XSS vector if user data ever lands in a popover.
     template.innerHTML = html;
     const scripts = [...template.content.querySelectorAll('preload-script')].map(element => element.getAttribute('src'));
     template.content.querySelectorAll('preload-script').forEach(element => element.remove());
     if (id !== navigationId) return;
     const content = document.querySelector('body > .content');
+    if (!content) return;
     content.replaceChildren(template.content);
     Translatable.translateGroup(Translatable.find('body'));
     // Reveal the new page before optional scripts or API calls finish.
@@ -167,7 +170,6 @@ async function ChangePage(page, animate = true) {
     }
 }
 
-function SetContent(html) { document.querySelector('body > .content').innerHTML = html; }
 
 async function GetUploadCount() {
     try {
@@ -181,13 +183,12 @@ async function GetUploadCount() {
 
 async function initializeLanguage() {
     Translatable.setAvailableLanguages(window.__APP.languages);
-    defaultLanguage = window.__APP.translations;
     globalTranslationObject = defaultLanguage;
     const stored = localStorage.getItem('language');
     Translatable.setLanguage(stored || 'en');
     const selector = document.querySelector('#__main_language_select');
-    selector.replaceChildren(...availableLanguages.map(language => new Option(language.name, language.code)));
-    selector.value = CurrentLanguage;
+    if (selector) selector.replaceChildren(...availableLanguages.map(language => new Option(language.name, language.code)));
+    if (selector) selector.value = CurrentLanguage;
     const apply = async () => {
         try {
             Translatable.setGlobalTranslationObject(await Translatable.getTranslationObject(CurrentLanguage));
@@ -195,7 +196,8 @@ async function initializeLanguage() {
             Translatable.setGlobalTranslationObject(defaultLanguage);
             console.warn('Using default translations.', error);
         }
-        document.documentElement.lang = CurrentLanguage === 'jp' ? 'ja' : CurrentLanguage === 'sa' ? 'ar' : CurrentLanguage;
+        const langMap = { jp: 'ja', sa: 'ar' };
+        document.documentElement.lang = langMap[CurrentLanguage] ?? CurrentLanguage;
         document.body.style.direction = availableLanguages.find(language => language.code === CurrentLanguage)?.rtl ? 'rtl' : 'initial';
         Translatable.translateGroup(Translatable.find('body'));
     };
