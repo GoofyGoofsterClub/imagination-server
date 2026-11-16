@@ -63,10 +63,16 @@ export default class AdminModifySessionsAPIRoute extends APIRoute {
 
         let accessKey = "vX2~!" + uuidv4();
 
-        let _target = await server.db.query(`UPDATE uwuso.users SET access_key = $2 WHERE username = $1`, [
+        let result = await server.db.query(`UPDATE uwuso.users SET access_key = $2 WHERE username = $1`, [
             request.query.target,
             hash(accessKey)
         ]);
+
+        if (result.rowCount === 0)
+            return {
+                "success": false,
+                "error": "Failed to update the user's key."
+            };
 
         return {
             "success": true,
