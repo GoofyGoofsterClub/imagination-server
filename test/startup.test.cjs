@@ -14,23 +14,23 @@ function launch(env) {
     const child = spawn(process.execPath, ['lib/run.js'], {
         cwd: path.resolve(__dirname, '..'), env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'pipe']
     });
-    let output = '';
+    let stdout = '';
+    let stderr = '';
     const exited = new Promise(resolve => child.once('exit', (code, signal) => resolve({ code, signal })));
     const ready = new Promise((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error('Startup timed out:\n' + output)), 20000);
-        const receive = chunk => {
-            output += chunk.toString();
-            if (output.includes('Server started')) { clearTimeout(timer); resolve(); }
+        const timer = setTimeout(() => reject(new Error('Startup timed out:\n' + stdout + stderr)), 20000);
+        const checkReady = () => {
+            if (stdout.includes('Server started')) { clearTimeout(timer); resolve(); }
         };
-        child.stdout.on('data', receive);
-        child.stderr.on('data', receive);
+        child.stdout.on('data', chunk => { stdout += chunk.toString(); checkReady(); });
+        child.stderr.on('data', chunk => { stderr += chunk.toString(); checkReady(); });
         child.once('error', error => { clearTimeout(timer); reject(error); });
         exited.then(({ code }) => {
             clearTimeout(timer);
-            if (!output.includes('Server started')) reject(new Error(`Startup exited (${code}):\n${output}`));
+            if (!stdout.includes('Server started')) reject(new Error(`Startup exited (${code}):\n${stdout}${stderr}`));
         });
     });
-    return { child, ready, exited };
+    return { child, ready, exited, stdout: () => stdout, stderr: () => stderr };
 }
 
 for (const legacyDuplicates of [false, true]) test(`startup initializes automatically and preserves data${legacyDuplicates ? ' with legacy duplicate hashes' : ''}`, {
@@ -47,6 +47,15 @@ for (const legacyDuplicates of [false, true]) test(`startup initializes automati
     const processes = [];
     let server;
     let pool;
+    // Spawn a starter, wait for the startup log line, stop it and collect the result.
+    const startAndStop = async env => {
+        const process = launch(env);
+        processes.push(process);
+        await process.ready;
+        process.child.kill('SIGTERM');
+        const { code } = await process.exited;
+        return { exitCode: code, stdout: process.stdout(), stderr: process.stderr() };
+    };
     t.after(async () => {
         if (server) await server.stop();
         if (pool) await pool.end();
@@ -94,22 +103,17 @@ for (const legacyDuplicates of [false, true]) test(`startup initializes automati
         LOG_WEBHOOK: '', OTLP_LOG_ENDPOINT: '', NODE_ENV: 'production', ENABLE_TRIGRAM_INDEXES: 'false'
     };
     // Neither instance invokes the CLI or requires a separate deployment step.
-    const starters = [launch(env), launch(env)];
-    processes.push(...starters);
-    await Promise.all(starters.map(process => process.ready));
-    for (const process of starters) process.child.kill('SIGTERM');
-    for (const process of starters) assert.equal((await process.exited).code, 0);
+    const [first, second] = await Promise.all([startAndStop(env), startAndStop(env)]);
+    assert.equal(first.exitCode, 0);
+    assert.equal(second.exitCode, 0);
     const before = (await database.query('SELECT version, applied_at FROM uwuso.schema_migrations ORDER BY version')).rows;
     const extensionColumns = (await database.query(`SELECT data_type, is_nullable FROM information_schema.columns
         WHERE table_schema = 'uwuso' AND table_name = 'uploads' AND column_name = 'file_extension'`)).rows;
     assert.deepEqual(extensionColumns, [{ data_type: 'text', is_nullable: 'YES' }]);
     assert.equal((await database.query(`SELECT indisvalid FROM pg_index WHERE indexrelid='uwuso.users_username_uindex'::regclass`)).rows[0].indisvalid, true);
     assert.equal((await database.query(`SELECT value FROM uwuso.settings WHERE key='file_id_key'`)).rows[0].value, key);
-    const repeated = launch(env);
-    processes.push(repeated);
-    await repeated.ready;
-    repeated.child.kill('SIGTERM');
-    assert.equal((await repeated.exited).code, 0);
+    const repeated = await startAndStop(env);
+    assert.equal(repeated.exitCode, 0);
     assert.deepEqual((await database.query('SELECT version, applied_at FROM uwuso.schema_migrations ORDER BY version')).rows, before);
     if (legacyDuplicates) {
         assert.equal((await database.query(`SELECT COUNT(*) AS count FROM uwuso.uploads WHERE filehash=$1`, [fileHash])).rows[0].count, '2');
