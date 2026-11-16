@@ -57,7 +57,7 @@ export class Route extends BaseRoute {
         const maintenance = server.server?._public?.Maintenance;
         if (maintenance && maintenance.value) {
             const mode = Number(maintenance.value.mode) || 0;
-            const isDashboard = request.url === "/" || request.url.startsWith("/?");
+            const isDashboard = new URL(request.url, "http://localhost").pathname === "/";
             if (mode === 2 || isDashboard) {
                 reply.status(503);
                 return reply.viewAsync('maintenance.ejs', { reason: maintenance.value.message });
