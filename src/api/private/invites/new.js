@@ -32,79 +32,84 @@ export default class InvitesNewAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
-
-        if (!user)
-            return {
-                "success": false,
-                "error": "Invalid key."
-            };
-
-        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR) && !hasPermission(user.permissions, USER_PERMISSIONS.INVITE_USERS))
-            return {
-                "success": false,
-                "error": "You are not an administrator or you cannot invite users."
-            };
-
-        if (!request.query.target)
-            return {
-                "success": false,
-                "error": "Missing parameters."
-            };
-
-        if (request.query.target.length > 32 || !/^[a-zA-Z0-9_]+$/.test(request.query.target))
-            return {
-                "success": false,
-                "error": "Invalid username."
-            };
-
-        let target = await server.db.findUserByDisplayName(request.query.target);
-        if (target)
-            return {
-                "success": false,
-                "error": "Specified name is taken."
-            };
-
-        let inviteCode = hash(uuidv4());
-
-        // The cap and duplicate checks and the insert run in one transaction
-        // so concurrent requests for the same name cannot both create an
-        // active invite.
         try {
-            await server.db.transaction(async (client) => {
-                let pendingInvites = await client.query(`SELECT COUNT(*)::int AS n FROM uwuso.invites
-                    WHERE inviter = $1::bigint AND valid_until > EXTRACT(epoch FROM NOW())::bigint`, [user.id]);
-                if (pendingInvites.rows[0].n >= 100)
-                    throw new TooManyPendingInvitesError();
+            let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
-                let activeInvite = await client.query(`SELECT id FROM uwuso.invites
-                    WHERE username = $1::text AND valid_until > EXTRACT(epoch FROM NOW())::bigint`, [request.query.target]);
-                if (activeInvite.rows.length > 0)
-                    throw new InviteAlreadyActiveError();
+            if (!user)
+                return {
+                    "success": false,
+                    "error": "Invalid key."
+                };
 
-                await client.query(`INSERT INTO uwuso.invites (username, hash, inviter, valid_until)
-                    VALUES ($1::text, $2::text, $3::bigint, $4::bigint)`,
-                    [
-                        request.query.target,
-                        inviteCode,
-                        user.id,
-                        parseInt(Math.floor(+Date.now() / 1000) + 604800)
-                    ]
-                );
-            });
-        } catch (error) {
-            if (error instanceof InviteAlreadyActiveError || error instanceof TooManyPendingInvitesError)
-                return { "success": false, "error": error.message };
-            throw error;
-        }
+            if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR) && !hasPermission(user.permissions, USER_PERMISSIONS.INVITE_USERS))
+                return {
+                    "success": false,
+                    "error": "You are not an administrator or you cannot invite users."
+                };
 
-        return {
-            "success": true,
-            "data": {
-                "inviteCode": inviteCode,
-                "displayName": request.query.target,
-                "validUntil": Date.now() + 604800000 // 7 days
+            if (!request.query.target)
+                return {
+                    "success": false,
+                    "error": "Missing parameters."
+                };
+
+            if (request.query.target.length > 32 || !/^[a-zA-Z0-9_]+$/.test(request.query.target))
+                return {
+                    "success": false,
+                    "error": "Invalid username."
+                };
+
+            let target = await server.db.findUserByDisplayName(request.query.target);
+            if (target)
+                return {
+                    "success": false,
+                    "error": "Specified name is taken."
+                };
+
+            let inviteCode = hash(uuidv4());
+
+            // The cap and duplicate checks and the insert run in one
+            // transaction so concurrent requests for the same name cannot
+            // both create an active invite.
+            try {
+                await server.db.transaction(async (client) => {
+                    let pendingInvites = await client.query(`SELECT COUNT(*)::int AS n FROM uwuso.invites
+                        WHERE inviter = $1::bigint AND valid_until > EXTRACT(epoch FROM NOW())::bigint`, [user.id]);
+                    if (pendingInvites.rows[0].n >= 100)
+                        throw new TooManyPendingInvitesError();
+
+                    let activeInvite = await client.query(`SELECT id FROM uwuso.invites
+                        WHERE username = $1::text AND valid_until > EXTRACT(epoch FROM NOW())::bigint`, [request.query.target]);
+                    if (activeInvite.rows.length > 0)
+                        throw new InviteAlreadyActiveError();
+
+                    await client.query(`INSERT INTO uwuso.invites (username, hash, inviter, valid_until)
+                        VALUES ($1::text, $2::text, $3::bigint, $4::bigint)`,
+                        [
+                            request.query.target,
+                            inviteCode,
+                            user.id,
+                            parseInt(Math.floor(+Date.now() / 1000) + 604800)
+                        ]
+                    );
+                });
+            } catch (error) {
+                if (error instanceof InviteAlreadyActiveError || error instanceof TooManyPendingInvitesError)
+                    return { "success": false, "error": error.message };
+                throw error;
             }
-        };
+
+            return {
+                "success": true,
+                "data": {
+                    "inviteCode": inviteCode,
+                    "displayName": request.query.target,
+                    "validUntil": Date.now() + 604800000 // 7 days
+                }
+            };
+        } catch (error) {
+            reply.code(500);
+            return { "success": false, "error": "An unexpected error occurred. Please try again." };
+        }
     }
 }
