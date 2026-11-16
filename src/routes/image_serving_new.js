@@ -6,6 +6,19 @@ import { getFileByFilename } from "utilities/filecache";
 import serveUpload from 'utilities/serveupload';
 import downloadFilename from 'utilities/downloadfilename';
 
+const BROWSER_IMAGE_TYPES = new Set([
+    "image/avif", "image/bmp", "image/gif", "image/jpeg", "image/png",
+    "image/svg+xml", "image/webp", "image/x-icon"
+]);
+
+function mimeKind(mimetype) {
+    if (BROWSER_IMAGE_TYPES.has(mimetype)) return "image";
+    if (mimetype.startsWith("video/")) return "video";
+    if (mimetype.startsWith("audio/")) return "audio";
+    if (mimetype === "application/pdf") return "pdf";
+    return "other";
+}
+
 export default class NewImageServing extends Route {
     constructor() {
         super("/:filename", "GET");
@@ -26,14 +39,7 @@ export default class NewImageServing extends Route {
 
         server.server._public.ViewCounter.add(file.id, file.uploader_id);
 
-        const browserImageTypes = [
-            "image/avif", "image/bmp", "image/gif", "image/jpeg", "image/png",
-            "image/svg+xml", "image/webp", "image/x-icon"
-        ];
-        const kind = browserImageTypes.includes(file.mimetype) ? "image"
-            : file.mimetype.startsWith("video/") ? "video"
-                : file.mimetype.startsWith("audio/") ? "audio"
-                    : file.mimetype === "application/pdf" ? "pdf" : "other";
+        const kind = mimeKind(file.mimetype);
         if (!isBrowserPageRequest(request) || kind === "other") {
             if (kind === "other")
                 reply.header("Content-Disposition", `attachment; filename="${downloadFilename(file)}"`);
