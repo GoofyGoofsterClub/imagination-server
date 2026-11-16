@@ -32,7 +32,7 @@ export default class HTTPServer {
             recordRequest(request.routeOptions.url || 'unmatched', reply.statusCode, reply.elapsedTime);
         });
         this.server.odb = db;
-        this.server.db = db;
+        this.server.db = _db;
         this.Output = new PresetOutput("http");
         this.externalLogging = new ExternalLogging(process.env.LOG_WEBHOOK);
         this.server.externalLogging = this.externalLogging;
