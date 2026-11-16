@@ -23,7 +23,8 @@ async function fixtureServer() {
                 { id: '1', filename: 'file-one', upload_time: '1700000000', upload_domain: 'localhost' }
             ] };
             return { rows: [], rowCount: 0 };
-        }
+        },
+        close: async () => {}
     };
     const server = new HTTPServer(null, db, null, { add() {} });
     await HTTPRouting.RegisterRoutes(server);
