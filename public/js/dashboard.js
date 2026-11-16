@@ -1,3 +1,7 @@
+const API_ENDPOINTS = {
+    sessionInfo: '/api/private/session/info',
+};
+
 window.PageInitializers.dashboard = async function () {
 document.getElementById("__dashboard_login_token").onkeyup = function(event) {
     if (event.keyCode === 13) {
@@ -5,16 +9,17 @@ document.getElementById("__dashboard_login_token").onkeyup = function(event) {
     }
 }
 
-document.getElementById("__dashboard_login_button").onclick = function() {
+document.getElementById("__dashboard_login_button").onclick = async function() {
     LockInput();
-    let key = document.getElementById("__dashboard_login_token").value;
-    if (key == "")
+    const key = document.getElementById("__dashboard_login_token").value.trim();
+    if (key === "")
     {
         setDashboardResult("ERROR: You must enter a key to login.");
         UnlockInput();
         return;
     }
-    FetchJSON("/api/private/session/info", { headers: { Authorization: key } }).then(async function(data) {
+    try {
+        const data = await FetchJSON(API_ENDPOINTS.sessionInfo, { headers: { Authorization: key } });
         if (data.success)
         {
             localStorage.setItem("key", key);
@@ -23,13 +28,14 @@ document.getElementById("__dashboard_login_button").onclick = function() {
         }
         else
         {
-            setDashboardResult("ERROR: " + data.error);
+            setDashboardResult("ERROR: " + (data.error || "Login failed. Please try again."));
             UnlockInput();
         }
-    }).catch(error => {
-        setDashboardResult(error.status === 429 ? 'Too many attempts. Please wait and retry.' : error.message);
+    } catch (error) {
+        setDashboardResult(error.status === 429 ? 'Too many attempts. Please wait and retry.'
+            : (error.status ? error.message : 'Network error. Please check your connection and retry.'));
         UnlockInput();
-    });
+    }
 
 }
 };
