@@ -1,4 +1,5 @@
 import fastify from "fastify";
+import { randomUUID } from "node:crypto";
 import fastifyMultipart from "@fastify/multipart";
 import fastifyCookie from "@fastify/cookie";
 import fastifyStatic from "@fastify/static";
@@ -71,6 +72,8 @@ export default class HTTPServer {
     async registerErrorHandler() {
         this.server.setErrorHandler((error, request, reply) => {
             this.Output.Error("sys", "An error occured while processing a request:", error);
+            const requestId = randomUUID();
+            reply.header("X-Request-Id", requestId);
             let cookies = "";
             for (let cookie in request.cookies) {
                 cookies += `\`${cookie}\` = \`<redacted>\`\n`;
@@ -96,6 +99,7 @@ export default class HTTPServer {
                 null,
                 new Field("Request URL", url, false),
                 new Field("Request Method", request.method, false),
+                new Field("Request ID", requestId, false),
                 new Field("Request Headers", headersJson ? (headersJson.length > 1024 ? "Too large to display" : headersJson) : "No data", false),
                 new Field("Request Body", bodyJson ? (bodyJson.length > 1024 ? "Too large to display" : bodyJson) : "No data", false),
                 new Field("Request Cookies", cookies ? (cookies.length > 1024 ? "Too large to display" : cookies.length > 0 ? cookies : "None") : "No data", false),
@@ -116,7 +120,8 @@ export default class HTTPServer {
             return reply.viewAsync("error.ejs", {
                 "domain": publicHost(request),
                 "error_title": "An error occured while processing your request",
-                "error_message": errorMessage
+                "error_message": errorMessage,
+                "request_id": requestId
             });
         });
     }
