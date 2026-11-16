@@ -46,25 +46,36 @@ window.onload = async function ()
         document.getElementById("__invite__decline_button").disabled = true;
         document.getElementById("__invite_key_field").disabled = true;
 
-        let response = await fetch("/api/private/invites/use?code=<%= it.invite.hash %>");
-
-        let json = await response.json();
-        if (json.success)
+        try
         {
-            document.getElementById("__invite_accept_button").remove();
-            document.getElementById("__invite__decline_button").remove();
-            document.getElementById("__invite_key_field").value = json.data.accessKey;
-            document.getElementById("__invite_key_field").style.width = "100%";
-            document.getElementById("__invite_result_after_acceptance").style.display = "block";
-            document.getElementById("__invite_key_field").disabled = false;
+            let response = await fetch("/api/private/invites/use?code=<%= it.invite.hash %>");
+
+            let json = await response.json();
+            if (json.success)
+            {
+                document.getElementById("__invite_accept_button").remove();
+                document.getElementById("__invite__decline_button").remove();
+                document.getElementById("__invite_key_field").value = json.data.accessKey;
+                document.getElementById("__invite_key_field").style.width = "100%";
+                document.getElementById("__invite_result_after_acceptance").style.display = "block";
+                document.getElementById("__invite_key_field").disabled = false;
+            }
+            else
+            {
+                document.getElementById("__invite_accept_button").disabled = false;
+                document.getElementById("__invite_accept_button").innerText = "I accept";
+                document.getElementById("__invite__decline_button").disabled = false;
+                document.getElementById("__invite_key_field").disabled = false;
+                document.getElementById("__invite_result_message").innerText = json.error;
+            }
         }
-        else
+        catch (error)
         {
             document.getElementById("__invite_accept_button").disabled = false;
             document.getElementById("__invite_accept_button").innerText = "I accept";
             document.getElementById("__invite__decline_button").disabled = false;
             document.getElementById("__invite_key_field").disabled = false;
-            document.getElementById("__invite_result_message").innerText = json.error;
+            document.getElementById("__invite_result_message").innerText = "Something went wrong. Please try again.";
         }
     });
 
@@ -74,20 +85,30 @@ window.onload = async function ()
         document.getElementById("__invite__decline_button").disabled = true;
         document.getElementById("__invite_key_field").disabled = true;
 
-        let response = await fetch("/api/private/invites/remove?code=<%= it.invite.hash %>");
-        let json = await response.json();
-        if (json.success)
+        try
         {
-            document.getElementById("__invite_accept_button").remove();
-            document.getElementById("__invite__decline_button").remove();
-            document.getElementById("__invite_key_field").remove();
-            document.getElementById("__invite_result_message").innerText = "You've declined the invitation. You can close this page now.";
+            let response = await fetch("/api/private/invites/remove?code=<%= it.invite.hash %>");
+            let json = await response.json();
+            if (json.success)
+            {
+                document.getElementById("__invite_accept_button").remove();
+                document.getElementById("__invite__decline_button").remove();
+                document.getElementById("__invite_key_field").remove();
+                document.getElementById("__invite_result_message").innerText = "You've declined the invitation. You can close this page now.";
+            }
+            else
+            {
+                document.getElementById("__invite_accept_button").disabled = false;
+                document.getElementById("__invite__decline_button").disabled = false;
+                document.getElementById("__invite_result_message").innerText = json.error;
+            }
         }
-        else
+        catch (error)
         {
             document.getElementById("__invite_accept_button").disabled = false;
             document.getElementById("__invite__decline_button").disabled = false;
-            document.getElementById("__invite_result_message").innerText = json.error;
+            document.getElementById("__invite_key_field").disabled = false;
+            document.getElementById("__invite_result_message").innerText = "Something went wrong. Please try again.";
         }
     });
 
