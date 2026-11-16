@@ -72,7 +72,14 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute {
             };
         }
 
-        await server.db.query(`DELETE FROM uwuso.users WHERE id = $1::bigint`, [target.id]);
+        try {
+            await server.db.query(`DELETE FROM uwuso.users WHERE id = $1::bigint`, [target.id]);
+        } catch (error) {
+            return {
+                "success": false,
+                "error": "Failed to delete the user."
+            };
+        }
 
         return {
             "success": true
