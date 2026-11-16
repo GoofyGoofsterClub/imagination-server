@@ -19,45 +19,48 @@ export default class InvitesInfoAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
+        try {
+            let user = await server.db.findUserByAccessKey(hash(request.query.key));
 
-        if (!user)
+            if (!user)
+                return {
+                    "success": false,
+                    "error": "Invalid key."
+                };
+
+            if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
+                return {
+                    "success": false,
+                    "error": "You are not an administrator."
+                };
+
+            if (!request.query.code)
+                return {
+                    "success": false,
+                    "error": "Missing parameters."
+                };
+
+            let target = await server.db.query(`SELECT * FROM uwuso.invites WHERE hash = $1::text`, [request.query.code]);
+
+            if (target.rows.length < 1)
+                return {
+                    "success": false,
+                    "error": "Invalid code."
+                };
+
+            if (target.rows[0].valid_until * 1000 < Date.now())
+                return {
+                    "success": false,
+                    "error": "Code expired."
+                };
+
             return {
-                "success": false,
-                "error": "Invalid key."
+                "success": true,
+                "data": target.rows
             };
-
-        if (!hasPermission(user.permissions, USER_PERMISSIONS.ADMINISTRATOR))
-            return {
-                "success": false,
-                "error": "You are not an administrator."
-            };
-
-        if (!request.query.code)
-            return {
-                "success": false,
-                "error": "Missing parameters."
-            };
-
-        let target = await server.db.query(`SELECT * FROM uwuso.invites WHERE hash = $1::text`, [request.query.code]);
-
-        if (target.rows.length < 1)
-            return {
-                "success": false,
-                "error": "Invalid code."
-            };
-
-        if (target.rows[0].valid_until * 1000 < Date.now())
-            return {
-                "success": false,
-                "error": "Code expired."
-            };
-
-        return {
-            "success": true,
-            "data": target.rows
-        };
-
-
+        } catch (error) {
+            reply.code(500);
+            return { "success": false, "error": error.message };
+        }
     }
 }
