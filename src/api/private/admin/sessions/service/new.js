@@ -50,18 +50,23 @@ export default class AdminCreateServiceAccount extends APIRoute {
         let accessKey = GeneratePrivateID();
         let internalKey = GeneratePublicID(16, "v2S.~");
 
-        let _r = await server.db.query(`INSERT INTO uwuso.services (access_key, internal_key, display_name,
+        try {
+            await server.db.query(`INSERT INTO uwuso.services (access_key, internal_key, display_name,
                 owner, permissions, disabled)
                 VALUES ($1::text, $2::text, $3::text,
                 $4::bigint, $5::bigint, $6::boolean);`,
-            [
-                hash(accessKey),
-                internalKey,
-                request.body.internal_name.slice(0, MAX_INTERNAL_NAME_LENGTH),
-                user.id,
-                permissions(USER_PERMISSIONS.UPLOAD, USER_PERMISSIONS.VIEW_OWN_FILES),
-                false
-            ]);
+                [
+                    hash(accessKey),
+                    internalKey,
+                    request.body.internal_name.slice(0, MAX_INTERNAL_NAME_LENGTH),
+                    user.id,
+                    permissions(USER_PERMISSIONS.UPLOAD, USER_PERMISSIONS.VIEW_OWN_FILES),
+                    false
+                ]);
+        } catch (error) {
+            reply.code(500);
+            return { "success": false, "error": "Failed to create the service account." };
+        }
 
         return {
             "success": true,
