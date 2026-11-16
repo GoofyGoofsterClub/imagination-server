@@ -44,7 +44,7 @@ export default class ModifyGlobalsMaintenanceAPIRoute extends APIRoute {
         const mode = Number.parseInt(request.body?.mode, 10);
         const message = (typeof request.body?.reason === "string" ? request.body.reason : "").trim().slice(0, 500);
 
-        if (!Number.isInteger(mode) || mode < 0 || mode > 2)
+        if (enabled && (!Number.isInteger(mode) || mode < 0 || mode > 2))
             return {
                 "success": false,
                 "error": "Mode must be 0, 1, or 2."
