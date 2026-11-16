@@ -17,16 +17,23 @@ export default class RawLegacyImageServing extends Route {
     }
 
     async call(request, reply, server) {
-        const file = await getFileByFilename(server.db, request.params.filename);
-        if (!file) {
+        try {
+            const file = await getFileByFilename(server.db, request.params.filename);
+            if (!file) {
+                reply.status(404);
+                return reply.viewAsync("error.ejs", { error_title: "Not Found", error_message: "<p>This file does not exist.</p>" });
+            }
+
+            reply.header("X-Content-Type-Options", "nosniff");
+            if (request.query.download === "1" || isDocumentMimetype(file.mimetype))
+                reply.header("Content-Disposition", `attachment; filename="${downloadFilename(file)}"`);
+            reply.type(file.mimetype);
+            return serveUpload(reply, file.disk_filename);
+        } catch {
+            // A database failure or a file missing from disk both mean this
+            // upload cannot be served right now.
             reply.status(404);
             return reply.viewAsync("error.ejs", { error_title: "Not Found", error_message: "<p>This file does not exist.</p>" });
         }
-
-        reply.header("X-Content-Type-Options", "nosniff");
-        if (request.query.download === "1" || isDocumentMimetype(file.mimetype))
-            reply.header("Content-Disposition", `attachment; filename="${downloadFilename(file)}"`);
-        reply.type(file.mimetype);
-        return serveUpload(reply, file.disk_filename);
     }
 }
