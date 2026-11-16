@@ -39,10 +39,10 @@ export class Route {
     async callWrapper(request, reply, server, handler) {
         reply.header("X-Frame-Options", "SAMEORIGIN");
         reply.header("Content-Security-Policy", "frame-ancestors 'self'");
-        if (server.server._public.initialSetup) {
+        if (server.server?._public?.initialSetup) {
             return reply.viewAsync('initial-setup.ejs');
         }
-        const maintenance = server.server._public.Maintenance;
+        const maintenance = server.server?._public?.Maintenance;
         if (maintenance && maintenance.value) {
             const mode = Number(maintenance.value.mode) || 0;
             const isDashboard = request.url === "/" || request.url.startsWith("/?");
@@ -71,7 +71,7 @@ export class APIRoute {
     async call(request, reply) { }
 
     async callWrapper(request, reply, server, handler) {
-        const maintenance = server.server._public.Maintenance;
+        const maintenance = server.server?._public?.Maintenance;
         if (maintenance && maintenance.value && (Number(maintenance.value.mode) || 0) >= 1 && !this.excludeFromMaintenance) {
             reply.status(503);
             return reply.send({ success: false, error: `503 - Maintenance: ${maintenance.value.message}` });
