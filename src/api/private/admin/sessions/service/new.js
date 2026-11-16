@@ -11,7 +11,7 @@ import hash from "utilities/hash";
 @params [(string) key, (string) internal_name]
 @returns New service account authentication information or an error
 @returnexample { "success": true, "data": { "access_key": "", "internal_key": "" } }
-Returns specific field from a user's profile.
+Creates a new service account and returns its one-time access key and internal key.
 
 */
 export default class AdminCreateServiceAccount extends APIRoute {
