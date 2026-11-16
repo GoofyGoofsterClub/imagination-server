@@ -22,10 +22,11 @@ export default class ChangeUsername extends APIRoute {
     }
 
     async call(request, reply, server) {
-        if (!hash(request.query.key) || !request.query.new_name)
+        const key = hash(request.query.key);
+        if (!key || !request.query.new_name)
             return { "success": false, "error": "One or all of the required fields is missing." };
 
-        let user = await server.db.findUserByAccessKey(hash(request.query.key));
+        let user = await server.db.findUserByAccessKey(key);
 
         if (!user)
             return {
