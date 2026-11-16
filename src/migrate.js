@@ -3,6 +3,9 @@ import path from 'path';
 import crypto from 'crypto';
 import pg from 'pg';
 
+// Advisory lock key that serializes database initialization between starter processes.
+const DB_INIT_LOCK_ID = 18745201;
+
 const indexes = [
     ['idx_uploads_filehash', 'uwuso.uploads (filehash)'],
     ['idx_uploads_uploader_time_id', 'uwuso.uploads (uploader_id, upload_time DESC, id DESC)'],
@@ -32,7 +35,7 @@ export async function migrate({ connectionString } = {}) {
         // A blocking SELECT would retain a snapshot that CREATE INDEX CONCURRENTLY
         // can wait for, deadlocking against the advisory lock. Wait between short queries.
         const waitUntil = Date.now() + (Number(process.env.MIGRATION_WAIT_TIMEOUT_MS) || 300000);
-        while (!(await client.query('SELECT pg_try_advisory_lock(18745201) AS acquired')).rows[0].acquired) {
+        while (!(await client.query(`SELECT pg_try_advisory_lock(${DB_INIT_LOCK_ID}) AS acquired`)).rows[0].acquired) {
             if (Date.now() >= waitUntil) throw new Error('Timed out waiting for another starter to initialize the database.');
             await new Promise(resolve => setTimeout(resolve, 500));
         }
