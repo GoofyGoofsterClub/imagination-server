@@ -3,6 +3,18 @@ import { v4 as uuidv4 } from "uuid";
 import { USER_PERMISSIONS, permissions } from "utilities/permissions";
 import hash from "utilities/hash";
 
+class InviteAlreadyConsumedError extends Error {
+    constructor() {
+        super("Code already used or invalid.");
+    }
+}
+
+class UserAlreadyExistsError extends Error {
+    constructor() {
+        super("User already exists.");
+    }
+}
+
 /*--includedoc
 
 @private false
@@ -42,40 +54,44 @@ export default class InvitesUseAPIRoute extends APIRoute {
                 "error": "Code expired."
             };
 
-        let targetUser = await server.db.findUserByDisplayName(target.username);
-
-        if (targetUser)
-            return {
-                "success": false,
-                "error": "User already exists."
-            };
-
-        await server.db.query(`DELETE FROM uwuso.invites WHERE hash = $1::text`, [request.query.code]);
-
         let accessKey = "vX2~!" + uuidv4();
 
+        // Deleting the invite and creating the user run in one transaction,
+        // so a failure after the delete rolls the delete back too.
         try {
-                    await server.db.query(`INSERT INTO uwuso.users (username, access_key, permissions, private_profile, banned, views, uploads, superuser)
-                        VALUES ($1::text, $2::text, $3::bigint,
-                                $4::boolean, $5::boolean, $6::bigint, $7::bigint, $8::boolean)`,
-                        [
-                            target.username,
-                            hash(accessKey),
-                            permissions(USER_PERMISSIONS.UPLOAD,
-                                USER_PERMISSIONS.VIEW_OWN_FILES,
-                                USER_PERMISSIONS.CHANGE_DISPLAY_NAME
-                            ),
-                            false,
-                            false,
-                            0,
-                            0,
-                            false
-                        ]
-                    );
-        } catch (e) {
-            if (e.code === "23505")
+            await server.db.transaction(async (client) => {
+                let deleted = await client.query(`DELETE FROM uwuso.invites WHERE hash = $1::text`, [request.query.code]);
+                if (deleted.rowCount !== 1)
+                    throw new InviteAlreadyConsumedError();
+
+                let targetUser = await client.query(`SELECT * FROM uwuso.users WHERE username = $1 LIMIT 1`, [target.username]);
+                if (targetUser.rows.length > 0)
+                    throw new UserAlreadyExistsError();
+
+                await client.query(`INSERT INTO uwuso.users (username, access_key, permissions, private_profile, banned, views, uploads, superuser)
+                    VALUES ($1::text, $2::text, $3::bigint,
+                            $4::boolean, $5::boolean, $6::bigint, $7::bigint, $8::boolean)`,
+                    [
+                        target.username,
+                        hash(accessKey),
+                        permissions(USER_PERMISSIONS.UPLOAD,
+                            USER_PERMISSIONS.VIEW_OWN_FILES,
+                            USER_PERMISSIONS.CHANGE_DISPLAY_NAME
+                        ),
+                        false,
+                        false,
+                        0,
+                        0,
+                        false
+                    ]
+                );
+            });
+        } catch (error) {
+            if (error instanceof InviteAlreadyConsumedError)
+                return { "success": false, "error": "Code already used or invalid." };
+            if (error instanceof UserAlreadyExistsError || error.code === "23505")
                 return { "success": false, "error": "User already exists." };
-            throw e;
+            throw error;
         }
 
         return {
