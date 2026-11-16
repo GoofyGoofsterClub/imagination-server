@@ -96,15 +96,25 @@ export default class UploadsNewAPIRoute extends APIRoute {
         try {
             data = await request.file();
         }
-        catch (e) {
-            data = null;
-        }
-
-        if (!data) {
+        catch (error) {
+            if (!error.statusCode) {
+                reply.status(400);
+                return reply.send({
+                    "success": false,
+                    "error": "No file was provided."
+                });
+            }
+            if (error.code === "FST_REQ_FILE_TOO_LARGE") {
+                reply.status(413);
+                return reply.send({
+                    "success": false,
+                    "error": "File is too large."
+                });
+            }
             reply.status(400);
             return reply.send({
                 "success": false,
-                "error": "No file was provided"
+                "error": `Failed to read the file: ${error.message}`
             });
         }
 
