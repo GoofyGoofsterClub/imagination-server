@@ -65,11 +65,21 @@ export default class DeleteUploadAPIRoute extends APIRoute {
                 "error": "You do not own this file."
             };
 
-        await server.db.query(`DELETE FROM uwuso.uploads WHERE uploader_id = $1::bigint AND filename = $2::text`, [user.id, request.query.filename]);
+        try {
+            // The file is removed from disk before the database row so a
+            // failed request can be retried without leaving an orphan row.
+            await removeUploadFiles({ filename: request.query.filename, disk_filename: fileInfo.disk_filename });
 
-        clearListCounts();
-        invalidateStatistics();
-        await removeUploadFiles({ filename: request.query.filename, disk_filename: fileInfo.disk_filename });
+            await server.db.query(`DELETE FROM uwuso.uploads WHERE uploader_id = $1::bigint AND filename = $2::text`, [user.id, request.query.filename]);
+
+            clearListCounts();
+            invalidateStatistics();
+        } catch (error) {
+            return {
+                "success": false,
+                "error": "Failed to delete the upload."
+            };
+        }
 
         return {
             "success": true
