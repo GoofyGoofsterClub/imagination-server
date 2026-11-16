@@ -11,6 +11,8 @@ import { clearListCounts } from 'utilities/pagination';
 import { invalidateFileByFilename } from 'utilities/filecache';
 import path from 'path';
 
+const PRIVATE_UPLOADS_DIR = `${__dirname}/../../../../privateuploads`;
+
 /*--includedoc
 
 @private false
@@ -119,7 +121,7 @@ export default class UploadsNewAPIRoute extends APIRoute {
         }
 
         const diskFilename = GeneratePrivateID();
-        const diskPath = `${__dirname}/../../../../privateuploads/${diskFilename}`;
+        const diskPath = `${PRIVATE_UPLOADS_DIR}/${diskFilename}`;
 
         const fileHash = crypto.createHash('sha256');
         let fileSizeInBytes = 0;
