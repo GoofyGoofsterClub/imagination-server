@@ -18,7 +18,8 @@ export default class UploadsCountAPIRoute extends APIRoute {
     }
 
     async call(request, reply, server) {
+        const statistics = await getStatistics(server.db);
         reply.header("Cache-Control", "public, max-age=10, stale-while-revalidate=60");
-        return getStatistics(server.db);
+        return statistics;
     }
 }
