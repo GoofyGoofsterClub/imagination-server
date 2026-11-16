@@ -3,6 +3,7 @@ import { USER_PERMISSIONS, hasPermission } from "utilities/permissions";
 import hash from "utilities/hash";
 
 const MAINTENANCE_KEY = "maintenance";
+const MAX_REASON_LENGTH = 500;
 
 /*--includedoc
 
@@ -42,7 +43,7 @@ export default class ModifyGlobalsMaintenanceAPIRoute extends APIRoute {
 
         const enabled = request.body?.enabled === true;
         const mode = Number.parseInt(request.body?.mode, 10);
-        const message = (typeof request.body?.reason === "string" ? request.body.reason : "").trim().slice(0, 500);
+        const message = (typeof request.body?.reason === "string" ? request.body.reason : "").trim().slice(0, MAX_REASON_LENGTH);
 
         if (enabled && (!Number.isInteger(mode) || mode < 0 || mode > 2))
             return {
