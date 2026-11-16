@@ -14,6 +14,7 @@
     "navbar-dashboard": "لوحة التحكم",
     "dashboard-login-title": "تسجيل الدخول",
     "dashboard-login-paragraph": "يرجى إدخال المفتاح للوصول الى لوحة تحكم المستخدم.",
+    "dashboard-placeholder": "مفتاحك",
     "dashboard-login-button": "سجل الدخول",
     "dashboard-login-forgot": "نسيت المفتاح؟",
     "dashboard-title": "لوحة التحكم",

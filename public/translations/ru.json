@@ -14,6 +14,7 @@
     "navbar-dashboard": "Личный кабинет",
     "dashboard-login-title": "Вход",
     "dashboard-login-paragraph": "Пожалуйста введите ваш личный ключ.",
+    "dashboard-placeholder": "Ваш ключ",
     "dashboard-login-button": "Войти",
     "dashboard-login-forgot": "Забыли ключ?",
     "dashboard-title": "Личный кабинет",

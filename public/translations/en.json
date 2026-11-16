@@ -14,6 +14,7 @@
     "navbar-dashboard": "Dashboard",
     "dashboard-login-title": "Log in",
     "dashboard-login-paragraph": "Please provide your key to access the user dashboard.",
+    "dashboard-placeholder": "Your Key",
     "dashboard-login-button": "Log in",
     "dashboard-login-forgot": "Forgot key?",
     "dashboard-title": "Dashboard",
