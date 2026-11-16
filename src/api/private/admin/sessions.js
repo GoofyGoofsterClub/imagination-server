@@ -56,8 +56,10 @@ export default class AdminGetSessionsAPIRoute extends APIRoute {
         const countClause = whereClause;
         const cursorMode = request.query.pagination === 'cursor';
         let cursor;
-        try { cursor = decodeCursor(request.query.cursor); }
-        catch (error) { reply.code(400); return { success: false, error: error.message }; }
+        if (cursorMode) {
+            try { cursor = decodeCursor(request.query.cursor); }
+            catch (error) { reply.code(400); return { success: false, error: error.message }; }
+        }
         if (cursorMode && cursor) {
             filters.push(...cursor);
             whereClause += `${whereClause ? ' AND' : 'WHERE'} (username, id) > ($${filters.length - 1}::text, $${filters.length}::bigint)`;
