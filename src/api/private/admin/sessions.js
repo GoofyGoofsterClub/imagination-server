@@ -8,10 +8,10 @@ import { cachedCount, decodeCursor, encodeCursor } from 'utilities/pagination';
 @private false
 @needsauth true
 @adminonly true
-@params [(string) key]
-@returns Returns if key is valid
-@returnexample { "success": true, "data": [...] }
-Returns all user's public and private profile data.
+@params [(string) key, (integer) page, (string) search, (string) pagination, (string) cursor]
+@returns Returns a paginated list of users.
+@returnexample { "success": true, "data": [...], "pagination": "cursor", "hasNext": true }
+Returns a paginated list of users. Supports offset pagination (default) and cursor pagination (?pagination=cursor), optional username search, and a page number.
 
 */
 export default class AdminGetSessionsAPIRoute extends APIRoute {
