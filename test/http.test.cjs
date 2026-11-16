@@ -52,3 +52,37 @@ test('optional browser metrics are validated and never publicly readable', async
     assert.equal(read.statusCode, 403);
     assert.equal(read.headers['cache-control'], 'no-store');
 });
+
+test('the APIRoute wrapper honors handler status, errors and the maintenance exclusion', async t => {
+    const { server } = await fixtureServer();
+    t.after(async () => { await server.stop(); });
+    const { APIRoute } = require('../lib/http/routing');
+    class StatusAPIRoute extends APIRoute {
+        constructor() { super('GET'); }
+        async call(request, reply) { reply.code(418); return { success: true }; }
+    }
+    class FailingAPIRoute extends APIRoute {
+        constructor() { super('GET'); }
+        async call() { throw new Error('api route exploded'); }
+    }
+    class ExcludedAPIRoute extends APIRoute {
+        constructor() { super('GET', true); }
+        async call() { return { success: true, excluded: true }; }
+    }
+    await new StatusAPIRoute().register(server, '/api/test/status');
+    await new FailingAPIRoute().register(server, '/api/test/failing');
+    await new ExcludedAPIRoute().register(server, '/api/test/excluded');
+    const status = await server.server.inject('/api/test/status');
+    assert.equal(status.statusCode, 418, status.body);
+    assert.deepEqual(status.json(), { success: true });
+    const failing = await server.server.inject('/api/test/failing');
+    assert.equal(failing.statusCode, 500, failing.body);
+    assert.match(failing.body, /api route exploded/);
+    server.server._public.Maintenance = { value: { enabled: true, mode: 1, message: 'Updating the website' } };
+    const blocked = await server.server.inject('/api/test/status');
+    assert.equal(blocked.statusCode, 503, blocked.body);
+    assert.equal(blocked.json().error, '503 - Maintenance: Updating the website');
+    const excluded = await server.server.inject('/api/test/excluded');
+    assert.equal(excluded.statusCode, 200, excluded.body);
+    assert.deepEqual(excluded.json(), { success: true, excluded: true });
+});
