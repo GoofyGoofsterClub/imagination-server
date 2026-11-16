@@ -31,7 +31,7 @@ export default class DeleteSessionAPIRoute extends APIRoute {
         if (user.banned)
             return { "success": false, "error": "You are banned." };
 
-        if (request.query.confirmation != user.username) return { "success": false, "error": "Confirmation username is missing or incorrect." };
+        if (request.query.confirmation !== user.username) return { "success": false, "error": "Confirmation username is missing or incorrect." };
 
         await server.db.query(`DELETE FROM uwuso.users WHERE id = $1::bigint`, [user.id]);
 
