@@ -6,8 +6,6 @@ export default class InviteRoute extends Route {
     }
 
     async call(request, reply, server) {
-        let inviteKey = request.params.key;
-
         let inviteInfo = await server.db.query(`SELECT uwuso.invites.*, uwuso.users.username AS inviter_username
                                                 FROM uwuso.invites
                                                 JOIN uwuso.users ON uwuso.invites.inviter = uwuso.users.id
