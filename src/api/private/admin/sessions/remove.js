@@ -60,7 +60,7 @@ export default class AdminRemoveSessionAPIRoute extends APIRoute {
             };
 
         if (hasPermission(target.permissions, USER_PERMISSIONS.ADMINISTRATOR) || hasPermission(target.permissions, USER_PERMISSIONS.DELETE_ACCOUNTS)) {
-            if (user.username == target.username)
+            if (user.username === target.username)
                 return {
                     "success": false,
                     "error": "You cannot remove yourself."
