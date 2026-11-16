@@ -77,8 +77,8 @@ services:
         reservations:
           cpus: '0.25'
           memory: 128M
-    env_file:
-      - ./.env
+    # The container no longer loads ./.env directly; the values below are
+    # substituted from the project .env file by compose.
     environment:
       - HTTP_PORT=$HTTP_PORT
       - MONGO_HOST=mongo
