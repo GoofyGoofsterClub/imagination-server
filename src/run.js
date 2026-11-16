@@ -123,7 +123,7 @@ async function gracefulShutdown(signal, exitCode = 0) {
     await redisConnection?.quit().catch(() => {});
     await legacyDatabase?.client.close().catch(() => {});
     await postgres?.pool.end().catch(() => {});
-    await shutdownLogger();
+    await shutdownLogger().catch(() => {});
     process.exit(exitCode);
 }
 
